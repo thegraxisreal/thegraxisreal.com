@@ -28,11 +28,14 @@ async function saveData() {
     await fs.writeFile('tweets.json', JSON.stringify(tweets, null, 2));
     await fs.writeFile('classrooms.json', JSON.stringify(classrooms, null, 2));
     await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
-    console.log('Data saved to users.json, tweets.json, classrooms.json, and announcements.json');
+    console.log('Data auto-saved to JSON files');
   } catch (err) {
     console.error('Error saving data:', err);
   }
 }
+
+// Set up auto-save every 5 minutes (300000 milliseconds)
+const autoSaveInterval = setInterval(saveData, 300000);
 
 // Function to load data from JSON files
 async function loadData() {
@@ -436,6 +439,7 @@ process.on('SIGINT', async () => {
 });
 
 process.on('SIGTERM', async () => {
+  clearInterval(autoSaveInterval);
   console.log('Received SIGTERM, saving data...');
   await saveData();
   process.exit(0);
