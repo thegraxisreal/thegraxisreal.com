@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>X - What's happening</title>
+  <title>X - Whats happening</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
@@ -660,6 +660,20 @@
     
     body.light-mode .current-user-info {
       border-color: #eff3f4;
+    }
+    
+    .tweet-stats {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      color: var(--x-secondary-text);
+      font-size: 13px;
+    }
+
+    .tweet-stat {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
   </style>
 </head>
@@ -1467,80 +1481,31 @@
         // Retweet button
         const retweetBtn = document.createElement("button");
         retweetBtn.className = "engagement-action repost";
-        retweetBtn.innerHTML = `<i class="fas fa-retweet"></i> <span></span>`;
-        
-        // Add a dropdown for retweet options
-        retweetBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const dropdown = tweetDiv.querySelector(".retweet-dropdown");
-          if (dropdown) {
-            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-          }
-        });
+        retweetBtn.innerHTML = `<i class="fas fa-retweet"></i>`;
         
         // Like button
         const likeBtn = document.createElement("button");
-        const isLiked = false; // Update this based on user's likes
+        const isLiked = false; // You might have logic to determine this
         likeBtn.className = `engagement-action like ${isLiked ? 'liked' : ''}`;
         likeBtn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> <span>${tweet.likes || 0}</span>`;
-        
-        likeBtn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          const isNowLiked = !likeBtn.classList.contains("liked");
-          let newLikes = isNowLiked ? (tweet.likes || 0) + 1 : (tweet.likes || 1) - 1;
-          
-          likeBtn.classList.toggle("liked");
-          likeBtn.innerHTML = `<i class="${isNowLiked ? 'fas' : 'far'} fa-heart"></i> <span>${newLikes}</span>`;
-          
-          await fetch("/api/tweet/like", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: tweet.id, likes: newLikes })
-          });
-        });
         
         // Bookmark button
         const bookmarkBtn = document.createElement("button");
         const isBookmarked = userBookmarks.includes(tweet.id);
-        bookmarkBtn.className = "engagement-action";
+        bookmarkBtn.className = `engagement-action bookmark ${isBookmarked ? 'bookmarked' : ''}`;
         bookmarkBtn.innerHTML = `<i class="${isBookmarked ? 'fas' : 'far'} fa-bookmark"></i>`;
         
-        bookmarkBtn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          const isCurrentlyBookmarked = bookmarkBtn.querySelector('i').classList.contains('fas');
-          
-          if (isCurrentlyBookmarked) {
-            // Remove bookmark
-            const success = await unbookmarkTweet(tweet.id);
-            if (success) {
-              bookmarkBtn.innerHTML = `<i class="far fa-bookmark"></i>`;
-            }
-          } else {
-            // Add bookmark
-            const success = await bookmarkTweet(tweet.id);
-            if (success) {
-              bookmarkBtn.innerHTML = `<i class="fas fa-bookmark"></i>`;
-            }
-          }
-        });
+        // Add view count button
+        const viewsBtn = document.createElement("button");
+        viewsBtn.className = "engagement-action";
+        viewsBtn.innerHTML = `<i class="far fa-eye"></i> <span>${tweet.views || '0'}</span>`;
         
-        // Share button (for quote tweets)
-        const shareBtn = document.createElement("button");
-        shareBtn.className = "engagement-action";
-        shareBtn.innerHTML = `<i class="far fa-clipboard"></i>`;
-        shareBtn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const quoteForm = tweetDiv.querySelector(".quote-form");
-          if (quoteForm) {
-            quoteForm.style.display = quoteForm.style.display === "block" ? "none" : "block";
-          }
-        });
-        
+        // Add all buttons to the engagement div
         engagementDiv.appendChild(commentBtn);
         engagementDiv.appendChild(retweetBtn);
         engagementDiv.appendChild(likeBtn);
         engagementDiv.appendChild(bookmarkBtn);
-        engagementDiv.appendChild(shareBtn);
+        engagementDiv.appendChild(viewsBtn); // Add the views button
         
         tweetDiv.appendChild(engagementDiv);
         
