@@ -1482,18 +1482,91 @@
         const retweetBtn = document.createElement("button");
         retweetBtn.className = "engagement-action repost";
         retweetBtn.innerHTML = `<i class="fas fa-retweet"></i>`;
+        retweetBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!currentUser) return;
+          await fetch("/api/tweet/retweet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tweetId: tweet.id, handle: currentUser })
+          });
+          fetchAndRenderTweets();
+        });
         
         // Like button
         const likeBtn = document.createElement("button");
-        const isLiked = false; // You might have logic to determine this
+        const isLiked = tweet.likedBy && tweet.likedBy.includes(currentUser);
         likeBtn.className = `engagement-action like ${isLiked ? 'liked' : ''}`;
         likeBtn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> <span>${tweet.likes || 0}</span>`;
+
+        // Clear any existing event listeners
+        likeBtn.replaceWith(likeBtn.cloneNode(true));
+        const newLikeBtn = likeBtn.cloneNode(true);
+
+        // Add the event listener
+        newLikeBtn.addEventListener("click", async function(e) {
+          e.stopPropagation();
+          console.log("Like button clicked"); // Debug log
+          
+          if (!currentUser) return;
+          
+          try {
+            const isCurrentlyLiked = this.classList.contains("liked");
+            let newLikes = isCurrentlyLiked ? (tweet.likes || 1) - 1 : (tweet.likes || 0) + 1;
+            
+            console.log("Setting likes to:", newLikes); // Debug log
+            
+            // Update UI first for responsive feel
+            this.classList.toggle("liked");
+            this.innerHTML = `<i class="${!isCurrentlyLiked ? 'fas' : 'far'} fa-heart"></i> <span>${newLikes}</span>`;
+            
+            // Send update to server
+            const response = await fetch("/api/tweet/like", {
+              method: "PATCH",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ id: tweet.id, likes: newLikes })
+            });
+            
+            const result = await response.json();
+            console.log("Like update result:", result); // Debug log
+            
+            if (!result.success) {
+              // If server update fails, revert UI
+              this.classList.toggle("liked");
+              this.innerHTML = `<i class="${isCurrentlyLiked ? 'fas' : 'far'} fa-heart"></i> <span>${tweet.likes}</span>`;
+              console.error("Failed to update like count:", result.error);
+            }
+          } catch (error) {
+            console.error("Error updating like count:", error);
+          }
+        });
+
+        // Replace the like button with our new one that has the event listener
+        likeBtn.replaceWith(newLikeBtn);
         
         // Bookmark button
         const bookmarkBtn = document.createElement("button");
         const isBookmarked = userBookmarks.includes(tweet.id);
         bookmarkBtn.className = `engagement-action bookmark ${isBookmarked ? 'bookmarked' : ''}`;
         bookmarkBtn.innerHTML = `<i class="${isBookmarked ? 'fas' : 'far'} fa-bookmark"></i>`;
+        bookmarkBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!currentUser) return;
+          
+          if (isBookmarked) {
+            const success = await unbookmarkTweet(tweet.id);
+            if (success) {
+              bookmarkBtn.classList.remove('bookmarked');
+              bookmarkBtn.innerHTML = `<i class="far fa-bookmark"></i>`;
+            }
+          } else {
+            const success = await bookmarkTweet(tweet.id);
+            if (success) {
+              bookmarkBtn.classList.add('bookmarked');
+              bookmarkBtn.innerHTML = `<i class="fas fa-bookmark"></i>`;
+            }
+          }
+        });
         
         // Add view count button
         const viewsBtn = document.createElement("button");
