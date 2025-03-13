@@ -483,28 +483,23 @@ http.listen(PORT, '0.0.0.0', () => {
 }
 
 function createTweetElement(tweet) {
-  // ... existing tweet element creation code ...
-
-  // Add this where you want the stats to appear
   const statsDiv = document.createElement('div');
   statsDiv.className = 'tweet-stats';
   statsDiv.innerHTML = `
     <div class="tweet-stat">
       <i class="far fa-chart-bar"></i>
-      <span>${tweet.views}</span>
+      <span>${tweet.views || '0'}</span>
     </div>
     <div class="tweet-stat">
       <i class="far fa-comment"></i>
-      <span>${tweet.replies.length}</span>
+      <span>${tweet.replies ? tweet.replies.length : '0'}</span>
     </div>
     <div class="tweet-stat">
       <i class="far fa-heart"></i>
-      <span>${tweet.likes}</span>
+      <span>${tweet.likes || '0'}</span>
     </div>
   `;
 
   // Add the stats div to your tweet element
   tweetElement.appendChild(statsDiv);
-
-  // ... rest of existing tweet element code ...
 }
