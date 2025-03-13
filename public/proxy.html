@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Web Proxy</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <style>
+    body { font-family: 'Inter', sans-serif; background-color: #e6ecf0; margin: 0; padding: 0; }
+    .container { margin-top: 20px; }
+    .proxy-form { background-color: #fff; border-radius: 8px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+    .proxy-form input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid #ccd6dd; border-radius: 8px; }
+    .proxy-form button { background-color: #1da1f2; color: #fff; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; }
+    .proxy-form button:hover { background-color: #0d95e8; }
+    #proxyFrame { width: 100%; height: 600px; border: none; margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Web Proxy</h2>
+    <p>Enter a URL below to browse the web within this page (e.g., https://google.com).</p>
+    <div class="proxy-form">
+      <input type="text" id="urlInput" placeholder="Enter URL (e.g., https://google.com)" />
+      <button id="loadButton">Load</button>
+    </div>
+    <iframe id="proxyFrame" sandbox="allow-scripts allow-same-origin"></iframe>
+  </div>
+  <script>
+    document.getElementById("loadButton").addEventListener("click", () => {
+      const url = document.getElementById("urlInput").value.trim();
+      if (url) {
+        fetch(`/proxy?url=${encodeURIComponent(url)}`)
+          .then(response => response.text())
+          .then(html => {
+            const frame = document.getElementById("proxyFrame");
+            frame.srcdoc = html; // Load the fetched content into the iframe
+          })
+          .catch(error => console.error("Error fetching URL:", error));
+      }
+    });
+  </script>
+</body>
+</html>

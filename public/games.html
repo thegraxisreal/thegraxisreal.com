@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Games - Klanite</title>
+  
+  <!-- Google Fonts for modern typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap CSS (via CDN) -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
+  <!-- Animate.css for animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    /* Navbar styling */
+    .navbar {
+      background-color: #1a202c;
+    }
+    .navbar-brand, .nav-link {
+      color: #f7fafc !important;
+      font-weight: 600;
+    }
+    .nav-link:hover {
+      color: #e2e8f0 !important;
+    }
+    /* Page Header */
+    .page-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      margin: 2rem auto;
+      text-align: center;
+      max-width: 800px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .page-header h1 {
+      font-size: 2.5rem;
+      animation: fadeInDown 1s;
+    }
+    .page-header p {
+      font-size: 1.125rem;
+      animation: fadeInUp 1s;
+    }
+    /* Game Cards Grid */
+    .game-grid {
+      margin: 2rem auto;
+      max-width: 1200px;
+    }
+    .game-card {
+      cursor: pointer;
+      border: none;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      margin-bottom: 2rem;
+    }
+    .game-card:hover {
+      transform: scale(1.02);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+    .game-card img {
+      width: 100%;
+      height: auto;
+      display: block;
+      object-fit: cover;
+    }
+    .game-card .card-body {
+      text-align: center;
+      padding: 1rem;
+    }
+    .game-card .card-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    .game-card .card-text {
+      font-size: 1rem;
+      margin-bottom: 1rem;
+    }
+    .btn-play {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      border: none;
+      border-radius: 50px;
+      padding: 0.75rem 2rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: #fff;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .btn-play:hover {
+      background: linear-gradient(135deg, #5a67d8, #6b46c1);
+      transform: translateY(-2px);
+    }
+    /* Custom gradient backgrounds for each card */
+    .nav-card-tic {
+      background: linear-gradient(45deg, #667eea, #764ba2);
+    }
+    .nav-card-snake {
+      background: linear-gradient(45deg, #ffafbd, #ffc3a0);
+    }
+    .nav-card-puzzle {
+      background: linear-gradient(45deg, #a1c4fd, #c2e9fb);
+    }
+    .nav-card-bubble {
+      background: linear-gradient(45deg, #f6d365, #fda085);
+    }
+    .nav-card-airport {
+      background: linear-gradient(45deg, #cfd9df, #e2ebf0);
+    }
+    .nav-card-blog {
+      background: linear-gradient(45deg, #fddb92, #d1fdff);
+    }
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    footer {
+      background-color: #1a202c;
+      color: #f7fafc;
+      text-align: center;
+      padding: 1rem 0;
+      margin-top: 2rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Klanite</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon" style="color: #fff;"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+         <ul class="navbar-nav ml-auto">
+           <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+           <li class="nav-item"><a class="nav-link" href="videos.html">Videos</a></li>
+           <li class="nav-item"><a class="nav-link" href="deepseek.html">Klani</a></li>
+           <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+           <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+           <li class="nav-item"><a class="nav-link" href="games.html">Games</a></li>
+           <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
+         </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Page Header -->
+  <div class="container">
+    <div class="page-header animate__animated animate__fadeIn">
+      <h1 class="animate__animated animate__fadeInDown">Games</h1>
+      <p class="animate__animated animate__fadeInUp">Select a game to play with your friends!</p>
+    </div>
+  </div>
+  
+  <!-- Game Cards Grid -->
+  <div class="container game-grid">
+    <div class="row">
+      <!-- Tic Tac Toe Card -->
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card game-card nav-card-tic" onclick="location.href='tic-tac-toe.html'">
+          <img src="images/image2.png" alt="Tic Tac Toe">
+          <div class="card-body">
+            <h5 class="card-title">Tic Tac Toe</h5>
+            <p class="card-text">Challenge your friends in this classic game.</p>
+            <a href="tic-tac-toe.html" class="btn btn-play">Play Now</a>
+          </div>
+        </div>
+      </div>
+      <!-- Snake Card -->
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card game-card nav-card-snake">
+          <img src="images/image.png" alt="Snake">
+          <div class="card-body">
+            <h5 class="card-title">Snake</h5>
+            <p class="card-text">Slither through challenges. (Coming Soon)</p>
+            <a href="#" class="btn btn-play disabled" role="button" aria-disabled="true">Coming Soon</a>
+          </div>
+        </div>
+      </div>
+      <!-- Puzzle Card -->
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card game-card nav-card-puzzle">
+          <img src="images/blocks.png" alt="Puzzle">
+          <div class="card-body">
+            <h5 class="card-title">Puzzle</h5>
+            <p class="card-text">Solve challenges to test your mind. (Coming Soon)</p>
+            <a href="#" class="btn btn-play disabled" role="button" aria-disabled="true">Coming Soon</a>
+          </div>
+        </div>
+      </div>
+      <!-- Bubble Shooter Card -->
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card game-card nav-card-bubble" onclick="location.href='bubble-shooter.html'">
+          <img src="images/bubble.png" alt="Bubble Shooter">
+          <div class="card-body">
+            <h5 class="card-title">Bubble Shooter</h5>
+            <p class="card-text">Pop bubbles in this classic arcade game.</p>
+            <a href="bubble-shooter.html" class="btn btn-play">Play Now</a>
+          </div>
+        </div>
+      </div>
+      <!-- Airport Sniper Card -->
+      <div class="col-md-3 col-sm-6 mb-4">
+        <div class="card game-card nav-card-airport" onclick="location.href='airport-sniper.html'">
+          <img src="images/shooter.png" alt="Airport Sniper">
+          <div class="card-body">
+            <h5 class="card-title">Airport Sniper</h5>
+            <p class="card-text">Test your aim in this action-packed game.</p>
+            <a href="airport-sniper.html" class="btn btn-play">Play Now</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+      <!-- Airport Sniper Card -->
+<div class="col-md-3 col-sm-6 mb-4">
+  <div class="card game-card nav-card-airport" onclick="location.href='login.html'">
+    <img src="images/wip.png" alt="Login Game">
+    <div class="card-body">
+      <h5 class="card-title">Login Game</h5>
+      <p class="card-text">WIP</p>
+      <a href="login.html" class="btn btn-play">Play Now</a>
+    </div>
+  </div>
+</div>
+  
+  <!-- Footer -->
+  <footer class="text-center">
+    <div class="container">
+      &copy; 2025 Klanite. All rights reserved.
+    </div>
+  </footer>
+  
+  <!-- Bootstrap JS and dependencies (via CDN) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

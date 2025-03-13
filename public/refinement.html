@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Welcome to Klanite Macrodata Refinement</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body, .number-cell, .number-text, .float-container {
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .number-cell:focus, .number-text:focus {
+      outline: none;
+    }
+    body {
+      background-color: #001a33;
+      color: #70e0ff;
+      font-family: "Courier New", Courier, monospace;
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      position: relative;
+      perspective: 1000px;
+    }
+    h1 {
+      text-align: center;
+      margin: 20px 0;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-size: 1.5rem;
+    }
+    .status {
+      text-align: center;
+      margin-bottom: 10px;
+      font-size: 0.9rem;
+      padding: 0 10px;
+    }
+    /* ----------------------
+       GRID VIEWPORT & CONTAINER
+       ---------------------- */
+    .grid-viewport {
+      position: relative;
+      width: 80%;
+      max-width: 1000px;
+      height: 600px;
+      margin: 0 auto 40px;
+      overflow: hidden;
+      border: 1px solid #0f3a66;
+    }
+    .grid-container {
+      position: absolute;
+      display: grid;
+      grid-template-columns: repeat(50, 60px);
+      gap: 10px;
+      top: 0;
+      left: 0;
+    }
+    .number-cell {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      overflow: visible;
+      transition: background-color 0.2s ease;
+    }
+    .number-cell.selected {
+      background-color: rgba(112, 224, 255, 0.2);
+    }
+    /* Red numbers */
+    .number-cell.red .number-text {
+      color: red;
+    }
+    .float-container {
+      display: inline-block;
+      animation: float 3s ease-in-out infinite;
+      transition: all 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+      transform-origin: center;
+    }
+    .number-text {
+      display: inline-block;
+      transition: all 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67);
+    }
+    .number-cell:hover .float-container {
+      animation: inflate 0.4s cubic-bezier(0.17, 0.67, 0.83, 0.67) forwards;
+      animation-play-state: running;
+    }
+    @keyframes inflate {
+      0% { transform: scale(1); text-shadow: 0 0 0 rgba(112,224,255,0); }
+      50% { transform: scale(1.8); text-shadow: 0 0 15px rgba(112,224,255,0.5); }
+      75% { transform: scale(1.6); text-shadow: 0 0 20px rgba(112,224,255,0.7); }
+      100% { transform: scale(1.7); text-shadow: 0 0 25px rgba(112,224,255,0.8); }
+    }
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-3px); }
+      100% { transform: translateY(0); }
+    }
+    /* Selection rectangle */
+    .selection-rectangle {
+      position: absolute;
+      border: 1px dashed #70e0ff;
+      background-color: rgba(112,224,255,0.1);
+      z-index: 1000;
+      pointer-events: none;
+    }
+    .boxes-container {
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      width: 80%;
+      max-width: 1000px;
+      margin: 0 auto 40px;
+      perspective: 1000px;
+    }
+    .box {
+      width: 100px;
+      height: 60px;
+      background-color: #00294d;
+      border: 2px solid #0f3a66;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: transform 0.3s ease;
+      transform-style: preserve-3d;
+      overflow: visible;
+    }
+    .box-label {
+      position: absolute;
+      top: -25px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 3;
+      font-size: 0.9rem;
+      margin: 0;
+    }
+    .box-content {
+      position: relative;
+      z-index: 1;
+      transform-style: preserve-3d;
+    }
+    .flap {
+      position: absolute;
+      width: 50%;
+      height: 100%;
+      background-color: #00294d;
+      border: 2px solid #0f3a66;
+      top: 0;
+      transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+      transform-style: preserve-3d;
+      z-index: 2;
+    }
+    .flap-left {
+      left: -2px;
+      transform-origin: left;
+      transform: rotateY(0deg);
+      border-right: none;
+    }
+    .flap-right {
+      right: -2px;
+      transform-origin: right;
+      transform: rotateY(0deg);
+      border-left: none;
+    }
+    /* When hovering over a box, open the flaps and bring the content (percent) forward */
+    .box:hover .flap-left {
+      transform: rotateY(-120deg);
+    }
+    .box:hover .flap-right {
+      transform: rotateY(120deg);
+    }
+    .box:hover .box-content {
+      z-index: 3;
+    }
+    .box.open {
+      transform: scale(1.05);
+    }
+    .box.open .flap-left {
+      transform: rotateY(-120deg);
+    }
+    .box.open .flap-right {
+      transform: rotateY(120deg);
+    }
+    .box-percent {
+      font-size: 0.8rem;
+    }
+    .flying {
+      position: absolute;
+      font-size: 1.2rem;
+      background-color: transparent;
+      color: #70e0ff;
+      z-index: 9999;
+      pointer-events: none;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 60px;
+      height: 60px;
+      transition: all 0.5s ease;
+    }
+    .end-screen {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      color: #70e0ff;
+      font-family: "Courier New", Courier, monospace;
+      font-size: 2rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      z-index: 10000;
+    }
+    .end-screen h2 {
+      margin-bottom: 20px;
+    }
+    .end-screen button {
+      background-color: #00294d;
+      border: 2px solid #0f3a66;
+      color: #70e0ff;
+      padding: 10px 20px;
+      cursor: pointer;
+      font-size: 1rem;
+      letter-spacing: 1px;
+    }
+    .end-screen button:hover {
+      background-color: #0f3a66;
+    }
+    /* Animation for full box */
+    .box-full {
+      animation: boxSlideAway 2s forwards;
+      position: absolute;
+      z-index: 2000;
+    }
+    @keyframes boxSlideAway {
+      0% { transform: translate(0,0) scale(1); opacity: 1; }
+      100% { transform: translate(100vw, -100vh) scale(0.5); opacity: 0; }
+    }
+    .confetti {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 3000;
+      animation: confettiFall 3s forwards;
+    }
+    @keyframes confettiFall {
+      0% { opacity: 0; }
+      20% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+    .box-full-message {
+      position: fixed;
+      top: 40%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 2rem;
+      z-index: 4000;
+      color: gold;
+      animation: messageFade 3s forwards;
+    }
+    @keyframes messageFade {
+      0% { opacity: 1; }
+      100% { opacity: 0; }
+    }
+  </style>
+</head>
+<body>
+  <h1>Welcome to Klanite Macrodata Refinement</h1>
+  <div class="status">
+    Welcome to Klanite Macrodata Refinement!<br>
+    You help refine leftover data from our mock Twitter and Klanite datasets.
+    For every red number you refine, you'll earn a small bonus.
+    Use the arrow keys to pan the grid, click and drag over red numbers to select them, or click a red number to refine it individually.
+    Every 30 seconds, every cell regenerates its number and then uses normal statistics to determine if it becomes red.
+    When a box is filled, it will lift up, slide away with confetti, and a message will announce its refinement.
+  </div>
+  
+  <!-- Grid viewport contains the large grid -->
+  <div class="grid-viewport" id="grid-viewport">
+    <div class="grid-container" id="grid"></div>
+  </div>
+  
+  <div class="boxes-container">
+    <div class="box" data-box="0">
+      <div class="box-label">01</div>
+      <div class="flap flap-left"></div>
+      <div class="flap flap-right"></div>
+      <div class="box-content">
+        <div class="box-percent" id="box-percent-0">0%</div>
+      </div>
+    </div>
+    <div class="box" data-box="1">
+      <div class="box-label">02</div>
+      <div class="flap flap-left"></div>
+      <div class="flap flap-right"></div>
+      <div class="box-content">
+        <div class="box-percent" id="box-percent-1">0%</div>
+      </div>
+    </div>
+    <div class="box" data-box="2">
+      <div class="box-label">03</div>
+      <div class="flap flap-left"></div>
+      <div class="flap flap-right"></div>
+      <div class="box-content">
+        <div class="box-percent" id="box-percent-2">0%</div>
+      </div>
+    </div>
+    <div class="box" data-box="3">
+      <div class="box-label">04</div>
+      <div class="flap flap-left"></div>
+      <div class="flap flap-right"></div>
+      <div class="box-content">
+        <div class="box-percent" id="box-percent-3">0%</div>
+      </div>
+    </div>
+    <div class="box" data-box="4">
+      <div class="box-label">05</div>
+      <div class="flap flap-left"></div>
+      <div class="flap flap-right"></div>
+      <div class="box-content">
+        <div class="box-percent" id="box-percent-4">0%</div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="end-screen" id="end-screen">
+    <!-- End screen content will be updated on finish -->
+  </div>
+
+  <script>
+    // Grid dimensions and box settings
+    const rows = 50;
+    const cols = 50;
+    // Each refined number is worth 5%, so maxCapacity is 20 numbers.
+    const maxCapacity = 20;
+    const boxFill = [0, 0, 0, 0, 0];
+
+    const gridContainer = document.getElementById('grid');
+    const gridViewport = document.getElementById('grid-viewport');
+
+    // Build all cells as one HTML string.
+    // Adjusted probabilities: base chance is 2% (0.02) and if the previous cell was red, chance becomes 65% (0.65).
+    let cellsHTML = '';
+    let prevWasRed = false;
+    for (let i = 0; i < rows * cols; i++) {
+      let chance = prevWasRed ? 0.65 : 0.02;
+      let isRed = Math.random() < chance;
+      prevWasRed = isRed;
+      const randomNum = Math.floor(Math.random() * 10);
+      cellsHTML += `<div class="number-cell${isRed ? " red" : ""}">
+                      <div class="float-container">
+                        <span class="number-text">${randomNum}</span>
+                      </div>
+                    </div>`;
+    }
+    gridContainer.innerHTML = cellsHTML;
+
+    // Cache cell elements once.
+    const allCells = Array.from(document.querySelectorAll('.number-cell'));
+    const boxes = document.querySelectorAll('.box');
+
+    // ---------------------------
+    // PAN THE GRID WITH ARROW KEYS
+    // ---------------------------
+    let panX = 0, panY = 0;
+    function updateGridPosition() {
+      gridContainer.style.left = panX + 'px';
+      gridContainer.style.top = panY + 'px';
+    }
+    updateGridPosition();
+
+    document.addEventListener('keydown', (e) => {
+      const step = 20;
+      switch (e.key) {
+        case 'ArrowLeft':
+          panX += step;
+          updateGridPosition();
+          break;
+        case 'ArrowRight':
+          panX -= step;
+          updateGridPosition();
+          break;
+        case 'ArrowUp':
+          panY += step;
+          updateGridPosition();
+          break;
+        case 'ArrowDown':
+          panY -= step;
+          updateGridPosition();
+          break;
+      }
+    });
+
+    // -----------------------
+    // SELECTION (click and drag) with throttled mousemove
+    // -----------------------
+    let isSelecting = false;
+    let selectionStart = { x: 0, y: 0 };
+    let selectionRect = null;
+    let lastMouseEvent;
+    let ticking = false;
+
+    // Attach mousedown on gridViewport.
+    gridViewport.addEventListener('mousedown', (e) => {
+      if (e.button !== 0) return;
+      isSelecting = true;
+      const vpRect = gridViewport.getBoundingClientRect();
+      selectionStart = {
+        x: e.clientX - vpRect.left,
+        y: e.clientY - vpRect.top
+      };
+      selectionRect = document.createElement('div');
+      selectionRect.className = 'selection-rectangle';
+      selectionRect.style.left = selectionStart.x + 'px';
+      selectionRect.style.top = selectionStart.y + 'px';
+      selectionRect.style.width = '0px';
+      selectionRect.style.height = '0px';
+      gridViewport.appendChild(selectionRect);
+      e.preventDefault();
+    });
+
+    // Attach mousemove and mouseup on window so dragging continues even if pointer leaves gridViewport.
+    window.addEventListener('mousemove', (e) => {
+      if (!isSelecting) return;
+      lastMouseEvent = e;
+      if (!ticking) {
+        requestAnimationFrame(updateSelection);
+        ticking = true;
+      }
+    });
+
+    window.addEventListener('mouseup', (e) => {
+      if (!isSelecting) return;
+      isSelecting = false;
+      if (selectionRect) {
+        selectionRect.remove();
+        selectionRect = null;
+      }
+      const selectedCells = allCells.filter(cell =>
+        cell.classList.contains('selected') && cell.classList.contains('red')
+      );
+      selectedCells.forEach(cell => cell.classList.remove('selected'));
+      if (selectedCells.length === 0) return;
+
+      const fullSelectedCount = selectedCells.length;
+      const validBoxes = [];
+      boxFill.forEach((count, index) => {
+        if (count + fullSelectedCount <= maxCapacity) validBoxes.push(index);
+      });
+      let targetBox, cellsToSend;
+      if (validBoxes.length > 0) {
+        const boxIndex = validBoxes[Math.floor(Math.random() * validBoxes.length)];
+        targetBox = boxes[boxIndex];
+        cellsToSend = selectedCells;
+      } else {
+        const alternativeBoxes = [];
+        boxFill.forEach((count, index) => {
+          if (count < maxCapacity) alternativeBoxes.push(index);
+        });
+        if (alternativeBoxes.length === 0) return;
+        const boxIndex = alternativeBoxes[Math.floor(Math.random() * alternativeBoxes.length)];
+        targetBox = boxes[boxIndex];
+        const freeSlots = maxCapacity - boxFill[boxIndex];
+        cellsToSend = selectedCells.slice(0, freeSlots);
+      }
+
+      targetBox.classList.add('open');
+      const boxIndex = parseInt(targetBox.getAttribute('data-box'));
+      let animationsRemaining = cellsToSend.length;
+      cellsToSend.forEach(cell => {
+        animateCellToBox(cell, targetBox, () => {
+          boxFill[boxIndex]++;
+          updateBoxPercent(boxIndex);
+          animationsRemaining--;
+          if (animationsRemaining === 0) {
+            setTimeout(() => {
+              targetBox.classList.remove('open');
+            }, 300);
+            if (allBoxesFull()) {
+              showEndScreen();
+            }
+          }
+        });
+      });
+    });
+
+    function updateSelection() {
+      const vpRect = gridViewport.getBoundingClientRect();
+      const currentPos = {
+        x: lastMouseEvent.clientX - vpRect.left,
+        y: lastMouseEvent.clientY - vpRect.top
+      };
+      const x = Math.min(currentPos.x, selectionStart.x);
+      const y = Math.min(currentPos.y, selectionStart.y);
+      const width = Math.abs(currentPos.x - selectionStart.x);
+      const height = Math.abs(currentPos.y - selectionStart.y);
+      selectionRect.style.left = x + 'px';
+      selectionRect.style.top = y + 'px';
+      selectionRect.style.width = width + 'px';
+      selectionRect.style.height = height + 'px';
+
+      const selRect = selectionRect.getBoundingClientRect();
+      allCells.forEach(cell => {
+        const cellRect = cell.getBoundingClientRect();
+        if (rectsIntersect(selRect, cellRect)) {
+          cell.classList.add('selected');
+        } else {
+          cell.classList.remove('selected');
+        }
+      });
+      ticking = false;
+    }
+
+    // -----------------------
+    // CLICK-TO-REFINE using event delegation
+    // -----------------------
+    gridContainer.addEventListener('click', (e) => {
+      if (isSelecting) return;
+      const cell = e.target.closest('.number-cell');
+      if (cell && cell.classList.contains('red')) {
+        refineSingleCell(cell);
+      }
+    });
+
+    function refineSingleCell(cell) {
+      const fullSelectedCount = 1;
+      const validBoxes = [];
+      boxFill.forEach((count, index) => {
+        if (count + fullSelectedCount <= maxCapacity) validBoxes.push(index);
+      });
+      let targetBox;
+      if (validBoxes.length > 0) {
+        const boxIndex = validBoxes[Math.floor(Math.random() * validBoxes.length)];
+        targetBox = boxes[boxIndex];
+      } else {
+        const alternativeBoxes = [];
+        boxFill.forEach((count, index) => {
+          if (count < maxCapacity) alternativeBoxes.push(index);
+        });
+        if (alternativeBoxes.length === 0) return;
+        const boxIndex = alternativeBoxes[Math.floor(Math.random() * alternativeBoxes.length)];
+        targetBox = boxes[boxIndex];
+      }
+      targetBox.classList.add('open');
+      const boxIndex = parseInt(targetBox.getAttribute('data-box'));
+      animateCellToBox(cell, targetBox, () => {
+        boxFill[boxIndex]++;
+        updateBoxPercent(boxIndex);
+        targetBox.classList.remove('open');
+        if (allBoxesFull()) {
+          showEndScreen();
+        }
+      });
+    }
+
+    // Helper: Check if two rectangles intersect
+    function rectsIntersect(r1, r2) {
+      return !(r2.left > r1.right ||
+               r2.right < r1.left ||
+               r2.top > r1.bottom ||
+               r2.bottom < r1.top);
+    }
+
+    // -----------------------
+    // Animate a cell flying to a target box and regenerate its number.
+    // -----------------------
+    function animateCellToBox(cell, targetBox, doneCallback) {
+      const clone = cell.cloneNode(true);
+      const floatCont = clone.querySelector('.float-container');
+      if (floatCont) {
+        floatCont.style.animation = 'none';
+      }
+      clone.classList.add('flying');
+      document.body.appendChild(clone);
+      const numberElement = cell.querySelector('.number-text');
+      if (numberElement) {
+        numberElement.textContent = '';
+      }
+      const startPos = getOffset(cell);
+      clone.style.left = startPos.left + 'px';
+      clone.style.top = startPos.top + 'px';
+      clone.getBoundingClientRect();
+      const boxPos = getOffset(targetBox);
+      const boxWidth = targetBox.offsetWidth;
+      const boxHeight = targetBox.offsetHeight;
+      const cloneWidth = clone.offsetWidth;
+      const cloneHeight = clone.offsetHeight;
+      const endLeft = boxPos.left + (boxWidth - cloneWidth) / 2;
+      const endTop = boxPos.top + (boxHeight - cloneHeight) / 2;
+      clone.style.transform = `translate(${endLeft - startPos.left}px, ${endTop - startPos.top}px) scale(0.8)`;
+      clone.addEventListener('transitionend', () => {
+        clone.remove();
+        if (numberElement) {
+          numberElement.textContent = Math.floor(Math.random() * 10);
+          cell.classList.remove("red");
+          if (Math.random() < 0.02) {
+            cell.classList.add("red");
+          }
+        }
+        doneCallback();
+      }, { once: true });
+    }
+
+    // Utility: Get an element's offset relative to the document.
+    function getOffset(el) {
+      const rect = el.getBoundingClientRect();
+      return {
+        top: rect.top + window.scrollY,
+        left: rect.left + window.scrollX
+      };
+    }
+
+    function updateBoxPercent(index) {
+      const percentEl = document.getElementById(`box-percent-${index}`);
+      const percent = Math.floor((boxFill[index] / maxCapacity) * 100);
+      percentEl.textContent = percent + '%';
+      if (boxFill[index] >= maxCapacity && !boxes[index].classList.contains('full')) {
+        boxes[index].classList.add('full');
+        animateBoxFull(boxes[index], index);
+      }
+    }
+
+    function allBoxesFull() {
+      return boxFill.every(count => count >= maxCapacity);
+    }
+
+    function showEndScreen() {
+      const userId = "USER-" + Math.floor(Math.random() * 1000000000);
+      const reward = Math.floor(Math.random() * 9) + 2;
+      const endScreen = document.getElementById('end-screen');
+      endScreen.innerHTML = `<h2>Thank you ${userId}! You earned: ${reward} cents!</h2>
+                              <button onclick="location.reload()">Restart</button>`;
+      endScreen.style.display = 'flex';
+    }
+
+    // Animate a full box: lift it up, slide it away, show confetti and a message.
+    function animateBoxFull(box, index) {
+      const boxClone = box.cloneNode(true);
+      boxClone.classList.add('box-full');
+      document.body.appendChild(boxClone);
+      box.style.visibility = 'hidden';
+      const confettiEl = document.createElement('div');
+      confettiEl.classList.add('confetti');
+      document.body.appendChild(confettiEl);
+      const messageEl = document.createElement('div');
+      messageEl.classList.add('box-full-message');
+      messageEl.textContent = `Box ${("0" + (index+1)).slice(-2)} refined!`;
+      document.body.appendChild(messageEl);
+      setTimeout(() => {
+        boxClone.remove();
+        confettiEl.remove();
+        messageEl.remove();
+      }, 3000);
+    }
+
+    // Timer: Every 30 seconds, every cell regenerates its number and then redecides its red status.
+    setInterval(() => {
+      let prevWasRed = false;
+      allCells.forEach(cell => {
+        const numberElement = cell.querySelector('.number-text');
+        if (numberElement) {
+          numberElement.textContent = Math.floor(Math.random() * 10);
+        }
+        cell.classList.remove("red");
+        let chance = prevWasRed ? 0.65 : 0.02;
+        if (Math.random() < chance) {
+          cell.classList.add("red");
+          prevWasRed = true;
+        } else {
+          prevWasRed = false;
+        }
+      });
+    }, 30000);
+  </script>
+</body>
+</html>

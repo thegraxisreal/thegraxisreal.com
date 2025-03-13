@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Multiplayer Tic Tac Toe - Klanite</title>
+  
+  <!-- Google Fonts for modern typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap CSS (using CDN) -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
+  <!-- Animate.css for animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  
+  <style>
+    /* Basic Reset & Typography */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      color: #333;
+    }
+    /* Navbar Styling */
+    .navbar {
+      background-color: #1a202c;
+    }
+    .navbar-brand, .nav-link {
+      color: #f7fafc !important;
+      font-weight: 600;
+    }
+    .nav-link:hover {
+      color: #e2e8f0 !important;
+    }
+    /* Page Header Styling */
+    .page-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 2rem;
+      border-radius: 1rem;
+      margin: 2rem auto;
+      text-align: center;
+      max-width: 800px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .page-header h1 {
+      font-size: 2.5rem;
+      animation: fadeInDown 1s;
+    }
+    .page-header p {
+      font-size: 1.125rem;
+      animation: fadeInUp 1s;
+    }
+    /* Tic Tac Toe Board Styling */
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 5px;
+      max-width: 400px;
+      margin: 2rem auto;
+      background: #fff;
+      border: 2px solid #1a202c;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .cell {
+      background: #edf2f7;
+      border: 1px solid #1a202c;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      position: relative;
+      padding-top: 100%; /* This creates a square cell */
+      overflow: hidden;
+      transition: background 0.3s;
+    }
+    .cell:hover {
+      background: #e2e8f0;
+    }
+    .cell-content {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      font-weight: 600;
+      color: #1a202c;
+    }
+    /* Game Status Styling */
+    .status {
+      text-align: center;
+      font-size: 1.25rem;
+      margin-top: 1rem;
+    }
+    /* Footer Styling */
+    footer {
+      background-color: #1a202c;
+      color: #f7fafc;
+      text-align: center;
+      padding: 1rem 0;
+      margin-top: 2rem;
+    }
+    
+    /* Animations */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Klanite</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+         <ul class="navbar-nav ml-auto">
+           <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+           <li class="nav-item"><a class="nav-link" href="videos.html">Videos</a></li>
+           <li class="nav-item"><a class="nav-link" href="deepseek.html">Klani</a></li>
+           <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+           <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+           <li class="nav-item"><a class="nav-link" href="games.html">Games</a></li>
+           <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
+         </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Page Header -->
+  <div class="container">
+    <div class="page-header animate__animated animate__fadeIn">
+      <h1 class="animate__animated animate__fadeInDown">Multiplayer Tic Tac Toe</h1>
+      <p class="animate__animated animate__fadeInUp">Challenge your friends in real time!</p>
+    </div>
+  </div>
+  
+  <!-- Game Board -->
+  <div class="board" id="board">
+    <!-- 9 cells -->
+    <div class="cell" data-index="0"><div class="cell-content" id="cell-0"></div></div>
+    <div class="cell" data-index="1"><div class="cell-content" id="cell-1"></div></div>
+    <div class="cell" data-index="2"><div class="cell-content" id="cell-2"></div></div>
+    <div class="cell" data-index="3"><div class="cell-content" id="cell-3"></div></div>
+    <div class="cell" data-index="4"><div class="cell-content" id="cell-4"></div></div>
+    <div class="cell" data-index="5"><div class="cell-content" id="cell-5"></div></div>
+    <div class="cell" data-index="6"><div class="cell-content" id="cell-6"></div></div>
+    <div class="cell" data-index="7"><div class="cell-content" id="cell-7"></div></div>
+    <div class="cell" data-index="8"><div class="cell-content" id="cell-8"></div></div>
+  </div>
+  
+  <!-- Game Status -->
+  <div class="status" id="status">Waiting for players...</div>
+  
+  <!-- Footer -->
+  <footer class="text-center">
+    <div class="container">
+      &copy; 2025 Klanite. All rights reserved.
+    </div>
+  </footer>
+  
+  <!-- Include Socket.IO client library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- jQuery and Bootstrap JS (via CDN) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Connect to Socket.IO
+    const socket = io();
+    
+    // Game state
+    let board = Array(9).fill("");
+    let currentPlayer = "X"; // X always starts
+    let mySymbol = null; // Your symbol (X or O)
+    let gameActive = false;
+    const statusDiv = document.getElementById('status');
+    
+    // Assign a symbol via prompt (for simplicity)
+    mySymbol = prompt("Enter your symbol (X or O):", "X");
+    if (mySymbol !== "X" && mySymbol !== "O") {
+      mySymbol = "X";
+    }
+    
+    // Function to update the board UI
+    function updateBoard() {
+      board.forEach((cell, index) => {
+        document.getElementById(`cell-${index}`).textContent = cell;
+      });
+    }
+    
+    // Function to handle cell clicks
+    function handleCellClick(e) {
+      const index = parseInt(e.currentTarget.getAttribute("data-index"));
+      // Do nothing if cell is already filled, game not active, or not your turn
+      if (board[index] !== "" || !gameActive || currentPlayer !== mySymbol) return;
+      makeMove(index, mySymbol, true);
+    }
+    
+    // Function to make a move on the board
+    function makeMove(index, symbol, emit) {
+      board[index] = symbol;
+      updateBoard();
+      if (emit) {
+        socket.emit("tic move", { index, symbol });
+      }
+      checkGameStatus();
+    }
+    
+    // Function to check for a win or draw
+    function checkGameStatus() {
+      const winPatterns = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // columns
+        [0, 4, 8], [2, 4, 6]             // diagonals
+      ];
+      let winner = null;
+      for (const pattern of winPatterns) {
+        const [a, b, c] = pattern;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+          winner = board[a];
+          break;
+        }
+      }
+      if (winner) {
+        statusDiv.textContent = `${winner} wins!`;
+        gameActive = false;
+        return;
+      }
+      if (!board.includes("")) {
+        statusDiv.textContent = `Draw!`;
+        gameActive = false;
+        return;
+      }
+      // Switch turns
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      statusDiv.textContent = `It's ${currentPlayer}'s turn.`;
+    }
+    
+    // Attach event listeners to all cells
+    document.querySelectorAll(".cell").forEach(cell => {
+      cell.addEventListener("click", handleCellClick);
+    });
+    
+    // Socket.IO event: receive a move from another player
+    socket.on("tic move", (data) => {
+      if (board[data.index] === "") {
+        makeMove(data.index, data.symbol, false);
+      }
+    });
+    
+    // Socket.IO event: start the game
+    socket.on("game start", () => {
+      board = Array(9).fill("");
+      currentPlayer = "X";
+      gameActive = true;
+      statusDiv.textContent = `Game started! It's ${currentPlayer}'s turn.`;
+      updateBoard();
+    });
+    
+    // Signal to the server that we want to join the Tic Tac Toe game
+    socket.emit("join tic");
+    
+    // For simplicity, start the game immediately after joining
+    gameActive = true;
+    statusDiv.textContent = `Game started! It's ${currentPlayer}'s turn.`;
+  </script>
+</body>
+</html>

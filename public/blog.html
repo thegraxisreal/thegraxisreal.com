@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Blog - Klanite</title>
+  
+  <!-- Google Fonts for modern typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap CSS (using CDN) -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
+  <!-- Animate.css for simple animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  
+  <style>
+    /* Basic reset and typography */
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      color: #333;
+      margin: 0;
+      padding: 0;
+    }
+    
+    /* Navbar styling (same as other pages) */
+    .navbar {
+      background-color: #1a202c;
+    }
+    .navbar-brand, .nav-link {
+      color: #f7fafc !important;
+      font-weight: 600;
+    }
+    .nav-link:hover {
+      color: #e2e8f0 !important;
+    }
+    
+    /* Page Header styling */
+    .page-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 2rem 1rem;
+      border-radius: 1rem;
+      margin: 2rem auto;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      max-width: 800px;
+    }
+    .page-header h1 {
+      font-size: 2.5rem;
+      animation: fadeInDown 1s;
+    }
+    .page-header p {
+      font-size: 1.125rem;
+      animation: fadeInUp 1s;
+    }
+    
+    /* Blog post card styling */
+    .blog-post {
+      background: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      padding: 1.5rem;
+      margin: 2rem auto;
+      max-width: 800px;
+    }
+    .blog-post h2 {
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .blog-post p {
+      font-size: 1rem;
+      line-height: 1.6;
+    }
+    
+    /* Footer styling */
+    footer {
+      background-color: #1a202c;
+      color: #f7fafc;
+      padding: 1rem 0;
+      text-align: center;
+      margin-top: 2rem;
+    }
+    
+    /* Animations */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Klanite</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="videos.html">Videos</a></li>
+          <li class="nav-item"><a class="nav-link" href="deepseek.html">Klani</a></li>
+          <li class="nav-item"><a class="nav-link" href="chat.html">Chat</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+          <li class="nav-item active"><a class="nav-link" href="blog.html">Blog</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1 class="animate__animated animate__fadeInDown">Welcome to the Klanite Blog</h1>
+    <p class="animate__animated animate__fadeInUp">Stay updated on our journey and read about our challenges and triumphs!</p>
+  </div>
+  
+  <!-- Blog Post -->
+  <div class="blog-post animate__animated animate__fadeInUp">
+    <h2>Welcome to Klanite</h2>
+    <p>
+      Hello and welcome to Klanite – your one-stop hub for engaging videos, interactive AI with Klani, group chats, and even a web proxy for anonymous browsing.
+    </p>
+    <p>
+      We're excited to launch our blog as a new feature on the site. Here, you'll find updates, stories, and even candid notes about our journey.
+    </p>
+    <p>
+      <strong>Note:</strong> We're still ironing out some bugs and ironing out the quirks of our system, so bear with us as we improve your experience. Your feedback is highly appreciated!
+    </p>
+    <p>
+      Stay tuned for more updates as we continue to build and enhance Klanite. Thank you for joining us on this exciting adventure!
+    </p>
+  </div>
+  
+  <!-- Footer -->
+  <footer>
+    <div class="container">
+      &copy; 2025 Klanite. All rights reserved.
+    </div>
+  </footer>
+  
+  <!-- Bootstrap JS and dependencies (using CDN) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

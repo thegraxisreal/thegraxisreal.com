@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chat - Klanite</title>
+  
+  <!-- Google Fonts for modern typography -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  
+  <!-- Bootstrap CSS (using CDN) -->
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  
+  <!-- Animate.css for animations -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  
+  <style>
+    /* Basic styles and typography */
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      background-color: #f3f4f6;
+      color: #333;
+    }
+    /* Navbar styling (consistent with the rest of your site) */
+    .navbar {
+      background-color: #1a202c;
+    }
+    .navbar-brand, .nav-link {
+      color: #f7fafc !important;
+      font-weight: 600;
+    }
+    .nav-link:hover {
+      color: #e2e8f0 !important;
+    }
+    /* Page header styling */
+    .page-header {
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      padding: 2rem 1rem;
+      border-radius: 1rem;
+      margin: 2rem auto;
+      text-align: center;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      max-width: 800px;
+    }
+    .page-header h1 {
+      font-size: 2.5rem;
+      animation: fadeInDown 1s;
+    }
+    .page-header p {
+      font-size: 1.125rem;
+      animation: fadeInUp 1s;
+    }
+    /* Chat container styling */
+    .chat-container {
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 280px); /* Adjust depending on header/footer height */
+      max-width: 800px;
+      margin: auto;
+      background-color: #fff;
+      border-radius: 1rem;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      overflow: hidden;
+    }
+    /* Chat log styling */
+    .chat-log {
+      flex-grow: 1;
+      padding: 1rem;
+      background-color: #f3f4f6;
+      overflow-y: auto;
+    }
+    .message {
+      margin-bottom: 1rem;
+      max-width: 80%;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      word-wrap: break-word;
+    }
+    .message.user {
+      background-color: #edf2f7;
+      align-self: flex-end;
+    }
+    .message.other {
+      background-color: #e2e8f0;
+      align-self: flex-start;
+    }
+    /* Chat input area styling */
+    .chat-input {
+      border-top: 1px solid #ccc;
+      padding: 1rem;
+      background-color: #fff;
+    }
+    .chat-input textarea {
+      width: 100%;
+      border: none;
+      border-radius: 50px;
+      padding: 0.75rem 1.25rem;
+      background: #edf2f7;
+      box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+      resize: none;
+      transition: box-shadow 0.3s ease;
+    }
+    .chat-input textarea:focus {
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(102,126,234,0.5);
+    }
+    .chat-input button {
+      margin-top: 0.5rem;
+      width: 100%;
+      border: none;
+      border-radius: 50px;
+      padding: 0.75rem;
+      font-size: 1.125rem;
+      font-weight: 600;
+      background: linear-gradient(135deg, #667eea, #764ba2);
+      color: #fff;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .chat-input button:hover {
+      background: linear-gradient(135deg, #5a67d8, #6b46c1);
+      transform: translateY(-2px);
+    }
+    /* Keyframe animations */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar -->
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="index.html">Klanite</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" 
+              aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
+          <li class="nav-item"><a class="nav-link" href="videos.html">Videos</a></li>
+          <li class="nav-item"><a class="nav-link" href="deepseek.html">Klani</a></li>
+          <li class="nav-item active"><a class="nav-link" href="chat.html">Chat</a></li>
+          <li class="nav-item"><a class="nav-link" href="admin.html">Admin</a></li>
+          <li class="nav-item"><a class="nav-link" href="proxy.html">Web Proxy</a></li>
+          <li class="nav-item"><a class="nav-link" href="blog.html">Blog</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Page Header -->
+  <div class="container">
+    <div class="page-header animate__animated animate__fadeIn">
+      <h1 class="animate__animated animate__fadeInDown">Group Chat</h1>
+      <p class="animate__animated animate__fadeInUp">Connect with your friends in real time.</p>
+    </div>
+  </div>
+  
+  <!-- Chat Interface -->
+  <div class="container mb-5">
+    <div class="chat-container">
+      <div class="chat-log" id="chatLog">
+        <!-- Chat messages will appear here -->
+      </div>
+      <div class="chat-input">
+        <textarea id="chatMessage" rows="2" placeholder="Type your message..."></textarea>
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-3">
+    <div class="container">
+      &copy; 2025 Klanite. All rights reserved.
+    </div>
+  </footer>
+  
+  <!-- Include Socket.IO client library -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- jQuery and Bootstrap JS (using CDN) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    // Connect to Socket.IO
+    const socket = io();
+
+    // Array to store chat messages locally
+    let chatMessages = [];
+
+    // Function to update the chat log
+    function updateChatLog() {
+      const log = document.getElementById('chatLog');
+      log.innerHTML = '';
+      chatMessages.forEach(msg => {
+        const msgDiv = document.createElement('div');
+        // Use "user" style if message is from You; otherwise, style as "other"
+        msgDiv.className = 'message ' + (msg.sender === 'You' ? 'user' : 'other');
+        msgDiv.innerHTML = `<strong>${msg.sender}:</strong> ${msg.text}`;
+        log.appendChild(msgDiv);
+      });
+      log.scrollTop = log.scrollHeight;
+    }
+
+    // Function to send a message via Socket.IO
+    function sendMessage() {
+      const input = document.getElementById('chatMessage');
+      const message = input.value.trim();
+      if (message === '') return;
+      // Add your message locally
+      chatMessages.push({ sender: 'You', text: message });
+      updateChatLog();
+      // Emit the message to the server
+      socket.emit('chat message', message);
+      input.value = '';
+    }
+
+    // Listen for messages from the server
+    socket.on('chat message', function(message) {
+      // If the message is not from you, add it as "Other"
+      // (You could enhance this by tracking your own messages via an ID)
+      chatMessages.push({ sender: 'Other', text: message });
+      updateChatLog();
+    });
+  </script>
+</body>
+</html>
