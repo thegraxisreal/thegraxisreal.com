@@ -3,265 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mock.Com</title>
+    <title>TheGraxIsReal - Young Developer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
         }
         
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            overflow-x: hidden;
+            color: #333;
+            line-height: 1.6;
         }
         
         .container {
             max-width: 1200px;
-            padding: 40px 20px;
-            text-align: center;
+            margin: 0 auto;
+            padding: 0 20px;
         }
         
-        h1 {
-            font-size: 4rem;
-            margin-bottom: 20px;
-            color: #333;
-            opacity: 0;
-            transform: translateY(-20px);
-            animation: fadeInDown 1s ease forwards;
-        }
-        
-        p {
-            font-size: 1.2rem;
-            color: #666;
-            margin-bottom: 40px;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            line-height: 1.6;
-            opacity: 0;
-            transform: translateY(-10px);
-            animation: fadeInDown 1s ease forwards 0.3s;
-        }
-        
-        .app-container {
+        nav {
             display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            padding: 30px 0;
+        }
+        
+        .logo {
+            font-weight: 700;
+            font-size: 24px;
+            color: #333;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
             gap: 30px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            color: #6366f1;
+        }
+        
+        /* Projects Section - Now at the top */
+        .projects {
+            padding: 60px 0;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 0.3s;
+        }
+        
+        .projects h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+            position: relative;
+            display: inline-block;
+        }
+        
+        .projects h2:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(to right, #6366f1, #8b5cf6);
+            border-radius: 2px;
+        }
+        
+        .project-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: transform 0.3s, box-shadow 0.3s;
             margin-top: 20px;
         }
         
-        .app-card {
-            background-color: white;
-            border-radius: 15px;
-            padding: 30px;
-            width: 300px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            transition: all 0.3s ease;
-            opacity: 0;
-            transform: scale(0.9);
+        .project-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
         }
         
-        .app-card:nth-child(1) {
-            animation: fadeInScale 0.7s ease forwards 0.6s;
-        }
-        
-        .app-card:nth-child(2) {
-            animation: fadeInScale 0.7s ease forwards 0.8s;
-        }
-        
-        .app-card:nth-child(3) {
-            animation: fadeInScale 0.7s ease forwards 1s;
-        }
-        
-        .app-card:nth-child(4) {
-            animation: fadeInScale 0.7s ease forwards 1.2s;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .app-card:nth-child(4)::after {
-            content: 'NEW';
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: #ff6b6b;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-        
-        .app-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
-        }
-        
-        .app-icon {
-            width: 80px;
-            height: 80px;
-            background-color: #f8f9fa;
-            border-radius: 50%;
+        /* Hero Section - Now in the middle */
+        .hero {
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 20px;
-        }
-        
-        .app-icon svg {
-            width: 40px;
-            height: 40px;
-        }
-        
-        .app-card h2 {
-            margin-bottom: 15px;
-            color: #333;
-        }
-        
-        .app-card p {
-            font-size: 0.9rem;
-            margin-bottom: 20px;
-            color: #777;
-        }
-        
-        .app-btn {
-            display: inline-block;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #6e8efb 0%, #a777e3 100%);
-            color: white;
-            text-decoration: none;
-            border-radius: 50px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            border: none;
-            cursor: pointer;
-        }
-        
-        .klanite-btn {
-            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
-        }
-        
-        .app-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-        
-        @keyframes fadeInDown {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        
-        @keyframes fadeInScale {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            }
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
-            }
-            100% {
-                transform: scale(1);
-                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            }
-        }
-        
-        .ios-btn {
-            animation: pulse 2s infinite;
-        }
-        
-        footer {
-            margin-top: 80px;
-            color: #888;
-            font-size: 0.9rem;
+            text-align: center;
+            min-height: 60vh;
+            padding: 60px 20px;
             opacity: 0;
-            animation: fadeInDown 1s ease forwards 1s;
+            animation: fadeIn 1s ease forwards 0.6s;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .hero h2 {
+            font-size: 1.5rem;
+            color: #666;
+            margin-bottom: 30px;
+        }
+        
+        .hero p {
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+        
+        /* Social Button styles */
+        .social-button {
+            display: inline-flex;
+            align-items: center;
+            background: #1da1f2;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            margin-bottom: 30px;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .social-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(29, 161, 242, 0.3);
+        }
+        
+        .social-button svg {
+            margin-right: 10px;
+        }
+        
+        /* Blog Section - New section at the bottom */
+        .blog {
+            padding: 60px 0;
+            text-align: center;
+            opacity: 0;
+            animation: fadeIn 1s ease forwards 0.9s;
+        }
+        
+        .blog h2 {
+            font-size: 2.5rem;
+            margin-bottom: 30px;
+        }
+        
+        .blog-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        /* Keep existing animations and media queries */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero h2 {
+                font-size: 1.2rem;
+            }
+            
+            .projects h2, .blog h2 {
+                font-size: 2rem;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Mock.Com</h1>
-        <p>Your gateway to popular app replicas. Experience the functionality of your favorite apps in a mock environment.</p>
+        <nav>
+            <a href="#" class="logo">TheGraxIsReal</a>
+            <div class="nav-links">
+                <a href="#">Home</a>
+                <a href="#projects">Projects</a>
+                <a href="#blog">Blog</a>
+            </div>
+        </nav>
         
-        <div class="app-container">
-            <div class="app-card">
-                <div class="app-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1DA1F2" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
-                    </svg>
-                </div>
-                <h2>Mock Twitter</h2>
-                <p>Experience a replica of the popular social media platform with all the core functionality.</p>
-                <a href="twitterhome.html" class="app-btn">Launch App</a>
-            </div>
+        <section id="projects" class="projects">
+            <h2>My Projects</h2>
+            <p>Check out what I've been working on lately. These projects showcase my skills in HTML, CSS, and Swift development.</p>
+            <a href="bloggg.html" class="project-button">Visit Mock.Com</a>
+        </section>
+        
+        <section class="hero">
+            <h1>Hey, I'm Grax</h1>
+            <h2>14-year-old Software Developer</h2>
+            <p>I specialize in HTML and Swift development, creating websites and apps that combine functionality with great design. Currently exploring new technologies and working on exciting projects.</p>
             
-            <div class="app-card">
-                <div class="app-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#4285F4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path>
-                        <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path>
-                    </svg>
-                </div>
-                <h2>Mock Google Classroom <span style="font-size: 0.6rem; background-color: #ff6b6b; color: white; padding: 2px 6px; border-radius: 10px; vertical-align: middle;">EARLY BETA</span></h2>
-                <p>An educational platform replica for students and teachers to collaborate efficiently.</p>
-                <a href="classroom.html" class="app-btn">Launch App</a>
+            <a href="https://twitter.com/thegraxisreal" class="social-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M23 3a10.9 10.9 0 0 1-3.14 1.53 4.48 4.48 0 0 0-7.86 3v1A10.66 10.66 0 0 1 3 4s-4 9 5 13a11.64 11.64 0 0 1-7 2c9 5 20 0 20-11.5a4.5 4.5 0 0 0-.08-.83A7.72 7.72 0 0 0 23 3z"></path>
+                </svg>
+                Follow me on Twitter
+            </a>
+        </section>
+        
+        <section id="blog" class="blog">
+            <h2>Latest Updates</h2>
+            <div class="blog-content">
+                <p>Stay tuned for updates about my journey in software development, new projects, and tech insights!</p>
             </div>
-            
-            <div class="app-card">
-                <div class="app-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#6a11cb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M12 21a9 9 0 0 1-9-9 9 9 0 0 1 9-9 9 9 0 0 1 9 9 9 9 0 0 1-9 9z"></path>
-                        <path d="M8 12h8"></path>
-                        <path d="M12 8v8"></path>
-                    </svg>
-                </div>
-                <h2>Klanite</h2>
-                <p>Connect with friends, share moments, and discover new communities in our unique social experience.</p>
-                <a href="twitter.html" class="app-btn klanite-btn">Launch App</a>
-            </div>
-            
-            <div class="app-card">
-                <div class="app-icon">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#000000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect>
-                        <line x1="12" y1="18" x2="12" y2="18"></line>
-                    </svg>
-                </div>
-                <h2>Mock iOS</h2>
-                <p>Experience a replica of the iOS interface with familiar apps and the iconic iPhone experience.</p>
-                <a href="ios.html" class="app-btn ios-btn" style="background: linear-gradient(135deg, #5B5F97 0%, #8661C1 100%);">Launch App</a>
-            </div>
-        </div>
+        </section>
         
         <footer>
-            &copy; 2025 Mock.Com - All rights reserved
+            <p>&copy; 2023 TheGraxIsReal. All rights reserved.</p>
         </footer>
     </div>
 </body>
