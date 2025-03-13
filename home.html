@@ -1482,18 +1482,61 @@
         const retweetBtn = document.createElement("button");
         retweetBtn.className = "engagement-action repost";
         retweetBtn.innerHTML = `<i class="fas fa-retweet"></i>`;
+        retweetBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!currentUser) return;
+          await fetch("/api/tweet/retweet", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ tweetId: tweet.id, handle: currentUser })
+          });
+          fetchAndRenderTweets();
+        });
         
         // Like button
         const likeBtn = document.createElement("button");
-        const isLiked = false; // You might have logic to determine this
+        const isLiked = tweet.likedBy && tweet.likedBy.includes(currentUser);
         likeBtn.className = `engagement-action like ${isLiked ? 'liked' : ''}`;
         likeBtn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> <span>${tweet.likes || 0}</span>`;
+        likeBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!currentUser) return;
+          const isNowLiked = !likeBtn.classList.contains("liked");
+          let newLikes = isNowLiked ? (tweet.likes || 0) + 1 : (tweet.likes || 1) - 1;
+          
+          likeBtn.classList.toggle("liked");
+          likeBtn.innerHTML = `<i class="${isNowLiked ? 'fas' : 'far'} fa-heart"></i> <span>${newLikes}</span>`;
+          
+          await fetch("/api/tweet/like", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: tweet.id, likes: newLikes })
+          });
+        });
         
         // Bookmark button
         const bookmarkBtn = document.createElement("button");
         const isBookmarked = userBookmarks.includes(tweet.id);
         bookmarkBtn.className = `engagement-action bookmark ${isBookmarked ? 'bookmarked' : ''}`;
         bookmarkBtn.innerHTML = `<i class="${isBookmarked ? 'fas' : 'far'} fa-bookmark"></i>`;
+        bookmarkBtn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          if (!currentUser) return;
+          
+          if (isBookmarked) {
+            const success = await unbookmarkTweet(tweet.id);
+            if (success) {
+              bookmarkBtn.classList.remove('bookmarked');
+              bookmarkBtn.innerHTML = `<i class="far fa-bookmark"></i>`;
+            }
+          } else {
+            const success = await bookmarkTweet(tweet.id);
+            if (success) {
+              bookmarkBtn.classList.add('bookmarked');
+              bookmarkBtn.innerHTML = `<i class="fas fa-bookmark"></i>`;
+            }
+          }
+        });
         
         // Add view count button
         const viewsBtn = document.createElement("button");
