@@ -145,6 +145,22 @@ app.post('/api/login', (req, res) => {
   return res.json({ success: true, message: "Login successful", handle: user.handle });
 });
 
+// Add this function at the top with other functions
+function generateViewCount() {
+  const roll = Math.random() * 100; // Roll 0-100
+  
+  if (roll < 33.33) { // ~33.33% chance for small tweet (0-900 views)
+    return Math.floor(Math.random() * 901);
+  } else if (roll < 66.66) { // ~33.33% chance for medium tweet (1k-500k)
+    const views = Math.floor(Math.random() * 499000) + 1000;
+    return Math.floor(views / 1000) + 'K';
+  } else { // ~33.33% chance for big tweet (500k-100M)
+    const views = Math.floor(Math.random() * 99500000) + 500000;
+    return Math.floor(views / 1000000) + 'M';
+  }
+}
+
+// Update the /api/tweet endpoint
 app.post('/api/tweet', (req, res) => {
   console.log("Received /api/tweet request:", req.body);
   const { handle, text, imageData, quotedTweet, poll } = req.body;
@@ -165,6 +181,7 @@ app.post('/api/tweet', (req, res) => {
     timestamp: Date.now(),
     likes: 0,
     replies: [],
+    views: generateViewCount(),
     poll: poll || null,
     quotedTweet: quotedTweet ? { ...quotedTweet, profilePicture: users[quotedTweet.handle.toLowerCase()]?.profilePicture || null, verified: users[quotedTweet.handle.toLowerCase()]?.verified || null } : null,
     last_retweeted_by: null,
@@ -449,3 +466,45 @@ process.on('SIGTERM', async () => {
 http.listen(PORT, '0.0.0.0', () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });
+
+// Add this CSS in the <style> section
+.tweet-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px 0;
+  color: var(--x-secondary-text);
+  font-size: 13px;
+}
+
+.tweet-stat {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+function createTweetElement(tweet) {
+  // ... existing tweet element creation code ...
+
+  // Add this where you want the stats to appear
+  const statsDiv = document.createElement('div');
+  statsDiv.className = 'tweet-stats';
+  statsDiv.innerHTML = `
+    <div class="tweet-stat">
+      <i class="far fa-chart-bar"></i>
+      <span>${tweet.views}</span>
+    </div>
+    <div class="tweet-stat">
+      <i class="far fa-comment"></i>
+      <span>${tweet.replies.length}</span>
+    </div>
+    <div class="tweet-stat">
+      <i class="far fa-heart"></i>
+      <span>${tweet.likes}</span>
+    </div>
+  `;
+
+  // Add the stats div to your tweet element
+  tweetElement.appendChild(statsDiv);
+
+  // ... rest of existing tweet element code ...
+}
