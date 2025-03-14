@@ -189,6 +189,7 @@ app.post('/api/tweet', (req, res) => {
     verified: user?.verified || null
   };
   tweets.push(newTweet);
+  saveData();
   io.emit('new tweet', newTweet);
   console.log("Tweet saved:", newTweet);
   return res.json({ success: true, tweet: newTweet });
@@ -212,6 +213,7 @@ app.post('/api/tweet/reply', (req, res) => {
     verified: user?.verified || null
   };
   tweet.replies.push(newReply);
+  saveData();
   io.emit('new reply', { tweetId, reply: newReply });
   return res.json({ success: true, reply: newReply });
 });
@@ -225,6 +227,7 @@ app.post('/api/tweet/retweet', (req, res) => {
   if (user.banned) return res.status(403).json({ success: false, error: "Account suspended" });
   tweet.timestamp = Date.now();
   tweet.last_retweeted_by = handle;
+  saveData();
   io.emit('tweet retweeted', tweet);
   return res.json({ success: true, tweet });
 });
@@ -236,6 +239,7 @@ app.patch('/api/tweet/poll/vote', (req, res) => {
   const pollOption = tweet.poll.options.find(opt => opt.text === option);
   if (!pollOption) return res.status(400).json({ success: false, error: "Option not found" });
   pollOption.votes += 1;
+  saveData();
   io.emit('poll voted', tweet);
   return res.json({ success: true, tweet });
 });
@@ -265,6 +269,7 @@ app.patch('/api/tweet/like', (req, res) => {
   const tweet = tweets.find(t => t.id === id);
   if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
   tweet.likes = likes;
+  saveData();
   io.emit('tweet liked', tweet);
   return res.json({ success: true, tweet });
 });
@@ -276,6 +281,7 @@ app.patch('/api/tweet/reply/like', (req, res) => {
   const reply = tweet.replies.find(r => r.id === replyId);
   if (!reply) return res.status(404).json({ success: false, error: "Reply not found" });
   reply.likes = likes;
+  saveData();
   io.emit('reply liked', { tweetId, reply });
   return res.json({ success: true, reply });
 });
@@ -296,6 +302,7 @@ app.patch('/api/profile', (req, res) => {
   if (bio !== undefined) user.bio = bio;
   if (profilePicture !== undefined) user.profilePicture = profilePicture;
   if (verified !== undefined) user.verified = verified;
+  saveData();
   return res.json({ success: true, message: "Profile updated", profile: { handle: user.handle, bio: user.bio, profilePicture: user.profilePicture, verified: user.verified } });
 });
 
@@ -314,6 +321,7 @@ app.post('/api/ban', (req, res) => {
   const user = users[handle.toLowerCase()];
   if (!user) return res.status(404).json({ success: false, error: "User not found" });
   user.banned = true;
+  saveData();
   return res.json({ success: true, message: "User banned" });
 });
 
