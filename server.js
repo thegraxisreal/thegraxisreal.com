@@ -40,43 +40,28 @@ const autoSaveInterval = setInterval(saveData, 300000);
 // Function to load data from JSON files
 async function loadData() {
   try {
-    const usersData = await fs.readFile('users.json', 'utf8');
+    const usersData = await fs.readFile(path.join(__dirname, 'users.json'), 'utf8');
     users = JSON.parse(usersData);
-    console.log('Users loaded from users.json');
-  } catch (err) {
-    if (err.code === 'ENOENT') console.log('No users.json found, starting fresh');
-    else console.error('Error loading users:', err);
-  }
-  try {
-    const tweetsData = await fs.readFile('tweets.json', 'utf8');
+    console.log(`Loaded ${Object.keys(users).length} users.`);
+    
+    const tweetsData = await fs.readFile(path.join(__dirname, 'tweets.json'), 'utf8');
     tweets = JSON.parse(tweetsData);
-    console.log('Tweets loaded from tweets.json');
-  } catch (err) {
-    if (err.code === 'ENOENT') console.log('No tweets.json found, starting fresh');
-    else console.error('Error loading tweets:', err);
-  }
-  try {
+    console.log(`Loaded ${tweets.length} tweets.`);
+    
     const classroomsData = await fs.readFile('classrooms.json', 'utf8');
     classrooms = JSON.parse(classroomsData);
     console.log('Classrooms loaded from classrooms.json');
-  } catch (err) {
-    if (err.code === 'ENOENT') console.log('No classrooms.json found, starting fresh');
-    else console.error('Error loading classrooms:', err);
-  }
-  try {
+    
     const announcementsData = await fs.readFile('announcements.json', 'utf8');
     announcements = JSON.parse(announcementsData);
     console.log('Announcements loaded from announcements.json');
   } catch (err) {
-    if (err.code === 'ENOENT') console.log('No announcements.json found, starting fresh');
-    else console.error('Error loading announcements:', err);
+    console.error('Error loading data:', err);
   }
 }
 
-// Load data when the server starts
-loadData().then(() => {
-  console.log('Initial data load complete');
-});
+// Load data before starting the server
+loadData();
 
 // Your existing endpoints
 app.post('/api/deepseek', (req, res) => {
@@ -250,6 +235,7 @@ app.patch('/api/tweet/poll/vote', (req, res) => {
 
 // Endpoint to return tweets for the timeline
 app.get('/api/tweets', (req, res) => {
+  console.log(`Returning ${tweets.length} tweets`);
   const enrichedTweets = tweets.map(tweet => ({
     ...tweet,
     profilePicture: users[tweet.handle.toLowerCase()]?.profilePicture || null,
