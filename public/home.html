@@ -1121,32 +1121,33 @@
     });
 
     async function fetchAndRenderTweets(query = "") {
-      const response = await fetch("/api/tweets");
-      const data = await response.json();
-      let tweets = data.tweets;
-      
-      // Enrich all tweets with profile pictures - make sure this is working
-      const enrichedTweets = [];
-      for (let i = 0; i < tweets.length; i++) {
-        const enrichedTweet = await enrichTweetWithProfilePicture(tweets[i]);
-        enrichedTweets.push(enrichedTweet);
-      }
-      tweets = enrichedTweets;
-      
-      if (query) {
-        tweets = filterTweets(tweets, query);
-      }
-      if (isRandomOrder) {
-        // Shuffle tweets randomly (Fisher-Yates shuffle)
-        for (let i = tweets.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [tweets[i], tweets[j]] = [tweets[j], tweets[i]];
+      try {
+        console.log("Fetching tweets...");
+        let url = "/api/tweets";
+        if (query) url += `?q=${encodeURIComponent(query)}`;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        console.log("Fetched tweets:", data);
+        
+        if (data.tweets && Array.isArray(data.tweets)) {
+          const tweetFeed = document.getElementById("tweetFeed");
+          tweetFeed.innerHTML = "";
+          
+          // Check if we have tweets
+          if (data.tweets.length === 0) {
+            tweetFeed.innerHTML = '<p class="text-center text-muted my-5">No tweets yet. Be the first to post!</p>';
+            return;
+          }
+          
+          // Render tweets
+          renderTweets(data.tweets, tweetFeed);
+        } else {
+          console.error("Invalid tweet data received:", data);
         }
-      } else {
-        tweets.sort((a, b) => b.timestamp - a.timestamp); // Newest to oldest
+      } catch (error) {
+        console.error("Error fetching tweets:", error);
       }
-      renderTweets(tweets);
-      renderTrendingHashtags(data.tweets);
     }
 
     function filterTweets(tweets, query) {
@@ -2272,6 +2273,11 @@
 
       // Initialize user avatar if available
       fetchCurrentUserProfile();
+      
+      // Fetch tweets on load if user is logged in
+      if (currentUser) {
+        fetchAndRenderTweets();
+      }
     });
 
     async function fetchCurrentUserProfile() {
