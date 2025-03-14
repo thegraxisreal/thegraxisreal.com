@@ -266,9 +266,20 @@ app.get('/api/tweets', (req, res) => {
 
 app.patch('/api/tweet/like', (req, res) => {
   const { id, likes } = req.body;
-  const tweet = tweets.find(t => t.id === id);
-  if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
+  console.log(`Like request received for tweet ID: ${id}, likes: ${likes}`);
+  
+  // Ensure ID is correctly formatted (tweets might store IDs as numbers)
+  const tweetId = typeof id === 'string' ? parseInt(id, 10) : id;
+  
+  const tweet = tweets.find(t => t.id === tweetId);
+  if (!tweet) {
+    console.log(`Tweet not found with ID: ${tweetId}`);
+    return res.status(404).json({ success: false, error: "Tweet not found" });
+  }
+  
   tweet.likes = likes;
+  console.log(`Updated tweet ${tweetId} with ${likes} likes`);
+  
   saveData();
   io.emit('tweet liked', tweet);
   return res.json({ success: true, tweet });
