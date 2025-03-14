@@ -1499,12 +1499,7 @@
         likeBtn.className = `engagement-action like ${isLiked ? 'liked' : ''}`;
         likeBtn.innerHTML = `<i class="${isLiked ? 'fas' : 'far'} fa-heart"></i> <span>${tweet.likes || 0}</span>`;
 
-        // Clear any existing event listeners
-        likeBtn.replaceWith(likeBtn.cloneNode(true));
-        const newLikeBtn = likeBtn.cloneNode(true);
-
-        // Add the event listener
-        newLikeBtn.addEventListener("click", async function(e) {
+        likeBtn.addEventListener("click", async function(e) {
           e.stopPropagation();
           console.log("Like button clicked"); // Debug log
           
@@ -1541,42 +1536,10 @@
           }
         });
 
-        // Replace the like button with our new one that has the event listener
-        likeBtn.replaceWith(newLikeBtn);
-        
-        // Bookmark button
-        const bookmarkBtn = document.createElement("button");
-        const isBookmarked = userBookmarks.includes(tweet.id);
-        bookmarkBtn.className = `engagement-action bookmark ${isBookmarked ? 'bookmarked' : ''}`;
-        bookmarkBtn.innerHTML = `<i class="${isBookmarked ? 'fas' : 'far'} fa-bookmark"></i>`;
-        bookmarkBtn.addEventListener("click", async (e) => {
-          e.stopPropagation();
-          if (!currentUser) return;
-          
-          if (isBookmarked) {
-            const success = await unbookmarkTweet(tweet.id);
-            if (success) {
-              bookmarkBtn.classList.remove('bookmarked');
-              bookmarkBtn.innerHTML = `<i class="far fa-bookmark"></i>`;
-            }
-          } else {
-            const success = await bookmarkTweet(tweet.id);
-            if (success) {
-              bookmarkBtn.classList.add('bookmarked');
-              bookmarkBtn.innerHTML = `<i class="fas fa-bookmark"></i>`;
-            }
-          }
-        });
-        
-        // Add view count button
-        const viewsBtn = document.createElement("button");
-        viewsBtn.className = "engagement-action";
-        viewsBtn.innerHTML = `<i class="far fa-eye"></i> <span>${tweet.views || '0'}</span>`;
-        
         // Add all buttons to the engagement div
         engagementDiv.appendChild(commentBtn);
         engagementDiv.appendChild(retweetBtn);
-        engagementDiv.appendChild(likeBtn);
+        engagementDiv.appendChild(likeBtn); // Add likeBtn directly
         engagementDiv.appendChild(bookmarkBtn);
         engagementDiv.appendChild(viewsBtn); // Add the views button
         
