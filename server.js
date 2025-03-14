@@ -183,7 +183,11 @@ app.post('/api/tweet', (req, res) => {
     replies: [],
     views: generateViewCount(),
     poll: poll || null,
-    quotedTweet: quotedTweet ? { ...quotedTweet, profilePicture: users[quotedTweet.handle.toLowerCase()]?.profilePicture || null, verified: users[quotedTweet.handle.toLowerCase()]?.verified || null } : null,
+    quotedTweet: quotedTweet ? { 
+      ...quotedTweet, 
+      profilePicture: users[quotedTweet.handle.toLowerCase()]?.profilePicture || null, 
+      verified: users[quotedTweet.handle.toLowerCase()]?.verified || null 
+    } : null,
     last_retweeted_by: null,
     profilePicture: user?.profilePicture || null,
     verified: user?.verified || null
@@ -244,6 +248,7 @@ app.patch('/api/tweet/poll/vote', (req, res) => {
   return res.json({ success: true, tweet });
 });
 
+// Endpoint to return tweets for the timeline
 app.get('/api/tweets', (req, res) => {
   const enrichedTweets = tweets.map(tweet => ({
     ...tweet,
@@ -261,7 +266,7 @@ app.get('/api/tweets', (req, res) => {
     } : null
   }));
   const sortedTweets = enrichedTweets.sort((a, b) => b.timestamp - a.timestamp);
-  res.json({ tweets: sortedTweets });
+  return res.json({ tweets: sortedTweets });
 });
 
 app.patch('/api/tweet/like', (req, res) => {
