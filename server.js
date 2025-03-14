@@ -37,26 +37,76 @@ async function saveData() {
 // Set up auto-save every 5 minutes (300000 milliseconds)
 const autoSaveInterval = setInterval(saveData, 300000);
 
-// Function to load data from JSON files
+// Function to load data from JSON files with better error handling
 async function loadData() {
   try {
-    const usersData = await fs.readFile(path.join(__dirname, 'users.json'), 'utf8');
-    users = JSON.parse(usersData);
-    console.log(`Loaded ${Object.keys(users).length} users.`);
+    // Check if users.json exists, if not create empty object
+    try {
+      const usersData = await fs.readFile(path.join(__dirname, 'users.json'), 'utf8');
+      users = JSON.parse(usersData);
+      console.log(`Loaded ${Object.keys(users).length} users from users.json`);
+    } catch (error) {
+      console.log('users.json not found or invalid, creating empty users object');
+      users = {};
+      await fs.writeFile('users.json', JSON.stringify(users, null, 2));
+    }
     
-    const tweetsData = await fs.readFile(path.join(__dirname, 'tweets.json'), 'utf8');
-    tweets = JSON.parse(tweetsData);
-    console.log(`Loaded ${tweets.length} tweets.`);
+    // Check if tweets.json exists, if not create empty array
+    try {
+      const tweetsData = await fs.readFile(path.join(__dirname, 'tweets.json'), 'utf8');
+      tweets = JSON.parse(tweetsData);
+      console.log(`Loaded ${tweets.length} tweets from tweets.json`);
+      // Log the first tweet for debugging
+      if (tweets.length > 0) {
+        console.log('First tweet:', JSON.stringify(tweets[0]).substring(0, 200) + '...');
+      }
+    } catch (error) {
+      console.log('tweets.json not found or invalid, creating empty tweets array');
+      tweets = [];
+      await fs.writeFile('tweets.json', JSON.stringify(tweets, null, 2));
+    }
     
-    const classroomsData = await fs.readFile('classrooms.json', 'utf8');
-    classrooms = JSON.parse(classroomsData);
-    console.log('Classrooms loaded from classrooms.json');
+    // Sample tweet for testing if no tweets found
+    if (tweets.length === 0) {
+      console.log('No tweets found. Adding a sample tweet for testing...');
+      const sampleTweet = {
+        id: Date.now(),
+        handle: "system",
+        text: "Welcome to our platform! This is a sample tweet to get you started.",
+        timestamp: Date.now(),
+        likes: 0,
+        replies: [],
+        views: "123",
+        profilePicture: null 
+      };
+      tweets.push(sampleTweet);
+      await fs.writeFile('tweets.json', JSON.stringify(tweets, null, 2));
+      console.log('Added sample tweet:', sampleTweet);
+    }
     
-    const announcementsData = await fs.readFile('announcements.json', 'utf8');
-    announcements = JSON.parse(announcementsData);
-    console.log('Announcements loaded from announcements.json');
+    // Load classrooms and announcements
+    try {
+      const classroomsData = await fs.readFile('classrooms.json', 'utf8');
+      classrooms = JSON.parse(classroomsData);
+      console.log('Classrooms loaded from classrooms.json');
+    } catch (error) {
+      console.log('classrooms.json not found or invalid, creating empty classrooms array');
+      classrooms = [];
+      await fs.writeFile('classrooms.json', JSON.stringify(classrooms, null, 2));
+    }
+    
+    try {
+      const announcementsData = await fs.readFile('announcements.json', 'utf8');
+      announcements = JSON.parse(announcementsData);
+      console.log('Announcements loaded from announcements.json');
+    } catch (error) {
+      console.log('announcements.json not found or invalid, creating empty announcements array');
+      announcements = [];
+      await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
+    }
+    
   } catch (err) {
-    console.error('Error loading data:', err);
+    console.error('Error in loadData function:', err);
   }
 }
 
@@ -233,26 +283,43 @@ app.patch('/api/tweet/poll/vote', (req, res) => {
   return res.json({ success: true, tweet });
 });
 
-// Endpoint to return tweets for the timeline
+// Make API endpoint for getting tweets more robust with better logging
 app.get('/api/tweets', (req, res) => {
-  console.log(`Returning ${tweets.length} tweets`);
-  const enrichedTweets = tweets.map(tweet => ({
-    ...tweet,
-    profilePicture: users[tweet.handle.toLowerCase()]?.profilePicture || null,
-    verified: users[tweet.handle.toLowerCase()]?.verified || null,
-    replies: tweet.replies.map(reply => ({
-      ...reply,
-      profilePicture: users[reply.handle.toLowerCase()]?.profilePicture || null,
-      verified: users[reply.handle.toLowerCase()]?.verified || null
-    })),
-    quotedTweet: tweet.quotedTweet ? {
-      ...tweet.quotedTweet,
-      profilePicture: users[tweet.quotedTweet.handle.toLowerCase()]?.profilePicture || null,
-      verified: users[tweet.quotedTweet.handle.toLowerCase()]?.verified || null
-    } : null
-  }));
-  const sortedTweets = enrichedTweets.sort((a, b) => b.timestamp - a.timestamp);
-  return res.json({ tweets: sortedTweets });
+  console.log(`GET /api/tweets: Returning ${tweets.length} tweets`);
+  
+  try {
+    if (!Array.isArray(tweets)) {
+      console.error('ERROR: tweets is not an array:', typeof tweets);
+      return res.json({ tweets: [] });
+    }
+    
+    const enrichedTweets = tweets.map(tweet => {
+      console.log(`Processing tweet by ${tweet.handle}`);
+      return {
+        ...tweet,
+        profilePicture: users[tweet.handle.toLowerCase()]?.profilePicture || null,
+        verified: users[tweet.handle.toLowerCase()]?.verified || null,
+        replies: Array.isArray(tweet.replies) ? tweet.replies.map(reply => ({
+          ...reply,
+          profilePicture: users[reply.handle?.toLowerCase()]?.profilePicture || null,
+          verified: users[reply.handle?.toLowerCase()]?.verified || null
+        })) : [],
+        quotedTweet: tweet.quotedTweet ? {
+          ...tweet.quotedTweet,
+          profilePicture: users[tweet.quotedTweet.handle?.toLowerCase()]?.profilePicture || null,
+          verified: users[tweet.quotedTweet.handle?.toLowerCase()]?.verified || null
+        } : null
+      };
+    });
+    
+    const sortedTweets = enrichedTweets.sort((a, b) => b.timestamp - a.timestamp);
+    console.log(`Returning ${sortedTweets.length} enriched tweets`);
+    
+    return res.json({ success: true, tweets: sortedTweets });
+  } catch (error) {
+    console.error('Error in /api/tweets:', error);
+    return res.json({ success: false, tweets: [], error: error.message });
+  }
 });
 
 app.patch('/api/tweet/like', (req, res) => {
