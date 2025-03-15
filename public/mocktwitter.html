@@ -166,35 +166,43 @@ TWITTER
     .tweet-actions {
       display: flex;
       justify-content: space-between;
-      max-width: 400px;
+      width: 100%;
       margin-top: 10px;
     }
     .action-btn {
       display: flex;
       align-items: center;
+      gap: 4px;
       background: none;
       border: none;
       font-size: 0.9rem;
       cursor: pointer;
       color: var(--twitter-dark-gray);
-      transition: color 0.2s;
+      transition: all 0.2s;
+      padding: 8px;
+      border-radius: 50%;
+    }
+    .action-btn:hover {
+      background-color: rgba(29, 161, 242, 0.1);
     }
     .action-btn i {
-      margin-right: 5px;
       font-size: 1.1rem;
     }
     .like-btn:hover {
       color: #e0245e;
+      background-color: rgba(224, 36, 94, 0.1);
     }
     .like-btn.liked {
       color: #e0245e;
     }
     .reply-btn:hover {
       color: var(--twitter-blue);
+      background-color: rgba(29, 161, 242, 0.1);
     }
-    .quote-btn:hover, 
-    .retweet-btn:hover {
+    .retweet-btn:hover,
+    .quote-btn:hover {
       color: #17bf63;
+      background-color: rgba(23, 191, 99, 0.1);
     }
     
     /* Poll and quoted tweet */
@@ -897,30 +905,33 @@ TWITTER
           quotedDiv.appendChild(qText);
           tweetDiv.appendChild(quotedDiv);
         }
-        const likeSection = document.createElement("div");
-        const likeBtn = document.createElement("button");
-        likeBtn.className = "like-btn";
-        likeBtn.textContent = "♡";
-        const likeCount = document.createElement("span");
-        likeCount.className = "like-count";
-        likeCount.textContent = tweet.likes || 0;
-        likeBtn.addEventListener("click", async () => {
-          let newLikes = likeBtn.classList.contains("liked") ? (tweet.likes || 1) - 1 : (tweet.likes || 0) + 1;
-          likeBtn.classList.toggle("liked");
-          likeBtn.textContent = likeBtn.classList.contains("liked") ? "❤️" : "♡";
-          likeCount.textContent = newLikes;
-          await fetch("/api/tweet/like", {
-            method: "PATCH",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ id: tweet.id, likes: newLikes })
-          });
-        });
-        likeSection.appendChild(likeBtn);
-        likeSection.appendChild(likeCount);
-        tweetDiv.appendChild(likeSection);
+        const actionsDiv = document.createElement("div");
+        actionsDiv.className = "tweet-actions";
+        
+        const replyBtn = document.createElement("button");
+        replyBtn.className = "action-btn reply-btn";
+        replyBtn.innerHTML = `<i class="far fa-comment"></i><span>${tweet.replies ? tweet.replies.length : 0}</span>`;
+        replyBtn.setAttribute("title", "Reply");
+        
         const retweetBtn = document.createElement("button");
-        retweetBtn.className = "quote-btn";
-        retweetBtn.textContent = "Retweet";
+        retweetBtn.className = "action-btn retweet-btn";
+        retweetBtn.innerHTML = `<i class="fas fa-retweet"></i><span>0</span>`;
+        retweetBtn.setAttribute("title", "Retweet");
+        
+        const quoteBtn = document.createElement("button");
+        quoteBtn.className = "action-btn quote-btn";
+        quoteBtn.innerHTML = `<i class="far fa-comment-dots"></i><span>0</span>`;
+        quoteBtn.setAttribute("title", "Quote Tweet");
+        
+        const likeBtn = document.createElement("button");
+        likeBtn.className = "action-btn like-btn";
+        likeBtn.innerHTML = `<i class="far fa-heart"></i><span>${tweet.likes || 0}</span>`;
+        likeBtn.setAttribute("title", "Like");
+        
+        replyBtn.addEventListener("click", () => {
+          replyFormDiv.style.display = replyFormDiv.style.display === "block" ? "none" : "block";
+        });
+        
         retweetBtn.addEventListener("click", async () => {
           await fetch("/api/tweet/retweet", {
             method: "POST",
@@ -929,11 +940,35 @@ TWITTER
           });
           fetchAndRenderTweets();
         });
-        tweetDiv.appendChild(retweetBtn);
-        const replyButton = document.createElement("button");
-        replyButton.className = "reply-btn";
-        replyButton.textContent = "Reply";
-        tweetDiv.appendChild(replyButton);
+        
+        quoteBtn.addEventListener("click", () => {
+          quoteFormDiv.style.display = quoteFormDiv.style.display === "block" ? "none" : "block";
+        });
+        
+        likeBtn.addEventListener("click", async () => {
+          let newLikes = likeBtn.classList.contains("liked") ? (tweet.likes || 1) - 1 : (tweet.likes || 0) + 1;
+          likeBtn.classList.toggle("liked");
+          
+          if (likeBtn.classList.contains("liked")) {
+            likeBtn.innerHTML = `<i class="fas fa-heart"></i><span>${newLikes}</span>`;
+          } else {
+            likeBtn.innerHTML = `<i class="far fa-heart"></i><span>${newLikes}</span>`;
+          }
+          
+          await fetch("/api/tweet/like", {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ id: tweet.id, likes: newLikes })
+          });
+        });
+        
+        actionsDiv.appendChild(replyBtn);
+        actionsDiv.appendChild(retweetBtn);
+        actionsDiv.appendChild(quoteBtn);
+        actionsDiv.appendChild(likeBtn);
+        
+        tweetDiv.appendChild(actionsDiv);
+        
         const replyFormDiv = document.createElement("div");
         replyFormDiv.className = "reply-form";
         const replyTextarea = document.createElement("textarea");
@@ -944,9 +979,6 @@ TWITTER
         replyFormDiv.appendChild(replyTextarea);
         replyFormDiv.appendChild(submitReplyBtn);
         tweetDiv.appendChild(replyFormDiv);
-        replyButton.addEventListener("click", () => {
-          replyFormDiv.style.display = replyFormDiv.style.display === "block" ? "none" : "block";
-        });
         submitReplyBtn.addEventListener("click", async () => {
           const replyText = replyTextarea.value.trim();
           if (!replyText) return;
@@ -972,13 +1004,13 @@ TWITTER
         }
         const retweetMenuDiv = document.createElement("div");
         retweetMenuDiv.className = "retweet-menu";
-        const quoteBtn = document.createElement("button");
-        quoteBtn.textContent = "Quote Tweet";
-        quoteBtn.addEventListener("click", () => {
+        const quoteBtnRetweet = document.createElement("button");
+        quoteBtnRetweet.textContent = "Quote Tweet";
+        quoteBtnRetweet.addEventListener("click", () => {
           retweetMenuDiv.style.display = "none";
           quoteFormDiv.style.display = quoteFormDiv.style.display === "block" ? "none" : "block";
         });
-        retweetMenuDiv.appendChild(quoteBtn);
+        retweetMenuDiv.appendChild(quoteBtnRetweet);
         const retweetToggleBtn = document.createElement("button");
         retweetToggleBtn.textContent = "More";
         retweetToggleBtn.className = "quote-btn";
@@ -1159,6 +1191,7 @@ TWITTER
         if (tweet.verified === "blue") verificationMark = '✔';
         else if (tweet.verified === "gold") verificationMark = '✔';
         nameSpan.textContent = tweet.handle + (verificationMark ? ` ${verificationMark}` : "");
+        nameSpan.addEventListener("click", () => showUserProfile(tweet.handle));
         const timeSpan = document.createElement("span");
         timeSpan.className = "tweet-timestamp";
         timeSpan.textContent = new Date(tweet.timestamp).toLocaleString();
