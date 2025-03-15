@@ -4,40 +4,73 @@ TWITTER
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Minimalist Mock Twitter</title>
+  <title>Twitter</title>
   <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
   <style>
     /* Base and layout */
+    :root {
+      --twitter-blue: #1da1f2;
+      --twitter-black: #14171a;
+      --twitter-dark-gray: #657786;
+      --twitter-light-gray: #aab8c2;
+      --twitter-extra-light-gray: #e1e8ed;
+      --twitter-background: #f5f8fa;
+    }
     body {
-      font-family: Arial, sans-serif;
-      background-color: #fafafa;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--twitter-background);
       margin: 0;
       padding: 0;
-      color: #333;
+      color: var(--twitter-black);
     }
     .container.main-container {
       margin-top: 20px;
+      max-width: 1200px;
     }
+    
+    /* Navigation */
     nav.navbar {
       background-color: #fff;
-      border-bottom: 1px solid #e6e6e6;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      position: sticky;
+      top: 0;
+      z-index: 1000;
     }
     nav.navbar .navbar-brand {
       font-weight: bold;
-      color: #333;
+      color: var(--twitter-blue);
+      font-size: 1.5rem;
     }
+    
     /* Sidebar */
     .sidebar {
       padding: 0;
+      position: sticky;
+      top: 70px;
     }
     .sidebar .nav-link {
-      padding: 8px 0;
-      color: #333;
-      font-weight: normal;
+      padding: 12px 15px;
+      color: var(--twitter-black);
+      font-weight: 500;
+      font-size: 1.1rem;
+      border-radius: 30px;
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+    }
+    .sidebar .nav-link i {
+      margin-right: 15px;
+      font-size: 1.3rem;
+      width: 24px;
+      text-align: center;
     }
     .sidebar .nav-link:hover {
-      text-decoration: underline;
+      background-color: rgba(29, 161, 242, 0.1);
+      color: var(--twitter-blue);
+      text-decoration: none;
     }
+    
     /* Forms and sections */
     .auth-form,
     .tweet-form,
@@ -47,8 +80,9 @@ TWITTER
     #userProfileSection,
     #adminSection {
       background: #fff;
-      border: 1px solid #e6e6e6;
-      padding: 15px;
+      border-radius: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      padding: 20px;
       margin-bottom: 20px;
     }
     .auth-form h2,
@@ -58,31 +92,38 @@ TWITTER
     #userProfileSection h2,
     #adminSection h2 {
       font-size: 1.25rem;
+      font-weight: 700;
       margin-bottom: 15px;
     }
     input.form-control,
     textarea.form-control {
-      border: 1px solid #ccc;
+      border: 1px solid var(--twitter-extra-light-gray);
       border-radius: 4px;
-      padding: 8px;
+      padding: 12px;
       font-size: 1rem;
+    }
+    textarea.form-control:focus {
+      box-shadow: none;
+      border-color: var(--twitter-blue);
     }
     button.btn {
-      background-color: #333;
+      background-color: var(--twitter-blue);
       color: #fff;
       border: none;
-      padding: 8px 16px;
+      padding: 8px 20px;
       font-size: 1rem;
-      border-radius: 4px;
+      border-radius: 30px;
       cursor: pointer;
+      font-weight: 600;
     }
     button.btn:hover {
-      background-color: #555;
+      background-color: #1a91da;
     }
+    
     /* Tweet styles */
     .tweet {
-      border-bottom: 1px solid #e6e6e6;
-      padding: 10px 0;
+      border-bottom: 1px solid var(--twitter-extra-light-gray);
+      padding: 15px 0;
     }
     .tweet:last-child {
       border-bottom: none;
@@ -90,93 +131,182 @@ TWITTER
     .tweet-header {
       display: flex;
       align-items: center;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
     }
     .tweet-profile-pic {
-      width: 35px;
-      height: 35px;
+      width: 48px;
+      height: 48px;
       border-radius: 50%;
-      margin-right: 10px;
-      border: 1px solid #ccc;
+      margin-right: 12px;
+      object-fit: cover;
     }
     .tweet-username {
       font-weight: bold;
-      margin-right: 10px;
+      margin-right: 5px;
       cursor: pointer;
+      color: var(--twitter-black);
+    }
+    .tweet-username:hover {
+      text-decoration: underline;
     }
     .tweet-timestamp {
-      font-size: 0.8rem;
-      color: #777;
+      font-size: 0.85rem;
+      color: var(--twitter-dark-gray);
     }
     .tweet-text {
-      margin: 5px 0;
+      margin: 5px 0 12px 0;
+      line-height: 1.4;
+      font-size: 1rem;
     }
-    .tweet-text {
-  margin: 5px 0;
-
-  .mention, .hashtag {
-  color: rgb(0, 153, 255);
-}
-
-}
-    .like-btn, .reply-btn, .quote-btn {
+    .tweet-text .mention, 
+    .tweet-text .hashtag {
+      color: var(--twitter-blue);
+      font-weight: 500;
+    }
+    .tweet-actions {
+      display: flex;
+      justify-content: space-between;
+      max-width: 400px;
+      margin-top: 10px;
+    }
+    .action-btn {
+      display: flex;
+      align-items: center;
       background: none;
       border: none;
       font-size: 0.9rem;
       cursor: pointer;
-      color: #555;
-      margin-right: 10px;
+      color: var(--twitter-dark-gray);
+      transition: color 0.2s;
+    }
+    .action-btn i {
+      margin-right: 5px;
+      font-size: 1.1rem;
+    }
+    .like-btn:hover {
+      color: #e0245e;
     }
     .like-btn.liked {
       color: #e0245e;
     }
+    .reply-btn:hover {
+      color: var(--twitter-blue);
+    }
+    .quote-btn:hover, 
+    .retweet-btn:hover {
+      color: #17bf63;
+    }
+    
     /* Poll and quoted tweet */
     .poll-container {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 4px;
+      background-color: #f7f9fa;
+      border: 1px solid var(--twitter-extra-light-gray);
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 12px;
     }
     .poll-option {
       display: flex;
       justify-content: space-between;
-      margin-bottom: 5px;
+      margin-bottom: 8px;
+      padding: 8px;
+      background: white;
+      border-radius: 5px;
+      border: 1px solid var(--twitter-extra-light-gray);
     }
     .poll-vote-btn {
-      background-color: #333;
+      background-color: var(--twitter-blue);
       color: #fff;
       border: none;
-      padding: 4px 8px;
-      border-radius: 4px;
+      padding: 4px 12px;
+      border-radius: 20px;
       cursor: pointer;
+      font-size: 0.9rem;
     }
     .quoted-tweet {
-      border-left: 3px solid #333;
-      padding-left: 10px;
-      margin-top: 10px;
-      font-size: 0.9rem;
-      color: #555;
+      background-color: #f7f9fa;
+      border: 1px solid var(--twitter-extra-light-gray);
+      border-radius: 12px;
+      padding: 12px;
+      margin: 10px 0;
+      font-size: 0.95rem;
     }
+    
+    /* Replies */
+    .tweet-replies {
+      margin-left: 25px;
+      border-left: 2px solid var(--twitter-extra-light-gray);
+      padding-left: 15px;
+      margin-top: 10px;
+    }
+    .reply {
+      padding: 10px 0;
+      border-bottom: 1px solid var(--twitter-extra-light-gray);
+    }
+    .reply:last-child {
+      border-bottom: none;
+    }
+    .reply-form, 
+    .quote-form {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 12px;
+      background: #f7f9fa;
+      display: none;
+    }
+    .reply-form textarea, 
+    .quote-form textarea {
+      width: 100%;
+      border: 1px solid var(--twitter-extra-light-gray);
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+    
     /* Theme toggle */
     #themeToggle {
       cursor: pointer;
       background: none;
       border: none;
-      padding: 0;
-      color: #333;
+      padding: 8px 15px;
+      color: var(--twitter-dark-gray);
       font-size: 1rem;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
     }
+    #themeToggle:hover {
+      background-color: rgba(29, 161, 242, 0.1);
+      color: var(--twitter-blue);
+    }
+    #themeToggle i {
+      margin-right: 8px;
+    }
+    
+    /* Search form */
+    #searchForm {
+      margin-bottom: 15px;
+    }
+    #searchInput {
+      border-radius: 20px;
+      border: 1px solid var(--twitter-extra-light-gray);
+      padding-left: 40px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23657786' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: 15px center;
+    }
+    
     /* Dark mode styles */
     body.dark-mode {
-      background-color: #1a1a1a;
-      color: #ccc;
+      background-color: #15202b;
+      color: #fff;
     }
     body.dark-mode nav.navbar {
-      background-color: #333;
-      border-bottom: 1px solid #444;
+      background-color: #15202b;
+      border-bottom: 1px solid #38444d;
     }
     body.dark-mode .sidebar .nav-link {
-      color: #ccc;
+      color: #fff;
     }
     body.dark-mode .auth-form,
     body.dark-mode .tweet-form,
@@ -185,68 +315,126 @@ TWITTER
     body.dark-mode #premiumSection,
     body.dark-mode #userProfileSection,
     body.dark-mode #adminSection {
-      background: #2a2a2a;
-      border: 1px solid #444;
+      background: #192734;
+      border: none;
+    }
+    body.dark-mode .poll-container,
+    body.dark-mode .quoted-tweet,
+    body.dark-mode .reply-form,
+    body.dark-mode .quote-form {
+      background-color: #253341;
+      border-color: #38444d;
+    }
+    body.dark-mode .poll-option {
+      background-color: #192734;
+      border-color: #38444d;
     }
     body.dark-mode input.form-control,
     body.dark-mode textarea.form-control {
-      background: #2a2a2a;
-      border: 1px solid #555;
-      color: #ccc;
+      background: #253341;
+      border: 1px solid #38444d;
+      color: #fff;
     }
-    body.dark-mode button.btn {
-      background-color: #555;
+    body.dark-mode .tweet {
+      border-bottom-color: #38444d;
     }
+    body.dark-mode .tweet-username {
+      color: #fff;
+    }
+    body.dark-mode .trending-section {
+      background: #192734;
+      border-color: #38444d;
+    }
+    body.dark-mode .trending-section h3 {
+      color: #fff;
+    }
+    
     /* Trending Hashtags Section */
-.trending-section {
-  margin-top: 20px;
-  padding: 10px;
-  background: #fff;
-  border: 1px solid #e6e6e6;
-  border-radius: 4px;
-}
-.trending-section h3 {
-  font-size: 1rem;
-  margin-bottom: 10px;
-  color: #333;
-}
-.trending-list {
-  list-style: none;
-  padding: 0;
-}
-.trending-list li {
-  margin-bottom: 8px;
-}
-.trending-list li a {
-  color: rgb(0, 153, 255);
-  text-decoration: none;
-}
-.trending-list li a:hover {
-  text-decoration: underline;
-}
-/* Dark mode adjustments */
-body.dark-mode .trending-section {
-  background: #2a2a2a;
-  border: 1px solid #444;
-}
-body.dark-mode .trending-section h3 {
-  color: #ccc;
-}
-
-
-/* Space out buttons in refreshFeed */
-#refreshFeed .btn {
-  margin-right: 10px; /* Add some space between Refresh and Random buttons */
-}
-
-
+    .trending-section {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff;
+      border: 1px solid var(--twitter-extra-light-gray);
+      border-radius: 15px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    }
+    .trending-section h3 {
+      font-size: 1.1rem;
+      font-weight: bold;
+      margin-bottom: 15px;
+      color: var(--twitter-black);
+    }
+    .trending-list {
+      list-style: none;
+      padding: 0;
+    }
+    .trending-list li {
+      margin-bottom: 12px;
+    }
+    .trending-list li a {
+      color: var(--twitter-blue);
+      text-decoration: none;
+      font-weight: 500;
+      display: block;
+      padding: 5px 0;
+    }
+    .trending-list li a:hover {
+      text-decoration: underline;
+    }
+    
+    /* Space out buttons in refreshFeed */
+    #refreshFeed .btn {
+      margin-right: 10px;
+    }
+    
+    /* Premium plans */
+    .premium-plan {
+      background-color: #f7f9fa;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+      border: 1px solid var(--twitter-extra-light-gray);
+    }
+    body.dark-mode .premium-plan {
+      background-color: #253341;
+      border-color: #38444d;
+    }
+    .premium-plan h3 {
+      color: var(--twitter-blue);
+      margin-bottom: 10px;
+    }
+    
+    /* Admin section */
+    .account-entry {
+      padding: 10px;
+      border-bottom: 1px solid var(--twitter-extra-light-gray);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    body.dark-mode .account-entry {
+      border-bottom-color: #38444d;
+    }
+    .ban-btn {
+      background-color: #e0245e;
+      padding: 5px 10px;
+      border-radius: 15px;
+      border: none;
+      color: white;
+    }
+    .ban-btn:disabled {
+      background-color: #7d8e9b;
+    }
   </style>
 </head>
 <body class="light-mode">
   <nav class="navbar navbar-expand-lg">
     <div class="container">
-      <a class="navbar-brand" href="#">Mock Twitter</a>
-      <button id="themeToggle" class="nav-link">Toggle Dark Mode</button>
+      <a class="navbar-brand" href="#"><i class="fab fa-twitter"></i> Twitter</a>
+      <button id="themeToggle">
+        <i class="fas fa-moon"></i>
+        <span>Dark Mode</span>
+      </button>
     </div>
   </nav>
   <div class="container main-container">
@@ -254,14 +442,26 @@ body.dark-mode .trending-section h3 {
       <!-- Sidebar -->
       <div class="col-md-3">
         <div class="sidebar">
-          <a href="#" class="nav-link" onclick="fetchAndRenderTweets()">Home</a>
-          <a href="#" class="nav-link" onclick="showEditableProfile()">Profile</a>
-          <a href="#" class="nav-link" onclick="showPremiumSection()">Premium</a>
-          <a href="#" class="nav-link" onclick="showAdminSection()">Admin</a>
-          <a href="#" class="nav-link" onclick="logout()">Logout</a>
-          <a href="twitter.html" class="nav-link">Back to Klanite</a>
+          <a href="#" class="nav-link" onclick="fetchAndRenderTweets()">
+            <i class="fas fa-home"></i>Home
+          </a>
+          <a href="#" class="nav-link" onclick="showEditableProfile()">
+            <i class="fas fa-user"></i>Profile
+          </a>
+          <a href="#" class="nav-link" onclick="showPremiumSection()">
+            <i class="fas fa-star"></i>Premium
+          </a>
+          <a href="#" class="nav-link" onclick="showAdminSection()">
+            <i class="fas fa-shield-alt"></i>Admin
+          </a>
+          <a href="#" class="nav-link" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>Logout
+          </a>
+          <a href="twitter.html" class="nav-link">
+            <i class="fas fa-arrow-left"></i>Back to Klanite
+          </a>
           <div id="trendingHashtags" class="trending-section">
-            <h3>Trending Hashtags</h3>
+            <h3><i class="fas fa-chart-line"></i> Trending</h3>
             <ul id="trendingList" class="trending-list"></ul>
           </div>
         </div>
@@ -284,8 +484,8 @@ body.dark-mode .trending-section h3 {
         <div id="tweetSection" style="display:none;">
           <div class="container mt-3">
             <form id="searchForm" class="form-inline">
-              <input type="text" id="searchInput" class="form-control mr-2" placeholder="Search tweets" />
-              <button type="submit" class="btn">Search</button>
+              <input type="text" id="searchInput" class="form-control mr-2 w-100" placeholder="Search tweets" />
+              <button type="submit" class="btn d-none">Search</button>
             </form>
           </div>
           <div class="tweet-form">
@@ -294,71 +494,96 @@ body.dark-mode .trending-section h3 {
               <small id="charCount" style="float: right;">280</small>
             </div>
             <div class="form-group">
-              <input type="file" id="tweetImage" class="form-control-file" accept="image/*" />
-              <button id="addPoll" class="btn" style="margin-top: 10px;">Add Poll</button>
-              <div id="pollFields" style="display: none; margin-top: 10px;">
+              <div class="d-flex align-items-center">
+                <label for="tweetImage" class="mr-3 mb-0" style="cursor: pointer; color: var(--twitter-blue);">
+                  <i class="far fa-image"></i>
+                </label>
+                <input type="file" id="tweetImage" class="form-control-file d-none" accept="image/*" />
+                <button id="addPoll" class="btn-sm btn-light mr-3" style="background: none; border: none;">
+                  <i class="fas fa-poll" style="color: var(--twitter-blue);"></i>
+                </button>
+              </div>
+              <div id="pollFields" style="display: none; margin-top: 15px;">
                 <input type="text" id="pollQuestion" class="form-control mb-2" placeholder="Poll question" />
                 <input type="text" id="pollOption1" class="form-control mb-1" placeholder="Option 1" />
                 <input type="text" id="pollOption2" class="form-control mb-1" placeholder="Option 2" />
-                <button id="submitPollTweet" class="btn">Tweet with Poll</button>
+                <button id="submitPollTweet" class="btn mt-2">Tweet with Poll</button>
               </div>
             </div>
             <button id="tweetButton" class="btn">Tweet</button>
           </div>
-          <div id="refreshFeed" class="mb-3">
-            <button class="btn" onclick="fetchAndRenderTweets()">Refresh Feed</button>
-            <button id="toggleOrder" class="btn" onclick="toggleTweetOrder()">Random Order</button>
+          <div id="refreshFeed" class="mt-3 mb-3">
+            <button class="btn" onclick="fetchAndRenderTweets()">
+              <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+            <button id="toggleOrder" class="btn" onclick="toggleTweetOrder()">
+              <i class="fas fa-random"></i> Random Order
+            </button>
           </div>
           <div id="tweetFeed" class="tweet-feed"></div>
         </div>
         <!-- Premium Section -->
         <div id="premiumSection" style="display:none;">
-          <h2>Premium Subscription</h2>
+          <h2><i class="fas fa-star"></i> Premium Subscription</h2>
           <div class="row">
             <div class="col-md-6">
               <div class="premium-plan">
-                <h3>Premium</h3>
+                <h3><i class="fas fa-check-circle" style="color: #1DA1F2;"></i> Premium</h3>
                 <p>Subscribe for blue checkmark verification.</p>
                 <button onclick="subscribePlan('blue')" class="btn">Subscribe</button>
               </div>
             </div>
             <div class="col-md-6">
               <div class="premium-plan">
-                <h3>Premium+</h3>
+                <h3><i class="fas fa-check-circle" style="color: gold;"></i> Premium+</h3>
                 <p>Subscribe for gold checkmark verification.</p>
                 <button onclick="subscribePlan('gold')" class="btn">Subscribe</button>
               </div>
             </div>
           </div>
-          <p id="premiumMessage" class="text-success"></p>
+          <p id="premiumMessage" class="text-success mt-3"></p>
         </div>
         <!-- Profile Editing -->
         <div id="profileSection" style="display:none;">
-          <h2>My Profile (Edit)</h2>
-          <img id="profilePicPreview" src="" alt="Profile Picture" style="width:100px; height:100px; border-radius:50%; margin-bottom:15px;" />
-          <div class="form-group">
-            <input type="file" id="profilePicUpload" class="form-control-file" accept="image/*" />
+          <h2><i class="fas fa-user-edit"></i> My Profile</h2>
+          <div class="text-center mb-4">
+            <img id="profilePicPreview" src="" alt="Profile Picture" style="width:120px; height:120px; border-radius:50%; margin-bottom:15px; object-fit: cover;" />
+            <div class="form-group">
+              <label for="profilePicUpload" class="btn">
+                <i class="fas fa-camera"></i> Change Photo
+              </label>
+              <input type="file" id="profilePicUpload" class="form-control-file d-none" accept="image/*" />
+            </div>
           </div>
-          <button id="updateProfilePic" class="btn">Update Profile Picture</button>
-          <p id="profileMessage" class="text-success"></p>
           <div class="form-group">
-            <label for="profileBio">Bio:</label>
-            <textarea id="profileBio" class="form-control" placeholder="Write your bio here..."></textarea>
+            <label for="profileBio"><i class="fas fa-info-circle"></i> Bio:</label>
+            <textarea id="profileBio" class="form-control" rows="4" placeholder="Write your bio here..."></textarea>
           </div>
-          <button id="saveBio" class="btn">Save Bio</button>
+          <div class="d-flex justify-content-between">
+            <button id="saveBio" class="btn">Save Bio</button>
+            <p id="profileMessage" class="text-success align-self-center mb-0"></p>
+          </div>
         </div>
         <!-- User Profile View -->
         <div id="userProfileSection" style="display:none;">
-          <button class="btn" onclick="backToMainFeed()">Back to Feed</button>
-          <h2 id="userProfileName"></h2>
-          <img id="userProfilePic" src="" alt="User Profile Picture" style="width:100px; height:100px; border-radius:50%; margin-bottom:15px;" />
-          <p id="userProfileBio"></p>
-          <div id="userTweets" class="tweet-feed"></div>
+          <button class="btn mb-3" onclick="backToMainFeed()">
+            <i class="fas fa-arrow-left"></i> Back to Feed
+          </button>
+          <div class="d-flex align-items-center mb-3">
+            <img id="userProfilePic" src="" alt="User Profile Picture" style="width:100px; height:100px; border-radius:50%; margin-right:20px; object-fit: cover;" />
+            <div>
+              <h2 id="userProfileName" class="mb-1"></h2>
+              <p id="userProfileBio" class="text-muted mb-0"></p>
+            </div>
+          </div>
+          <div id="userTweets" class="tweet-feed mt-4"></div>
         </div>
         <!-- Admin Panel -->
         <div id="adminSection" style="display:none;">
-          <h2>Admin Panel</h2>
-          <button class="btn" onclick="backToMainFeed()">Back to Feed</button>
+          <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
+          <button class="btn mb-3" onclick="backToMainFeed()">
+            <i class="fas fa-arrow-left"></i> Back to Feed
+          </button>
           <div id="accountList"></div>
         </div>
       </div>
@@ -379,18 +604,14 @@ body.dark-mode .trending-section h3 {
     });
 
     let currentUser = null;
-let isRandomOrder = false; // Track if we're in random mode (false = newest to oldest)
+    let isRandomOrder = false; // Track if we're in random mode (false = newest to oldest)
 
-function toggleTweetOrder() {
-  isRandomOrder = !isRandomOrder; // Flip the mode
-  const toggleButton = document.getElementById("toggleOrder");
-  toggleButton.textContent = isRandomOrder ? "Newest First" : "Random Order"; // Update button text
-  fetchAndRenderTweets(); // Refresh the feed with the new order
-}
-
-function showAuthError(msg) {
-  document.getElementById("authError").textContent = msg;
-}
+    function toggleTweetOrder() {
+      isRandomOrder = !isRandomOrder; // Flip the mode
+      const toggleButton = document.getElementById("toggleOrder");
+      toggleButton.textContent = isRandomOrder ? "Newest First" : "Random Order"; // Update button text
+      fetchAndRenderTweets(); // Refresh the feed with the new order
+    }
 
     function showAuthError(msg) {
       document.getElementById("authError").textContent = msg;
@@ -508,24 +729,24 @@ function showAuthError(msg) {
     });
 
     async function fetchAndRenderTweets(query = "") {
-  const response = await fetch("/api/tweets");
-  const data = await response.json();
-  let tweets = data.tweets;
-  if (query) {
-    tweets = filterTweets(tweets, query);
-  }
-  if (isRandomOrder) {
-    // Shuffle tweets randomly (Fisher-Yates shuffle)
-    for (let i = tweets.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [tweets[i], tweets[j]] = [tweets[j], tweets[i]];
+      const response = await fetch("/api/tweets");
+      const data = await response.json();
+      let tweets = data.tweets;
+      if (query) {
+        tweets = filterTweets(tweets, query);
+      }
+      if (isRandomOrder) {
+        // Shuffle tweets randomly (Fisher-Yates shuffle)
+        for (let i = tweets.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [tweets[i], tweets[j]] = [tweets[j], tweets[i]];
+        }
+      } else {
+        tweets.sort((a, b) => b.timestamp - a.timestamp); // Newest to oldest
+      }
+      renderTweets(tweets);
+      renderTrendingHashtags(data.tweets);
     }
-  } else {
-    tweets.sort((a, b) => b.timestamp - a.timestamp); // Newest to oldest
-  }
-  renderTweets(tweets);
-  renderTrendingHashtags(data.tweets);
-}
 
     function filterTweets(tweets, query) {
       const lowerQuery = query.toLowerCase();
@@ -793,39 +1014,39 @@ function showAuthError(msg) {
     }
 
     function renderTrendingHashtags(tweets) {
-  const hashtagCount = {}; // This is like a notebook to count hashtags
-  
-  // Look through every tweet and count its hashtags
-  tweets.forEach(tweet => {
-    const hashtags = tweet.text.match(/#([a-zA-Z0-9]+)/g) || []; // Find all #hashtags
-    hashtags.forEach(tag => {
-      const cleanTag = tag.toLowerCase(); // Make #Cool and #cool the same
-      hashtagCount[cleanTag] = (hashtagCount[cleanTag] || 0) + 1; // Add 1 to the count
-    });
-  });
+      const hashtagCount = {}; // This is like a notebook to count hashtags
+      
+      // Look through every tweet and count its hashtags
+      tweets.forEach(tweet => {
+        const hashtags = tweet.text.match(/#([a-zA-Z0-9]+)/g) || []; // Find all #hashtags
+        hashtags.forEach(tag => {
+          const cleanTag = tag.toLowerCase(); // Make #Cool and #cool the same
+          hashtagCount[cleanTag] = (hashtagCount[cleanTag] || 0) + 1; // Add 1 to the count
+        });
+      });
 
-  // Pick only hashtags used 2 or more times, sort them, and take the top 5
-  const trending = Object.entries(hashtagCount)
-    .filter(([tag, count]) => count >= 2) // Keep only 2+ uses
-    .sort((a, b) => b[1] - a[1]) // Sort by count (highest first)
-    .slice(0, 5); // Take top 5
+      // Pick only hashtags used 2 or more times, sort them, and take the top 5
+      const trending = Object.entries(hashtagCount)
+        .filter(([tag, count]) => count >= 2) // Keep only 2+ uses
+        .sort((a, b) => b[1] - a[1]) // Sort by count (highest first)
+        .slice(0, 5); // Take top 5
 
-  // Show them in the trending list
-  const trendingList = document.getElementById("trendingList");
-  trendingList.innerHTML = ""; // Clear the old list
-  trending.forEach(([tag, count]) => {
-    const li = document.createElement("li"); // Make a list item
-    const a = document.createElement("a"); // Make a clickable link
-    a.href = "#"; // Prevent page jump
-    a.textContent = `${tag} (${count})`; // Show "#tag (count)"
-    a.addEventListener("click", (e) => {
-      e.preventDefault(); // Stop the link from jumping
-      fetchAndRenderTweets(tag); // Show tweets with this hashtag
-    });
-    li.appendChild(a); // Put the link in the list item
-    trendingList.appendChild(li); // Put the list item in the list
-  });
-}
+      // Show them in the trending list
+      const trendingList = document.getElementById("trendingList");
+      trendingList.innerHTML = ""; // Clear the old list
+      trending.forEach(([tag, count]) => {
+        const li = document.createElement("li"); // Make a list item
+        const a = document.createElement("a"); // Make a clickable link
+        a.href = "#"; // Prevent page jump
+        a.textContent = `${tag} (${count})`; // Show "#tag (count)"
+        a.addEventListener("click", (e) => {
+          e.preventDefault(); // Stop the link from jumping
+          fetchAndRenderTweets(tag); // Show tweets with this hashtag
+        });
+        li.appendChild(a); // Put the link in the list item
+        trendingList.appendChild(li); // Put the list item in the list
+      });
+    }
 
     function renderReplies(tweet) {
       const repliesDiv = document.createElement("div");
