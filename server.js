@@ -1,7 +1,8 @@
 const express = require('express');
 const { spawn } = require('child_process');
 const fetch = require('node-fetch');
-const fs = require('fs').promises;
+const fs = require('fs'); // Change this to regular fs instead of fs.promises
+const fsPromises = require('fs').promises; // Use this for promise-based operations
 const path = require('path'); // Added for file paths
 const app = express();
 const PORT = process.env.PORT || 10000;
@@ -406,23 +407,44 @@ app.patch('/api/tweet/poll/vote', (req, res) => {
 });
 
 // Find out which endpoint your frontend is actually using to get tweets
-// It could be /api/tweets, /tweets, or something else
 app.get('/api/tweets', async (req, res) => {
   try {
+    console.log("GET /api/tweets request received");
+    
     const mongoTweets = await Tweet.find().sort({ timestamp: -1 });
     
     console.log(`Retrieved ${mongoTweets.length} tweets from MongoDB`);
+    if (mongoTweets.length > 0) {
+      console.log('First tweet sample:', JSON.stringify(mongoTweets[0]).substring(0, 200) + '...');
+    }
     
-    // No need to transform - return the documents directly
-    // The schema already matches what the frontend expects (id, handle, etc.)
+    // Convert MongoDB documents to plain objects (removes Mongoose-specific properties)
+    // This also helps eliminate any _id issues when returning to the frontend
+    const formattedTweets = mongoTweets.map(tweet => {
+      const tweetObj = tweet.toObject();
+      // Ensure the tweet has all expected properties
+      return {
+        ...tweetObj,
+        id: tweetObj.id || tweetObj._id, // Ensure id exists
+        handle: tweetObj.handle || tweetObj.username || "unknown", // Ensure handle exists
+        timestamp: tweetObj.timestamp || Date.now(),
+        likes: tweetObj.likes || 0,
+        views: tweetObj.views || 0,
+        replies: tweetObj.replies || []
+      };
+    });
     
-    // Update the in-memory tweets array for backward compatibility
-    tweets = mongoTweets.map(tweet => tweet.toObject());
+    console.log(`Sending ${formattedTweets.length} formatted tweets to client`);
     
-    res.json(mongoTweets);
+    // Update in-memory tweets array for backward compatibility
+    tweets = formattedTweets;
+    
+    return res.json(formattedTweets);
   } catch (error) {
     console.error('Error fetching tweets from MongoDB:', error);
-    res.status(500).json({ error: 'Failed to fetch tweets' });
+    // As a fallback, send the in-memory tweets
+    console.log('Sending in-memory tweets as fallback');
+    return res.json(tweets);
   }
 });
 
@@ -712,6 +734,32 @@ app.get('/api/bookmarks', (req, res) => {
   }
   const bookmarkedTweets = tweets.filter(tweet => user.bookmarks.includes(tweet.id));
   return res.json({ success: true, bookmarks: bookmarkedTweets });
+});
+
+// Add a debugging endpoint to check MongoDB contents
+app.get('/api/debug/mongodb', async (req, res) => {
+  try {
+    const tweetCount = await Tweet.countDocuments();
+    const userCount = await User.countDocuments();
+    
+    const recentTweets = await Tweet.find().sort({ timestamp: -1 }).limit(5);
+    
+    console.log('MongoDB Debug - Tweet Count:', tweetCount);
+    console.log('MongoDB Debug - User Count:', userCount);
+    console.log('MongoDB Debug - Recent Tweets:', recentTweets);
+    
+    return res.json({
+      status: 'MongoDB connection is working',
+      stats: {
+        tweetCount,
+        userCount
+      },
+      recentTweets: recentTweets
+    });
+  } catch (error) {
+    console.error('Error accessing MongoDB for debug:', error);
+    return res.status(500).json({ error: 'Failed to access MongoDB' });
+  }
 });
 
 // Start the server
