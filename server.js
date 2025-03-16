@@ -6,6 +6,48 @@ const path = require('path'); // Added for file paths
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// Add MongoDB requirements and connection setup
+const mongoose = require('mongoose');
+
+// Connect to MongoDB
+mongoose.connect(process.env.MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+})
+.then(() => console.log('Connected to MongoDB'))
+.catch(err => console.error('MongoDB connection error:', err));
+
+// Define Tweet schema and model
+const TweetSchema = new mongoose.Schema({
+  id: { type: Number, required: true, unique: true },
+  handle: String,
+  text: String,
+  imageData: String,
+  timestamp: { type: Number, default: () => Date.now() },
+  likes: { type: Number, default: 0 },
+  replies: { type: Array, default: [] },
+  views: { type: Number, default: 0 },
+  poll: Object,
+  quotedTweet: Object,
+  last_retweeted_by: String,
+  profilePicture: String,
+  verified: Boolean,
+  isAI: { type: Boolean, default: false }
+});
+
+const Tweet = mongoose.model('Tweet', TweetSchema);
+
+// Define User schema and model
+const UserSchema = new mongoose.Schema({
+  username: String,
+  displayName: String,
+  password: String,
+  profilePic: String,
+  // Add any other fields your users have
+});
+
+const User = mongoose.model('User', UserSchema);
+
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -21,92 +63,53 @@ let tweets = [];
 let classrooms = [];
 let announcements = [];
 
-// Function to save data to JSON files
+// Replace the existing saveData function
 async function saveData() {
-  try {
-    await fs.writeFile('users.json', JSON.stringify(users, null, 2));
-    await fs.writeFile('tweets.json', JSON.stringify(tweets, null, 2));
-    await fs.writeFile('classrooms.json', JSON.stringify(classrooms, null, 2));
-    await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
-    console.log('Data auto-saved to JSON files');
-  } catch (err) {
-    console.error('Error saving data:', err);
-  }
+  // With MongoDB, data is saved automatically when documents are created/updated
+  // This function is kept for compatibility with existing code but doesn't need to do anything
+  console.log("Data is automatically saved to MongoDB");
+  return true;
 }
 
-// Set up auto-save every 5 minutes (300000 milliseconds)
-const autoSaveInterval = setInterval(saveData, 300000);
-
-// Function to load data from JSON files with better error handling
+// Replace the existing loadData function
 async function loadData() {
   try {
-    // Check if users.json exists, if not create empty object
-    try {
-      const usersData = await fs.readFile(path.join(__dirname, 'users.json'), 'utf8');
-      users = JSON.parse(usersData);
-      console.log(`Loaded ${Object.keys(users).length} users from users.json`);
-    } catch (error) {
-      console.log('users.json not found or invalid, creating empty users object');
-      users = {};
-      await fs.writeFile('users.json', JSON.stringify(users, null, 2));
-    }
+    // Check if we have any tweets or users in the database
+    const tweetCount = await Tweet.countDocuments();
+    const userCount = await User.countDocuments();
     
-    // Check if tweets.json exists, if not create empty array
-    try {
-      const tweetsData = await fs.readFile(path.join(__dirname, 'tweets.json'), 'utf8');
-      tweets = JSON.parse(tweetsData);
-      console.log(`Loaded ${tweets.length} tweets from tweets.json`);
-      // Log the first tweet for debugging
-      if (tweets.length > 0) {
-        console.log('First tweet:', JSON.stringify(tweets[0]).substring(0, 200) + '...');
+    // If the database is empty, we might want to load initial data
+    if (tweetCount === 0) {
+      console.log("No tweets found in MongoDB, attempting to load from tweets.json as a fallback");
+      try {
+        const tweetsData = JSON.parse(fs.readFileSync('tweets.json', 'utf8'));
+        if (tweetsData && tweetsData.length > 0) {
+          await Tweet.insertMany(tweetsData);
+          console.log(`Imported ${tweetsData.length} tweets from tweets.json`);
+        }
+      } catch (err) {
+        console.log("Could not import tweets from file:", err.message);
       }
-    } catch (error) {
-      console.log('tweets.json not found or invalid, creating empty tweets array');
-      tweets = [];
-      await fs.writeFile('tweets.json', JSON.stringify(tweets, null, 2));
     }
     
-    // Sample tweet for testing if no tweets found
-    if (tweets.length === 0) {
-      console.log('No tweets found. Adding a sample tweet for testing...');
-      const sampleTweet = {
-        id: Date.now(),
-        handle: "system",
-        text: "Welcome to our platform! This is a sample tweet to get you started.",
-        timestamp: Date.now(),
-        likes: 0,
-        replies: [],
-        views: "123",
-        profilePicture: null 
-      };
-      tweets.push(sampleTweet);
-      await fs.writeFile('tweets.json', JSON.stringify(tweets, null, 2));
-      console.log('Added sample tweet:', sampleTweet);
+    if (userCount === 0) {
+      console.log("No users found in MongoDB, attempting to load from users.json as a fallback");
+      try {
+        const usersData = JSON.parse(fs.readFileSync('users.json', 'utf8'));
+        if (usersData && usersData.length > 0) {
+          await User.insertMany(usersData);
+          console.log(`Imported ${usersData.length} users from users.json`);
+        }
+      } catch (err) {
+        console.log("Could not import users from file:", err.message);
+      }
     }
     
-    // Load classrooms and announcements
-    try {
-      const classroomsData = await fs.readFile('classrooms.json', 'utf8');
-      classrooms = JSON.parse(classroomsData);
-      console.log('Classrooms loaded from classrooms.json');
-    } catch (error) {
-      console.log('classrooms.json not found or invalid, creating empty classrooms array');
-      classrooms = [];
-      await fs.writeFile('classrooms.json', JSON.stringify(classrooms, null, 2));
-    }
-    
-    try {
-      const announcementsData = await fs.readFile('announcements.json', 'utf8');
-      announcements = JSON.parse(announcementsData);
-      console.log('Announcements loaded from announcements.json');
-    } catch (error) {
-      console.log('announcements.json not found or invalid, creating empty announcements array');
-      announcements = [];
-      await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
-    }
-    
-  } catch (err) {
-    console.error('Error in loadData function:', err);
+    console.log("Database ready");
+    return true;
+  } catch (error) {
+    console.error("Error loading data:", error);
+    return false;
   }
 }
 
@@ -218,93 +221,170 @@ app.post('/api/login', (req, res) => {
 
 // Add this function at the top with other functions
 function generateViewCount() {
-  const roll = Math.random() * 100; // Roll 0-100
-  
-  if (roll < 33.33) { // ~33.33% chance for small tweet (0-900 views)
-    return Math.floor(Math.random() * 901);
-  } else if (roll < 66.66) { // ~33.33% chance for medium tweet (1k-500k)
-    const views = Math.floor(Math.random() * 499000) + 1000;
-    return Math.floor(views / 1000) + 'K';
-  } else { // ~33.33% chance for big tweet (500k-100M)
-    const views = Math.floor(Math.random() * 99500000) + 500000;
-    return Math.floor(views / 1000000) + 'M';
-  }
+  // Generate a random number between 50 and 500
+  return Math.floor(Math.random() * 451) + 50;
 }
 
 // Update the /api/tweet endpoint
-app.post('/api/tweet', (req, res) => {
+app.post('/api/tweet', async (req, res) => {
   console.log("Received /api/tweet request:", req.body);
   const { handle, text, imageData, quotedTweet, poll } = req.body;
+  
   if (!handle || (!text && !quotedTweet && !poll)) {
     console.log("Validation failed: Missing handle or content");
     return res.status(400).json({ success: false, error: "Handle and either text, quoted tweet, or poll required" });
   }
+  
+  // Check if user exists in the old users object
   const user = users[handle.toLowerCase()];
-  if (user.banned) {
+  if (user && user.banned) {
     console.log("User banned:", handle);
     return res.status(403).json({ success: false, error: "Account suspended" });
   }
-  const newTweet = {
-    id: Date.now(),
-    handle,
-    text: text || "",
-    imageData: imageData || null,
-    timestamp: Date.now(),
-    likes: 0,
-    replies: [],
-    views: generateViewCount(),
-    poll: poll || null,
-    quotedTweet: quotedTweet ? { 
-      ...quotedTweet, 
-      profilePicture: users[quotedTweet.handle.toLowerCase()]?.profilePicture || null, 
-      verified: users[quotedTweet.handle.toLowerCase()]?.verified || null 
-    } : null,
-    last_retweeted_by: null,
-    profilePicture: user?.profilePicture || null,
-    verified: user?.verified || null
-  };
-  tweets.push(newTweet);
-  saveData();
-  io.emit('new tweet', newTweet);
-  console.log("Tweet saved:", newTweet);
-  return res.json({ success: true, tweet: newTweet });
+  
+  try {
+    // Create a new tweet with MongoDB
+    const newTweet = new Tweet({
+      id: Date.now(), // Use timestamp as ID
+      handle,
+      text: text || "",
+      imageData: imageData || null,
+      timestamp: Date.now(),
+      likes: 0,
+      replies: [],
+      views: generateViewCount(),
+      poll: poll || null,
+      quotedTweet: quotedTweet ? { 
+        ...quotedTweet, 
+        profilePicture: users[quotedTweet.handle.toLowerCase()]?.profilePicture || null, 
+        verified: users[quotedTweet.handle.toLowerCase()]?.verified || null 
+      } : null,
+      last_retweeted_by: null,
+      profilePicture: user?.profilePicture || null,
+      verified: user?.verified || null
+    });
+    
+    // Save to MongoDB
+    await newTweet.save();
+    console.log("Tweet saved to MongoDB:", newTweet);
+    
+    // Also add to in-memory array for backward compatibility
+    tweets.push(newTweet.toObject());
+    
+    // Emit socket event if needed
+    if (io) {
+      io.emit('new tweet', newTweet);
+    }
+    
+    return res.json({ success: true, tweet: newTweet });
+  } catch (error) {
+    console.error("Error saving tweet to MongoDB:", error);
+    return res.status(500).json({ success: false, error: "Failed to save tweet" });
+  }
 });
 
-app.post('/api/tweet/reply', (req, res) => {
+app.post('/api/tweet/reply', async (req, res) => {
   const { tweetId, handle, text, imageData } = req.body;
-  if (!tweetId || !handle || !text) return res.status(400).json({ success: false, error: "Tweet ID, handle, and reply text required" });
-  const tweet = tweets.find(t => t.id === tweetId);
-  if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
+  
+  if (!tweetId || !handle || !text) {
+    return res.status(400).json({ success: false, error: "Tweet ID, handle, and reply text required" });
+  }
+  
+  // Check if user is banned
   const user = users[handle.toLowerCase()];
-  if (user.banned) return res.status(403).json({ success: false, error: "Account suspended" });
-  const newReply = {
-    id: Date.now(),
-    handle,
-    text,
-    imageData: imageData || null,
-    timestamp: Date.now(),
-    likes: 0,
-    profilePicture: user?.profilePicture || null,
-    verified: user?.verified || null
-  };
-  tweet.replies.push(newReply);
-  saveData();
-  io.emit('new reply', { tweetId, reply: newReply });
-  return res.json({ success: true, reply: newReply });
+  if (user && user.banned) {
+    return res.status(403).json({ success: false, error: "Account suspended" });
+  }
+  
+  try {
+    // Find the tweet in MongoDB
+    const tweet = await Tweet.findOne({ id: tweetId });
+    
+    if (!tweet) {
+      return res.status(404).json({ success: false, error: "Tweet not found" });
+    }
+    
+    // Create new reply
+    const newReply = {
+      id: Date.now(),
+      handle,
+      text,
+      imageData: imageData || null,
+      timestamp: Date.now(),
+      likes: 0,
+      profilePicture: user?.profilePicture || null,
+      verified: user?.verified || null
+    };
+    
+    // Add reply to the tweet's replies array
+    tweet.replies.push(newReply);
+    
+    // Save the updated tweet
+    await tweet.save();
+    
+    // Also update in-memory array for backward compatibility
+    const memoryTweet = tweets.find(t => t.id === tweetId);
+    if (memoryTweet) {
+      memoryTweet.replies.push(newReply);
+    }
+    
+    // Emit socket event if needed
+    if (io) {
+      io.emit('new reply', { tweetId, reply: newReply });
+    }
+    
+    return res.json({ success: true, reply: newReply });
+  } catch (error) {
+    console.error("Error adding reply to MongoDB:", error);
+    return res.status(500).json({ success: false, error: "Failed to add reply" });
+  }
 });
 
-app.post('/api/tweet/retweet', (req, res) => {
+app.post('/api/tweet/retweet', async (req, res) => {
   const { tweetId, handle } = req.body;
-  if (!tweetId || !handle) return res.status(400).json({ success: false, error: "Tweet ID and handle required" });
-  const tweet = tweets.find(t => t.id === tweetId);
-  if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
+  
+  if (!tweetId || !handle) {
+    return res.status(400).json({ success: false, error: "Tweet ID and handle required" });
+  }
+  
+  // Check if user is banned
   const user = users[handle.toLowerCase()];
-  if (user.banned) return res.status(403).json({ success: false, error: "Account suspended" });
-  tweet.timestamp = Date.now();
-  tweet.last_retweeted_by = handle;
-  saveData();
-  io.emit('tweet retweeted', tweet);
-  return res.json({ success: true, tweet });
+  if (user && user.banned) {
+    return res.status(403).json({ success: false, error: "Account suspended" });
+  }
+  
+  try {
+    // Find and update the tweet in MongoDB
+    const tweet = await Tweet.findOneAndUpdate(
+      { id: tweetId },
+      { 
+        timestamp: Date.now(),
+        last_retweeted_by: handle
+      },
+      { new: true } // Return the updated document
+    );
+    
+    if (!tweet) {
+      return res.status(404).json({ success: false, error: "Tweet not found" });
+    }
+    
+    // Also update in-memory array for backward compatibility
+    const memoryTweet = tweets.find(t => t.id === tweetId);
+    if (memoryTweet) {
+      memoryTweet.timestamp = Date.now();
+      memoryTweet.last_retweeted_by = handle;
+    }
+    
+    // Emit socket event if needed
+    if (io) {
+      io.emit('tweet retweeted', tweet);
+    }
+    
+    return res.json({ success: true, tweet });
+  } catch (error) {
+    console.error("Error retweeting in MongoDB:", error);
+    return res.status(500).json({ success: false, error: "Failed to retweet" });
+  }
 });
 
 app.patch('/api/tweet/poll/vote', (req, res) => {
@@ -320,63 +400,100 @@ app.patch('/api/tweet/poll/vote', (req, res) => {
 });
 
 // Make API endpoint for getting tweets more robust with better logging
-app.get('/api/tweets', (req, res) => {
-  console.log(`GET /api/tweets: Returning ${tweets.length} tweets`);
-  
+app.get('/api/tweets', async (req, res) => {
   try {
-    if (!Array.isArray(tweets)) {
-      console.error('ERROR: tweets is not an array:', typeof tweets);
-      return res.json({ tweets: [] });
-    }
+    // Get tweets from MongoDB, sorted by timestamp (newest first)
+    const mongoTweets = await Tweet.find().sort({ timestamp: -1 });
+    console.log(`Retrieved ${mongoTweets.length} tweets from MongoDB`);
     
-    const enrichedTweets = tweets.map(tweet => {
-      console.log(`Processing tweet by ${tweet.handle}`);
-      return {
-        ...tweet,
-        profilePicture: users[tweet.handle.toLowerCase()]?.profilePicture || null,
-        verified: users[tweet.handle.toLowerCase()]?.verified || null,
-        replies: Array.isArray(tweet.replies) ? tweet.replies.map(reply => ({
-          ...reply,
-          profilePicture: users[reply.handle?.toLowerCase()]?.profilePicture || null,
-          verified: users[reply.handle?.toLowerCase()]?.verified || null
-        })) : [],
-        quotedTweet: tweet.quotedTweet ? {
-          ...tweet.quotedTweet,
-          profilePicture: users[tweet.quotedTweet.handle?.toLowerCase()]?.profilePicture || null,
-          verified: users[tweet.quotedTweet.handle?.toLowerCase()]?.verified || null
-        } : null
-      };
-    });
+    // Update in-memory tweets array for backward compatibility
+    tweets = mongoTweets.map(tweet => tweet.toObject());
     
-    const sortedTweets = enrichedTweets.sort((a, b) => b.timestamp - a.timestamp);
-    console.log(`Returning ${sortedTweets.length} enriched tweets`);
-    
-    return res.json({ success: true, tweets: sortedTweets });
+    res.json(mongoTweets);
   } catch (error) {
-    console.error('Error in /api/tweets:', error);
-    return res.json({ success: false, tweets: [], error: error.message });
+    console.error('Error fetching tweets from MongoDB:', error);
+    res.status(500).json({ error: 'Failed to fetch tweets' });
   }
 });
 
-app.patch('/api/tweet/like', (req, res) => {
+app.post('/api/tweets', async (req, res) => {
+  try {
+    const { text, username, isAI } = req.body;
+    
+    const newTweet = new Tweet({
+      text,
+      username,
+      timestamp: new Date(),
+      likes: 0,
+      views: generateViewCount(),
+      isAI: isAI || false
+    });
+    
+    await newTweet.save();
+    res.status(201).json(newTweet);
+  } catch (error) {
+    console.error('Error creating tweet:', error);
+    res.status(500).json({ error: 'Failed to create tweet' });
+  }
+});
+
+app.post('/api/like', async (req, res) => {
+  try {
+    const { tweetId } = req.body;
+    
+    const tweet = await Tweet.findById(tweetId);
+    if (!tweet) {
+      return res.status(404).json({ error: 'Tweet not found' });
+    }
+    
+    tweet.likes += 1;
+    await tweet.save();
+    
+    res.json({ success: true, likes: tweet.likes });
+  } catch (error) {
+    console.error('Error liking tweet:', error);
+    res.status(500).json({ error: 'Failed to like tweet' });
+  }
+});
+
+app.patch('/api/tweet/like', async (req, res) => {
   const { id, likes } = req.body;
   console.log(`Like request received for tweet ID: ${id}, likes: ${likes}`);
   
   // Ensure ID is correctly formatted (tweets might store IDs as numbers)
   const tweetId = typeof id === 'string' ? parseInt(id, 10) : id;
   
-  const tweet = tweets.find(t => t.id === tweetId);
-  if (!tweet) {
-    console.log(`Tweet not found with ID: ${tweetId}`);
-    return res.status(404).json({ success: false, error: "Tweet not found" });
+  try {
+    // Find and update the tweet in MongoDB
+    const tweet = await Tweet.findOneAndUpdate(
+      { id: tweetId },
+      { likes: likes },
+      { new: true } // Return the updated document
+    );
+    
+    if (!tweet) {
+      console.log(`Tweet not found with ID: ${tweetId}`);
+      return res.status(404).json({ success: false, error: "Tweet not found" });
+    }
+    
+    console.log(`Updated tweet ${tweetId} with ${likes} likes in MongoDB`);
+    
+    // Also update in-memory array for backward compatibility
+    const memoryTweet = tweets.find(t => t.id === tweetId);
+    if (memoryTweet) {
+      memoryTweet.likes = likes;
+    }
+    
+    // Emit socket event if needed
+    if (io) {
+      io.emit('tweet liked', tweet);
+    }
+    
+    return res.json({ success: true, tweet });
+  } catch (error) {
+    console.error(`Error updating tweet ${tweetId} likes in MongoDB:`, error);
+    return res.status(500).json({ success: false, error: "Failed to update tweet likes" });
   }
-  
-  tweet.likes = likes;
-  console.log(`Updated tweet ${tweetId} with ${likes} likes`);
-  
-  saveData();
-  io.emit('tweet liked', tweet);
-  return res.json({ success: true, tweet });
 });
 
 app.patch('/api/tweet/reply/like', (req, res) => {
@@ -411,13 +528,39 @@ app.patch('/api/profile', (req, res) => {
   return res.json({ success: true, message: "Profile updated", profile: { handle: user.handle, bio: user.bio, profilePicture: user.profilePicture, verified: user.verified } });
 });
 
-app.get('/api/users', (req, res) => {
-  const userList = Object.values(users).map(user => ({
-    handle: user.handle,
-    password: user.password,
-    banned: user.banned
-  }));
-  res.json({ success: true, users: userList });
+app.get('/api/users', async (req, res) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    console.error('Error fetching users:', error);
+    res.status(500).json({ error: 'Failed to fetch users' });
+  }
+});
+
+app.post('/api/users', async (req, res) => {
+  try {
+    const { username, displayName, password, profilePic } = req.body;
+    
+    // Check if user already exists
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).json({ error: 'Username already exists' });
+    }
+    
+    const newUser = new User({
+      username,
+      displayName,
+      password, // Note: In a real app, you should hash this password
+      profilePic
+    });
+    
+    await newUser.save();
+    res.status(201).json(newUser);
+  } catch (error) {
+    console.error('Error creating user:', error);
+    res.status(500).json({ error: 'Failed to create user' });
+  }
 });
 
 app.post('/api/ban', (req, res) => {
@@ -559,37 +702,6 @@ app.get('/api/bookmarks', (req, res) => {
   }
   const bookmarkedTweets = tweets.filter(tweet => user.bookmarks.includes(tweet.id));
   return res.json({ success: true, bookmarks: bookmarkedTweets });
-});
-
-// Look for POST endpoints that might handle tweets and add saveData calls
-app.post('/api/tweets', async (req, res) => {
-  try {
-    // If this endpoint exists, make sure it calls saveData after modifying tweets
-    // ... existing tweet handling code ...
-    
-    // Make sure to save data immediately after any tweet modifications
-    await saveData();
-    
-    // ... existing response code ...
-  } catch (error) {
-    console.error('Error handling tweet:', error);
-    res.status(500).json({ error: 'Failed to process tweet' });
-  }
-});
-
-// Add this to any other endpoints that modify tweets
-app.post('/api/like', async (req, res) => {
-  try {
-    // ... existing like handling code ...
-    
-    // Save immediately after modifying data
-    await saveData();
-    
-    // ... existing response code ...
-  } catch (error) {
-    console.error('Error handling like:', error);
-    res.status(500).json({ error: 'Failed to process like' });
-  }
 });
 
 // Start the server
