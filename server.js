@@ -81,38 +81,37 @@ async function saveData() {
 // Replace the existing loadData function
 async function loadData() {
   try {
-    // Check if we have any tweets or users in the database
+    console.log("Loading data from files and MongoDB...");
+    
+    // Load tweets from JSON file into memory first (for backward compatibility)
+    try {
+      const tweetsData = JSON.parse(fs.readFileSync('tweets.json', 'utf8'));
+      if (tweetsData && tweetsData.length > 0) {
+        tweets = tweetsData;
+        console.log(`Loaded ${tweets.length} tweets from tweets.json into memory`);
+      }
+    } catch (err) {
+      console.log("Could not load tweets from file:", err.message);
+    }
+    
+    // Load users from JSON file
+    try {
+      const usersData = JSON.parse(fs.readFileSync('users.json', 'utf8'));
+      if (usersData) {
+        users = usersData;
+        console.log(`Loaded users from users.json into memory`);
+      }
+    } catch (err) {
+      console.log("Could not load users from file:", err.message);
+    }
+    
+    // Also check MongoDB for any tweets that might be there
     const tweetCount = await Tweet.countDocuments();
-    const userCount = await User.countDocuments();
+    console.log(`Found ${tweetCount} tweets in MongoDB`);
     
-    // If the database is empty, we might want to load initial data
-    if (tweetCount === 0) {
-      console.log("No tweets found in MongoDB, attempting to load from tweets.json as a fallback");
-      try {
-        const tweetsData = JSON.parse(fs.readFileSync('tweets.json', 'utf8'));
-        if (tweetsData && tweetsData.length > 0) {
-          await Tweet.insertMany(tweetsData);
-          console.log(`Imported ${tweetsData.length} tweets from tweets.json`);
-        }
-      } catch (err) {
-        console.log("Could not import tweets from file:", err.message);
-      }
-    }
+    // We DON'T import from MongoDB to memory - we'll handle that in the API calls
     
-    if (userCount === 0) {
-      console.log("No users found in MongoDB, attempting to load from users.json as a fallback");
-      try {
-        const usersData = JSON.parse(fs.readFileSync('users.json', 'utf8'));
-        if (usersData && usersData.length > 0) {
-          await User.insertMany(usersData);
-          console.log(`Imported ${usersData.length} users from users.json`);
-        }
-      } catch (err) {
-        console.log("Could not import users from file:", err.message);
-      }
-    }
-    
-    console.log("Database ready");
+    console.log("Data loading complete");
     return true;
   } catch (error) {
     console.error("Error loading data:", error);
@@ -232,7 +231,7 @@ function generateViewCount() {
   return Math.floor(Math.random() * 451) + 50;
 }
 
-// Update the /api/tweet endpoint
+// Update the /api/tweet endpoint to save to both MongoDB and memory
 app.post('/api/tweet', async (req, res) => {
   console.log("Received /api/tweet request:", req.body);
   const { handle, text, imageData, quotedTweet, poll } = req.body;
@@ -249,44 +248,61 @@ app.post('/api/tweet', async (req, res) => {
     return res.status(403).json({ success: false, error: "Account suspended" });
   }
   
+  // Create the tweet object
+  const tweetId = Date.now();
+  const newTweetData = {
+    id: tweetId, // Use timestamp as ID
+    handle,
+    text: text || "",
+    imageData: imageData || null,
+    timestamp: Date.now(),
+    likes: 0,
+    replies: [],
+    views: generateViewCount(),
+    poll: poll || null,
+    quotedTweet: quotedTweet ? { 
+      ...quotedTweet, 
+      profilePicture: users[quotedTweet.handle.toLowerCase()]?.profilePicture || null, 
+      verified: users[quotedTweet.handle.toLowerCase()]?.verified || null 
+    } : null,
+    last_retweeted_by: null,
+    profilePicture: user?.profilePicture || null,
+    verified: user?.verified || null
+  };
+  
   try {
-    // Create a new tweet with MongoDB
-    const newTweet = new Tweet({
-      id: Date.now(), // Use timestamp as ID
-      handle,
-      text: text || "",
-      imageData: imageData || null,
-      timestamp: Date.now(),
-      likes: 0,
-      replies: [],
-      views: generateViewCount(),
-      poll: poll || null,
-      quotedTweet: quotedTweet ? { 
-        ...quotedTweet, 
-        profilePicture: users[quotedTweet.handle.toLowerCase()]?.profilePicture || null, 
-        verified: users[quotedTweet.handle.toLowerCase()]?.verified || null 
-      } : null,
-      last_retweeted_by: null,
-      profilePicture: user?.profilePicture || null,
-      verified: user?.verified || null
-    });
+    // Step 1: Add to in-memory array (this keeps the frontend working with old code)
+    tweets.push(newTweetData);
+    console.log("Tweet added to in-memory storage");
     
-    // Save to MongoDB
-    await newTweet.save();
-    console.log("Tweet saved to MongoDB:", newTweet);
+    // Step 2: Save to MongoDB for persistence
+    try {
+      const newTweet = new Tweet(newTweetData);
+      await newTweet.save();
+      console.log("Tweet also saved to MongoDB for persistence");
+    } catch (mongoError) {
+      console.error("Error saving tweet to MongoDB (in-memory still worked):", mongoError);
+      // We continue even if MongoDB save fails - at least in-memory worked
+    }
     
-    // Also add to in-memory array for backward compatibility
-    tweets.push(newTweet.toObject());
+    // Step 3: Save in-memory tweets to JSON file for future loads
+    try {
+      await fsPromises.writeFile('tweets.json', JSON.stringify(tweets));
+      console.log("Tweets saved to tweets.json");
+    } catch (fileError) {
+      console.error("Error saving tweets to file:", fileError);
+      // Continue even if file save fails
+    }
     
     // Emit socket event if needed
     if (io) {
-      io.emit('new tweet', newTweet);
+      io.emit('new tweet', newTweetData);
     }
     
-    return res.json({ success: true, tweet: newTweet });
+    return res.json({ success: true, tweet: newTweetData });
   } catch (error) {
-    console.error("Error saving tweet to MongoDB:", error);
-    return res.status(500).json({ success: false, error: "Failed to save tweet" });
+    console.error("Error handling tweet creation:", error);
+    return res.status(500).json({ success: false, error: "Failed to create tweet" });
   }
 });
 
@@ -406,44 +422,49 @@ app.patch('/api/tweet/poll/vote', (req, res) => {
   return res.json({ success: true, tweet });
 });
 
-// Find out which endpoint your frontend is actually using to get tweets
+// Update the tweets endpoint to serve both in-memory and MongoDB tweets
 app.get('/api/tweets', async (req, res) => {
   try {
     console.log("GET /api/tweets request received");
     
+    // Step 1: Get tweets from MongoDB
     const mongoTweets = await Tweet.find().sort({ timestamp: -1 });
-    
     console.log(`Retrieved ${mongoTweets.length} tweets from MongoDB`);
-    if (mongoTweets.length > 0) {
-      console.log('First tweet sample:', JSON.stringify(mongoTweets[0]).substring(0, 200) + '...');
-    }
     
-    // Convert MongoDB documents to plain objects (removes Mongoose-specific properties)
-    // This also helps eliminate any _id issues when returning to the frontend
-    const formattedTweets = mongoTweets.map(tweet => {
-      const tweetObj = tweet.toObject();
-      // Ensure the tweet has all expected properties
-      return {
-        ...tweetObj,
-        id: tweetObj.id || tweetObj._id, // Ensure id exists
-        handle: tweetObj.handle || tweetObj.username || "unknown", // Ensure handle exists
-        timestamp: tweetObj.timestamp || Date.now(),
-        likes: tweetObj.likes || 0,
-        views: tweetObj.views || 0,
-        replies: tweetObj.replies || []
-      };
+    // Step 2: Convert MongoDB documents to plain objects
+    const formattedMongoTweets = mongoTweets.map(tweet => tweet.toObject());
+    
+    // Step 3: Combine with in-memory tweets
+    console.log(`Have ${tweets.length} tweets in memory`);
+    
+    // Create a Set of IDs to avoid duplicates (in case some tweets exist in both places)
+    const tweetIds = new Set();
+    const combinedTweets = [];
+    
+    // Add MongoDB tweets first
+    formattedMongoTweets.forEach(tweet => {
+      tweetIds.add(tweet.id);
+      combinedTweets.push(tweet);
     });
     
-    console.log(`Sending ${formattedTweets.length} formatted tweets to client`);
+    // Then add in-memory tweets that aren't already in the combined list
+    tweets.forEach(tweet => {
+      if (!tweetIds.has(tweet.id)) {
+        tweetIds.add(tweet.id);
+        combinedTweets.push(tweet);
+      }
+    });
     
-    // Update in-memory tweets array for backward compatibility
-    tweets = formattedTweets;
+    // Sort by timestamp (newest first)
+    combinedTweets.sort((a, b) => b.timestamp - a.timestamp);
     
-    return res.json(formattedTweets);
+    console.log(`Sending ${combinedTweets.length} combined tweets to client`);
+    
+    return res.json(combinedTweets);
   } catch (error) {
-    console.error('Error fetching tweets from MongoDB:', error);
-    // As a fallback, send the in-memory tweets
-    console.log('Sending in-memory tweets as fallback');
+    console.error('Error fetching tweets:', error);
+    // Fallback to just in-memory tweets
+    console.log('Sending just in-memory tweets as fallback due to error');
     return res.json(tweets);
   }
 });
@@ -736,29 +757,29 @@ app.get('/api/bookmarks', (req, res) => {
   return res.json({ success: true, bookmarks: bookmarkedTweets });
 });
 
-// Add a debugging endpoint to check MongoDB contents
-app.get('/api/debug/mongodb', async (req, res) => {
+// Add a debugging endpoint to check tweets from both sources
+app.get('/api/debug/tweets', async (req, res) => {
   try {
-    const tweetCount = await Tweet.countDocuments();
-    const userCount = await User.countDocuments();
+    // Get tweets from MongoDB
+    const mongoTweets = await Tweet.find().sort({ timestamp: -1 }).limit(5);
     
-    const recentTweets = await Tweet.find().sort({ timestamp: -1 }).limit(5);
-    
-    console.log('MongoDB Debug - Tweet Count:', tweetCount);
-    console.log('MongoDB Debug - User Count:', userCount);
-    console.log('MongoDB Debug - Recent Tweets:', recentTweets);
+    // Get sample from in-memory
+    const memoryTweetSample = tweets.slice(0, 5);
     
     return res.json({
-      status: 'MongoDB connection is working',
+      status: 'Hybrid tweet storage is working',
       stats: {
-        tweetCount,
-        userCount
+        mongoTweetCount: await Tweet.countDocuments(),
+        inMemoryTweetCount: tweets.length
       },
-      recentTweets: recentTweets
+      samples: {
+        mongoTweets: mongoTweets,
+        inMemoryTweets: memoryTweetSample
+      }
     });
   } catch (error) {
-    console.error('Error accessing MongoDB for debug:', error);
-    return res.status(500).json({ error: 'Failed to access MongoDB' });
+    console.error('Error accessing tweet data for debug:', error);
+    return res.status(500).json({ error: 'Failed to access tweet data' });
   }
 });
 
