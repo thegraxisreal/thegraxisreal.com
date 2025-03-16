@@ -113,6 +113,42 @@ async function loadData() {
 // Load data before starting the server
 loadData();
 
+// Add automatic saving every minute
+setInterval(async () => {
+  console.log("Auto-saving data...");
+  try {
+    await saveData();
+    console.log("Data auto-saved successfully!");
+  } catch (error) {
+    console.error("Error auto-saving data:", error);
+  }
+}, 60000); // 60000 ms = 1 minute
+
+// Handle graceful shutdown (for Render and other hosting platforms)
+process.on('SIGTERM', async () => {
+  console.log('SIGTERM received - saving data before shutdown');
+  try {
+    await saveData();
+    console.log('Data saved successfully before shutdown');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error saving data before shutdown:', error);
+    process.exit(1);
+  }
+});
+
+process.on('SIGINT', async () => {
+  console.log('SIGINT received - saving data before shutdown');
+  try {
+    await saveData();
+    console.log('Data saved successfully before shutdown');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error saving data before shutdown:', error);
+    process.exit(1);
+  }
+});
+
 // Your existing endpoints
 app.post('/api/deepseek', (req, res) => {
   const userInput = req.body.input;
@@ -525,18 +561,35 @@ app.get('/api/bookmarks', (req, res) => {
   return res.json({ success: true, bookmarks: bookmarkedTweets });
 });
 
-// Handle process signals for graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('Received SIGINT, saving data...');
-  await saveData();
-  process.exit(0);
+// Look for POST endpoints that might handle tweets and add saveData calls
+app.post('/api/tweets', async (req, res) => {
+  try {
+    // If this endpoint exists, make sure it calls saveData after modifying tweets
+    // ... existing tweet handling code ...
+    
+    // Make sure to save data immediately after any tweet modifications
+    await saveData();
+    
+    // ... existing response code ...
+  } catch (error) {
+    console.error('Error handling tweet:', error);
+    res.status(500).json({ error: 'Failed to process tweet' });
+  }
 });
 
-process.on('SIGTERM', async () => {
-  clearInterval(autoSaveInterval);
-  console.log('Received SIGTERM, saving data...');
-  await saveData();
-  process.exit(0);
+// Add this to any other endpoints that modify tweets
+app.post('/api/like', async (req, res) => {
+  try {
+    // ... existing like handling code ...
+    
+    // Save immediately after modifying data
+    await saveData();
+    
+    // ... existing response code ...
+  } catch (error) {
+    console.error('Error handling like:', error);
+    res.status(500).json({ error: 'Failed to process like' });
+  }
 });
 
 // Start the server
