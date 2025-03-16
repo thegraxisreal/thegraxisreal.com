@@ -6,6 +6,15 @@ const path = require('path'); // Added for file paths
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// Update file paths to use the persistent disk
+const USERS_FILE = process.env.NODE_ENV === 'production' 
+  ? '/data/users.json' 
+  : './users.json';
+  
+const TWEETS_FILE = process.env.NODE_ENV === 'production'
+  ? '/data/tweets.json'
+  : './tweets.json';
+
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -24,8 +33,8 @@ let announcements = [];
 // Function to save data to JSON files
 async function saveData() {
   try {
-    await fs.writeFile('users.json', JSON.stringify(users, null, 2));
-    await fs.writeFile('tweets.json', JSON.stringify(tweets, null, 2));
+    await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
+    await fs.writeFile(TWEETS_FILE, JSON.stringify(tweets, null, 2));
     await fs.writeFile('classrooms.json', JSON.stringify(classrooms, null, 2));
     await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
     console.log('Data auto-saved to JSON files');
@@ -34,36 +43,56 @@ async function saveData() {
   }
 }
 
-// Set up auto-save every 5 minutes (300000 milliseconds)
-const autoSaveInterval = setInterval(saveData, 300000);
+// Ensure data files exist on the persistent disk
+async function ensureDataFilesExist() {
+  try {
+    // Check if users file exists, create if not
+    try {
+      await fs.access(USERS_FILE);
+    } catch {
+      await fs.writeFile(USERS_FILE, JSON.stringify({}));
+      console.log(`Created empty ${USERS_FILE}`);
+    }
+    
+    // Check if tweets file exists, create if not
+    try {
+      await fs.access(TWEETS_FILE);
+    } catch {
+      await fs.writeFile(TWEETS_FILE, JSON.stringify([]));
+      console.log(`Created empty ${TWEETS_FILE}`);
+    }
+  } catch (err) {
+    console.error('Error ensuring data files exist:', err);
+  }
+}
 
 // Function to load data from JSON files with better error handling
 async function loadData() {
   try {
     // Check if users.json exists, if not create empty object
     try {
-      const usersData = await fs.readFile(path.join(__dirname, 'users.json'), 'utf8');
+      const usersData = await fs.readFile(USERS_FILE, 'utf8');
       users = JSON.parse(usersData);
-      console.log(`Loaded ${Object.keys(users).length} users from users.json`);
+      console.log(`Loaded ${Object.keys(users).length} users from ${USERS_FILE}`);
     } catch (error) {
-      console.log('users.json not found or invalid, creating empty users object');
+      console.log(`${USERS_FILE} not found or invalid, creating empty users object`);
       users = {};
-      await fs.writeFile('users.json', JSON.stringify(users, null, 2));
+      await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
     }
     
     // Check if tweets.json exists, if not create empty array
     try {
-      const tweetsData = await fs.readFile(path.join(__dirname, 'tweets.json'), 'utf8');
+      const tweetsData = await fs.readFile(TWEETS_FILE, 'utf8');
       tweets = JSON.parse(tweetsData);
-      console.log(`Loaded ${tweets.length} tweets from tweets.json`);
+      console.log(`Loaded ${tweets.length} tweets from ${TWEETS_FILE}`);
       // Log the first tweet for debugging
       if (tweets.length > 0) {
         console.log('First tweet:', JSON.stringify(tweets[0]).substring(0, 200) + '...');
       }
     } catch (error) {
-      console.log('tweets.json not found or invalid, creating empty tweets array');
+      console.log(`${TWEETS_FILE} not found or invalid, creating empty tweets array`);
       tweets = [];
-      await fs.writeFile('tweets.json', JSON.stringify(tweets, null, 2));
+      await fs.writeFile(TWEETS_FILE, JSON.stringify(tweets, null, 2));
     }
     
     // Sample tweet for testing if no tweets found
@@ -80,7 +109,7 @@ async function loadData() {
         profilePicture: null 
       };
       tweets.push(sampleTweet);
-      await fs.writeFile('tweets.json', JSON.stringify(tweets, null, 2));
+      await fs.writeFile(TWEETS_FILE, JSON.stringify(tweets, null, 2));
       console.log('Added sample tweet:', sampleTweet);
     }
     
@@ -110,489 +139,462 @@ async function loadData() {
   }
 }
 
-// Load data before starting the server
-loadData();
+// Call this before starting your server
+ensureDataFilesExist().then(() => {
+  // Start your server here
+  // Load data before starting the server
+  loadData();
 
-// Add automatic saving every minute
-setInterval(async () => {
-  console.log("Auto-saving data...");
-  try {
-    await saveData();
-    console.log("Data auto-saved successfully!");
-  } catch (error) {
-    console.error("Error auto-saving data:", error);
-  }
-}, 60000); // 60000 ms = 1 minute
+  // Add automatic saving every minute
+  setInterval(async () => {
+    console.log("Auto-saving data...");
+    try {
+      await saveData();
+      console.log("Data auto-saved successfully!");
+    } catch (error) {
+      console.error("Error auto-saving data:", error);
+    }
+  }, 60000); // 60000 ms = 1 minute
 
-// Handle graceful shutdown (for Render and other hosting platforms)
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received - saving data before shutdown');
-  try {
+  // Handle graceful shutdown (for Render and other hosting platforms)
+  process.on('SIGTERM', async () => {
+    console.log('SIGTERM received - saving data before shutdown');
+    try {
+      await saveData();
+      console.log('Data saved successfully before shutdown');
+      process.exit(0);
+    } catch (error) {
+      console.error('Error saving data before shutdown:', error);
+      process.exit(1);
+    }
+  });
+
+  process.on('SIGINT', async () => {
+    console.log('SIGINT received - saving data before shutdown');
+    try {
+      await saveData();
+      console.log('Data saved successfully before shutdown');
+      process.exit(0);
+    } catch (error) {
+      console.error('Error saving data before shutdown:', error);
+      process.exit(1);
+    }
+  });
+
+  // Your existing endpoints
+  app.post('/api/deepseek', (req, res) => {
+    const userInput = req.body.input;
+    const child = spawn('ollama', ['run', 'deepseek-r1:14b']);
+    let output = '';
+    child.stdout.on('data', (data) => output += data.toString());
+    child.stderr.on('data', (data) => console.error(`stderr: ${data}`));
+    child.on('close', (code) => res.json({ output }));
+    child.stdin.write(userInput);
+    child.stdin.end();
+  });
+
+  app.get('/proxy', async (req, res) => {
+    const targetUrl = req.query.url;
+    if (!targetUrl) return res.status(400).send("URL parameter is required");
+    try {
+      const response = await fetch(targetUrl, {
+        redirect: 'follow',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36',
+          'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+        }
+      });
+      if (!response.ok) return res.status(response.status).send(`Error fetching URL: ${response.status}`);
+      res.set("Content-Type", response.headers.get("content-type") || "text/html");
+      response.body.pipe(res);
+    } catch (err) {
+      console.error("Proxy error:", err.message);
+      res.status(500).send("Error fetching the requested URL");
+    }
+  });
+
+  app.post('/admin/shutdown', async (req, res) => {
+    res.send('Shutting down...');
     await saveData();
-    console.log('Data saved successfully before shutdown');
     process.exit(0);
-  } catch (error) {
-    console.error('Error saving data before shutdown:', error);
-    process.exit(1);
+  });
+
+  const http = require('http').createServer(app);
+  const io = require('socket.io')(http);
+  io.on('connection', (socket) => {
+    console.log('A user connected');
+    socket.on('chat message', (msg) => io.emit('chat message', msg));
+    socket.on('tic move', (data) => io.emit('tic move', data));
+    socket.on('join tic', () => io.emit('game start'));
+    socket.on('loud noise', () => io.emit('loud noise'));
+    socket.on('disconnect', () => console.log('A user disconnected'));
+  });
+
+  app.post('/api/signup', (req, res) => {
+    const { handle, password } = req.body;
+    if (!handle || !password) return res.status(400).json({ success: false, error: "Handle and password required" });
+    if (users[handle.toLowerCase()]) return res.status(400).json({ success: false, error: "User already exists" });
+    users[handle.toLowerCase()] = { handle, password, bio: "", profilePicture: null, verified: null, banned: false };
+    return res.json({ success: true, message: "User created successfully", handle });
+  });
+
+  app.post('/api/login', (req, res) => {
+    const { handle, password } = req.body;
+    if (!handle || !password) return res.status(400).json({ success: false, error: "Handle and password required" });
+    const user = users[handle.toLowerCase()];
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    if (user.banned) return res.status(403).json({ success: false, error: "Account suspended" });
+    if (user.password !== password) return res.status(401).json({ success: false, error: "Incorrect password" });
+    return res.json({ success: true, message: "Login successful", handle: user.handle });
+  });
+
+  // Add this function at the top with other functions
+  function generateViewCount() {
+    const roll = Math.random() * 100; // Roll 0-100
+    
+    if (roll < 33.33) { // ~33.33% chance for small tweet (0-900 views)
+      return Math.floor(Math.random() * 901);
+    } else if (roll < 66.66) { // ~33.33% chance for medium tweet (1k-500k)
+      const views = Math.floor(Math.random() * 499000) + 1000;
+      return Math.floor(views / 1000) + 'K';
+    } else { // ~33.33% chance for big tweet (500k-100M)
+      const views = Math.floor(Math.random() * 99500000) + 500000;
+      return Math.floor(views / 1000000) + 'M';
+    }
   }
-});
 
-process.on('SIGINT', async () => {
-  console.log('SIGINT received - saving data before shutdown');
-  try {
-    await saveData();
-    console.log('Data saved successfully before shutdown');
-    process.exit(0);
-  } catch (error) {
-    console.error('Error saving data before shutdown:', error);
-    process.exit(1);
-  }
-});
+  // Update the /api/tweet endpoint
+  app.post('/api/tweet', (req, res) => {
+    console.log("Received /api/tweet request:", req.body);
+    const { handle, text, imageData, quotedTweet, poll } = req.body;
+    if (!handle || (!text && !quotedTweet && !poll)) {
+      console.log("Validation failed: Missing handle or content");
+      return res.status(400).json({ success: false, error: "Handle and either text, quoted tweet, or poll required" });
+    }
+    const user = users[handle.toLowerCase()];
+    if (user.banned) {
+      console.log("User banned:", handle);
+      return res.status(403).json({ success: false, error: "Account suspended" });
+    }
+    const newTweet = {
+      id: Date.now(),
+      handle,
+      text: text || "",
+      imageData: imageData || null,
+      timestamp: Date.now(),
+      likes: 0,
+      replies: [],
+      views: generateViewCount(),
+      poll: poll || null,
+      quotedTweet: quotedTweet ? { 
+        ...quotedTweet, 
+        profilePicture: users[quotedTweet.handle.toLowerCase()]?.profilePicture || null, 
+        verified: users[quotedTweet.handle.toLowerCase()]?.verified || null 
+      } : null,
+      last_retweeted_by: null,
+      profilePicture: user?.profilePicture || null,
+      verified: user?.verified || null
+    };
+    tweets.push(newTweet);
+    saveData();
+    io.emit('new tweet', newTweet);
+    console.log("Tweet saved:", newTweet);
+    return res.json({ success: true, tweet: newTweet });
+  });
 
-// Your existing endpoints
-app.post('/api/deepseek', (req, res) => {
-  const userInput = req.body.input;
-  const child = spawn('ollama', ['run', 'deepseek-r1:14b']);
-  let output = '';
-  child.stdout.on('data', (data) => output += data.toString());
-  child.stderr.on('data', (data) => console.error(`stderr: ${data}`));
-  child.on('close', (code) => res.json({ output }));
-  child.stdin.write(userInput);
-  child.stdin.end();
-});
+  app.post('/api/tweet/reply', (req, res) => {
+    const { tweetId, handle, text, imageData } = req.body;
+    if (!tweetId || !handle || !text) return res.status(400).json({ success: false, error: "Tweet ID, handle, and reply text required" });
+    const tweet = tweets.find(t => t.id === tweetId);
+    if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
+    const user = users[handle.toLowerCase()];
+    if (user.banned) return res.status(403).json({ success: false, error: "Account suspended" });
+    const newReply = {
+      id: Date.now(),
+      handle,
+      text,
+      imageData: imageData || null,
+      timestamp: Date.now(),
+      likes: 0,
+      profilePicture: user?.profilePicture || null,
+      verified: user?.verified || null
+    };
+    tweet.replies.push(newReply);
+    saveData();
+    io.emit('new reply', { tweetId, reply: newReply });
+    return res.json({ success: true, reply: newReply });
+  });
 
-app.get('/proxy', async (req, res) => {
-  const targetUrl = req.query.url;
-  if (!targetUrl) return res.status(400).send("URL parameter is required");
-  try {
-    const response = await fetch(targetUrl, {
-      redirect: 'follow',
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8'
+  app.post('/api/tweet/retweet', (req, res) => {
+    const { tweetId, handle } = req.body;
+    if (!tweetId || !handle) return res.status(400).json({ success: false, error: "Tweet ID and handle required" });
+    const tweet = tweets.find(t => t.id === tweetId);
+    if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
+    const user = users[handle.toLowerCase()];
+    if (user.banned) return res.status(403).json({ success: false, error: "Account suspended" });
+    tweet.timestamp = Date.now();
+    tweet.last_retweeted_by = handle;
+    saveData();
+    io.emit('tweet retweeted', tweet);
+    return res.json({ success: true, tweet });
+  });
+
+  app.patch('/api/tweet/poll/vote', (req, res) => {
+    const { id, option } = req.body;
+    const tweet = tweets.find(t => t.id === id);
+    if (!tweet || !tweet.poll) return res.status(404).json({ success: false, error: "Tweet or poll not found" });
+    const pollOption = tweet.poll.options.find(opt => opt.text === option);
+    if (!pollOption) return res.status(400).json({ success: false, error: "Option not found" });
+    pollOption.votes += 1;
+    saveData();
+    io.emit('poll voted', tweet);
+    return res.json({ success: true, tweet });
+  });
+
+  // Make API endpoint for getting tweets more robust with better logging
+  app.get('/api/tweets', (req, res) => {
+    console.log(`GET /api/tweets: Returning ${tweets.length} tweets`);
+    
+    try {
+      if (!Array.isArray(tweets)) {
+        console.error('ERROR: tweets is not an array:', typeof tweets);
+        return res.json({ tweets: [] });
       }
-    });
-    if (!response.ok) return res.status(response.status).send(`Error fetching URL: ${response.status}`);
-    res.set("Content-Type", response.headers.get("content-type") || "text/html");
-    response.body.pipe(res);
-  } catch (err) {
-    console.error("Proxy error:", err.message);
-    res.status(500).send("Error fetching the requested URL");
-  }
-});
+      
+      const enrichedTweets = tweets.map(tweet => {
+        console.log(`Processing tweet by ${tweet.handle}`);
+        return {
+          ...tweet,
+          profilePicture: users[tweet.handle.toLowerCase()]?.profilePicture || null,
+          verified: users[tweet.handle.toLowerCase()]?.verified || null,
+          replies: Array.isArray(tweet.replies) ? tweet.replies.map(reply => ({
+            ...reply,
+            profilePicture: users[reply.handle?.toLowerCase()]?.profilePicture || null,
+            verified: users[reply.handle?.toLowerCase()]?.verified || null
+          })) : [],
+          quotedTweet: tweet.quotedTweet ? {
+            ...tweet.quotedTweet,
+            profilePicture: users[tweet.quotedTweet.handle?.toLowerCase()]?.profilePicture || null,
+            verified: users[tweet.quotedTweet.handle?.toLowerCase()]?.verified || null
+          } : null
+        };
+      });
+      
+      const sortedTweets = enrichedTweets.sort((a, b) => b.timestamp - a.timestamp);
+      console.log(`Returning ${sortedTweets.length} enriched tweets`);
+      
+      return res.json({ success: true, tweets: sortedTweets });
+    } catch (error) {
+      console.error('Error in /api/tweets:', error);
+      return res.json({ success: false, tweets: [], error: error.message });
+    }
+  });
 
-app.post('/admin/shutdown', async (req, res) => {
-  res.send('Shutting down...');
-  await saveData();
-  process.exit(0);
-});
-
-const http = require('http').createServer(app);
-const io = require('socket.io')(http);
-io.on('connection', (socket) => {
-  console.log('A user connected');
-  socket.on('chat message', (msg) => io.emit('chat message', msg));
-  socket.on('tic move', (data) => io.emit('tic move', data));
-  socket.on('join tic', () => io.emit('game start'));
-  socket.on('loud noise', () => io.emit('loud noise'));
-  socket.on('disconnect', () => console.log('A user disconnected'));
-});
-
-app.post('/api/signup', (req, res) => {
-  const { handle, password } = req.body;
-  if (!handle || !password) return res.status(400).json({ success: false, error: "Handle and password required" });
-  if (users[handle.toLowerCase()]) return res.status(400).json({ success: false, error: "User already exists" });
-  users[handle.toLowerCase()] = { handle, password, bio: "", profilePicture: null, verified: null, banned: false };
-  return res.json({ success: true, message: "User created successfully", handle });
-});
-
-app.post('/api/login', (req, res) => {
-  const { handle, password } = req.body;
-  if (!handle || !password) return res.status(400).json({ success: false, error: "Handle and password required" });
-  const user = users[handle.toLowerCase()];
-  if (!user) return res.status(404).json({ success: false, error: "User not found" });
-  if (user.banned) return res.status(403).json({ success: false, error: "Account suspended" });
-  if (user.password !== password) return res.status(401).json({ success: false, error: "Incorrect password" });
-  return res.json({ success: true, message: "Login successful", handle: user.handle });
-});
-
-// Add this function at the top with other functions
-function generateViewCount() {
-  const roll = Math.random() * 100; // Roll 0-100
-  
-  if (roll < 33.33) { // ~33.33% chance for small tweet (0-900 views)
-    return Math.floor(Math.random() * 901);
-  } else if (roll < 66.66) { // ~33.33% chance for medium tweet (1k-500k)
-    const views = Math.floor(Math.random() * 499000) + 1000;
-    return Math.floor(views / 1000) + 'K';
-  } else { // ~33.33% chance for big tweet (500k-100M)
-    const views = Math.floor(Math.random() * 99500000) + 500000;
-    return Math.floor(views / 1000000) + 'M';
-  }
-}
-
-// Update the /api/tweet endpoint
-app.post('/api/tweet', (req, res) => {
-  console.log("Received /api/tweet request:", req.body);
-  const { handle, text, imageData, quotedTweet, poll } = req.body;
-  if (!handle || (!text && !quotedTweet && !poll)) {
-    console.log("Validation failed: Missing handle or content");
-    return res.status(400).json({ success: false, error: "Handle and either text, quoted tweet, or poll required" });
-  }
-  const user = users[handle.toLowerCase()];
-  if (user.banned) {
-    console.log("User banned:", handle);
-    return res.status(403).json({ success: false, error: "Account suspended" });
-  }
-  const newTweet = {
-    id: Date.now(),
-    handle,
-    text: text || "",
-    imageData: imageData || null,
-    timestamp: Date.now(),
-    likes: 0,
-    replies: [],
-    views: generateViewCount(),
-    poll: poll || null,
-    quotedTweet: quotedTweet ? { 
-      ...quotedTweet, 
-      profilePicture: users[quotedTweet.handle.toLowerCase()]?.profilePicture || null, 
-      verified: users[quotedTweet.handle.toLowerCase()]?.verified || null 
-    } : null,
-    last_retweeted_by: null,
-    profilePicture: user?.profilePicture || null,
-    verified: user?.verified || null
-  };
-  tweets.push(newTweet);
-  saveData();
-  io.emit('new tweet', newTweet);
-  console.log("Tweet saved:", newTweet);
-  return res.json({ success: true, tweet: newTweet });
-});
-
-app.post('/api/tweet/reply', (req, res) => {
-  const { tweetId, handle, text, imageData } = req.body;
-  if (!tweetId || !handle || !text) return res.status(400).json({ success: false, error: "Tweet ID, handle, and reply text required" });
-  const tweet = tweets.find(t => t.id === tweetId);
-  if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
-  const user = users[handle.toLowerCase()];
-  if (user.banned) return res.status(403).json({ success: false, error: "Account suspended" });
-  const newReply = {
-    id: Date.now(),
-    handle,
-    text,
-    imageData: imageData || null,
-    timestamp: Date.now(),
-    likes: 0,
-    profilePicture: user?.profilePicture || null,
-    verified: user?.verified || null
-  };
-  tweet.replies.push(newReply);
-  saveData();
-  io.emit('new reply', { tweetId, reply: newReply });
-  return res.json({ success: true, reply: newReply });
-});
-
-app.post('/api/tweet/retweet', (req, res) => {
-  const { tweetId, handle } = req.body;
-  if (!tweetId || !handle) return res.status(400).json({ success: false, error: "Tweet ID and handle required" });
-  const tweet = tweets.find(t => t.id === tweetId);
-  if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
-  const user = users[handle.toLowerCase()];
-  if (user.banned) return res.status(403).json({ success: false, error: "Account suspended" });
-  tweet.timestamp = Date.now();
-  tweet.last_retweeted_by = handle;
-  saveData();
-  io.emit('tweet retweeted', tweet);
-  return res.json({ success: true, tweet });
-});
-
-app.patch('/api/tweet/poll/vote', (req, res) => {
-  const { id, option } = req.body;
-  const tweet = tweets.find(t => t.id === id);
-  if (!tweet || !tweet.poll) return res.status(404).json({ success: false, error: "Tweet or poll not found" });
-  const pollOption = tweet.poll.options.find(opt => opt.text === option);
-  if (!pollOption) return res.status(400).json({ success: false, error: "Option not found" });
-  pollOption.votes += 1;
-  saveData();
-  io.emit('poll voted', tweet);
-  return res.json({ success: true, tweet });
-});
-
-// Make API endpoint for getting tweets more robust with better logging
-app.get('/api/tweets', (req, res) => {
-  console.log(`GET /api/tweets: Returning ${tweets.length} tweets`);
-  
-  try {
-    if (!Array.isArray(tweets)) {
-      console.error('ERROR: tweets is not an array:', typeof tweets);
-      return res.json({ tweets: [] });
+  app.patch('/api/tweet/like', (req, res) => {
+    const { id, likes } = req.body;
+    console.log(`Like request received for tweet ID: ${id}, likes: ${likes}`);
+    
+    // Ensure ID is correctly formatted (tweets might store IDs as numbers)
+    const tweetId = typeof id === 'string' ? parseInt(id, 10) : id;
+    
+    const tweet = tweets.find(t => t.id === tweetId);
+    if (!tweet) {
+      console.log(`Tweet not found with ID: ${tweetId}`);
+      return res.status(404).json({ success: false, error: "Tweet not found" });
     }
     
-    const enrichedTweets = tweets.map(tweet => {
-      console.log(`Processing tweet by ${tweet.handle}`);
-      return {
-        ...tweet,
-        profilePicture: users[tweet.handle.toLowerCase()]?.profilePicture || null,
-        verified: users[tweet.handle.toLowerCase()]?.verified || null,
-        replies: Array.isArray(tweet.replies) ? tweet.replies.map(reply => ({
-          ...reply,
-          profilePicture: users[reply.handle?.toLowerCase()]?.profilePicture || null,
-          verified: users[reply.handle?.toLowerCase()]?.verified || null
-        })) : [],
-        quotedTweet: tweet.quotedTweet ? {
-          ...tweet.quotedTweet,
-          profilePicture: users[tweet.quotedTweet.handle?.toLowerCase()]?.profilePicture || null,
-          verified: users[tweet.quotedTweet.handle?.toLowerCase()]?.verified || null
-        } : null
-      };
-    });
+    tweet.likes = likes;
+    console.log(`Updated tweet ${tweetId} with ${likes} likes`);
     
-    const sortedTweets = enrichedTweets.sort((a, b) => b.timestamp - a.timestamp);
-    console.log(`Returning ${sortedTweets.length} enriched tweets`);
-    
-    return res.json({ success: true, tweets: sortedTweets });
-  } catch (error) {
-    console.error('Error in /api/tweets:', error);
-    return res.json({ success: false, tweets: [], error: error.message });
-  }
-});
-
-app.patch('/api/tweet/like', (req, res) => {
-  const { id, likes } = req.body;
-  console.log(`Like request received for tweet ID: ${id}, likes: ${likes}`);
-  
-  // Ensure ID is correctly formatted (tweets might store IDs as numbers)
-  const tweetId = typeof id === 'string' ? parseInt(id, 10) : id;
-  
-  const tweet = tweets.find(t => t.id === tweetId);
-  if (!tweet) {
-    console.log(`Tweet not found with ID: ${tweetId}`);
-    return res.status(404).json({ success: false, error: "Tweet not found" });
-  }
-  
-  tweet.likes = likes;
-  console.log(`Updated tweet ${tweetId} with ${likes} likes`);
-  
-  saveData();
-  io.emit('tweet liked', tweet);
-  return res.json({ success: true, tweet });
-});
-
-app.patch('/api/tweet/reply/like', (req, res) => {
-  const { tweetId, replyId, likes } = req.body;
-  const tweet = tweets.find(t => t.id === tweetId);
-  if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
-  const reply = tweet.replies.find(r => r.id === replyId);
-  if (!reply) return res.status(404).json({ success: false, error: "Reply not found" });
-  reply.likes = likes;
-  saveData();
-  io.emit('reply liked', { tweetId, reply });
-  return res.json({ success: true, reply });
-});
-
-app.get('/api/profile', (req, res) => {
-  const { handle } = req.query;
-  if (!handle) return res.status(400).json({ success: false, error: "Handle parameter is required" });
-  const user = users[handle.toLowerCase()];
-  if (!user) return res.status(404).json({ success: false, error: "User not found" });
-  return res.json({ success: true, profile: { handle: user.handle, bio: user.bio || "", profilePicture: user.profilePicture || null, verified: user.verified || null } });
-});
-
-app.patch('/api/profile', (req, res) => {
-  const { handle, bio, profilePicture, verified } = req.body;
-  if (!handle) return res.status(400).json({ success: false, error: "Handle is required" });
-  const user = users[handle.toLowerCase()];
-  if (!user) return res.status(404).json({ success: false, error: "User not found" });
-  if (bio !== undefined) user.bio = bio;
-  if (profilePicture !== undefined) user.profilePicture = profilePicture;
-  if (verified !== undefined) user.verified = verified;
-  saveData();
-  return res.json({ success: true, message: "Profile updated", profile: { handle: user.handle, bio: user.bio, profilePicture: user.profilePicture, verified: user.verified } });
-});
-
-app.get('/api/users', (req, res) => {
-  const userList = Object.values(users).map(user => ({
-    handle: user.handle,
-    password: user.password,
-    banned: user.banned
-  }));
-  res.json({ success: true, users: userList });
-});
-
-app.post('/api/ban', (req, res) => {
-  const { handle } = req.body;
-  if (!handle) return res.status(400).json({ success: false, error: "Handle is required" });
-  const user = users[handle.toLowerCase()];
-  if (!user) return res.status(404).json({ success: false, error: "User not found" });
-  user.banned = true;
-  saveData();
-  return res.json({ success: true, message: "User banned" });
-});
-
-app.get('/api/trending', (req, res) => {
-  const hashtagCount = {};
-  tweets.forEach(tweet => {
-    const hashtags = tweet.text.match(/#([a-zA-Z0-9]+)/g) || [];
-    hashtags.forEach(tag => {
-      const cleanTag = tag.toLowerCase();
-      hashtagCount[cleanTag] = (hashtagCount[cleanTag] || 0) + 1;
-    });
+    saveData();
+    io.emit('tweet liked', tweet);
+    return res.json({ success: true, tweet });
   });
-  const trending = Object.entries(hashtagCount)
-    .filter(([tag, count]) => count >= 2)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 5);
-  res.json({ success: true, trending });
-});
 
-// New endpoints for classrooms
-app.get('/api/classrooms', (req, res) => {
-  res.json({ success: true, classrooms });
-});
+  app.patch('/api/tweet/reply/like', (req, res) => {
+    const { tweetId, replyId, likes } = req.body;
+    const tweet = tweets.find(t => t.id === tweetId);
+    if (!tweet) return res.status(404).json({ success: false, error: "Tweet not found" });
+    const reply = tweet.replies.find(r => r.id === replyId);
+    if (!reply) return res.status(404).json({ success: false, error: "Reply not found" });
+    reply.likes = likes;
+    saveData();
+    io.emit('reply liked', { tweetId, reply });
+    return res.json({ success: true, reply });
+  });
 
-app.post('/api/classrooms', (req, res) => {
-  const { name, instructor } = req.body;
-  if (!name || !instructor) {
-    return res.status(400).json({ success: false, error: "Class name and instructor required" });
-  }
-  const newClassroom = {
-    id: Date.now(),
-    name,
-    instructor,
-    timestamp: Date.now()
-  };
-  classrooms.push(newClassroom);
-  io.emit('new classroom', newClassroom);
-  saveData();
-  return res.json({ success: true, classroom: newClassroom });
-});
+  app.get('/api/profile', (req, res) => {
+    const { handle } = req.query;
+    if (!handle) return res.status(400).json({ success: false, error: "Handle parameter is required" });
+    const user = users[handle.toLowerCase()];
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    return res.json({ success: true, profile: { handle: user.handle, bio: user.bio || "", profilePicture: user.profilePicture || null, verified: user.verified || null } });
+  });
 
-app.post('/api/announcements', (req, res) => {
-  const { classId, text, author, authorRole } = req.body;
-  if (!classId || !text || !author) {
-    return res.status(400).json({ success: false, error: "Missing required fields" });
-  }
-  const newAnnouncement = {
-    id: Date.now().toString(),
-    classId,
-    text,
-    author,
-    authorRole,
-    timestamp: Date.now()
-  };
-  announcements.push(newAnnouncement);
-  io.emit('new announcement', newAnnouncement);
-  saveData();
-  return res.json({ success: true, announcement: newAnnouncement });
-});
+  app.patch('/api/profile', (req, res) => {
+    const { handle, bio, profilePicture, verified } = req.body;
+    if (!handle) return res.status(400).json({ success: false, error: "Handle is required" });
+    const user = users[handle.toLowerCase()];
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    if (bio !== undefined) user.bio = bio;
+    if (profilePicture !== undefined) user.profilePicture = profilePicture;
+    if (verified !== undefined) user.verified = verified;
+    saveData();
+    return res.json({ success: true, message: "Profile updated", profile: { handle: user.handle, bio: user.bio, profilePicture: user.profilePicture, verified: user.verified } });
+  });
 
-app.get('/api/announcements/:classId', (req, res) => {
-  const { classId } = req.params;
-  const classAnnouncements = announcements
-    .filter(a => a.classId === classId)
-    .sort((a, b) => b.timestamp - a.timestamp);
-  return res.json({ success: true, announcements: classAnnouncements });
-});
+  app.get('/api/users', (req, res) => {
+    const userList = Object.values(users).map(user => ({
+      handle: user.handle,
+      password: user.password,
+      banned: user.banned
+    }));
+    res.json({ success: true, users: userList });
+  });
 
-app.delete('/api/announcements/:id', (req, res) => {
-  const { id } = req.params;
-  const index = announcements.findIndex(a => a.id === id);
-  if (index === -1) {
-    return res.status(404).json({ success: false, error: "Announcement not found" });
-  }
-  announcements.splice(index, 1);
-  io.emit('announcement deleted', id);
-  saveData();
-  return res.json({ success: true });
-});
+  app.post('/api/ban', (req, res) => {
+    const { handle } = req.body;
+    if (!handle) return res.status(400).json({ success: false, error: "Handle is required" });
+    const user = users[handle.toLowerCase()];
+    if (!user) return res.status(404).json({ success: false, error: "User not found" });
+    user.banned = true;
+    saveData();
+    return res.json({ success: true, message: "User banned" });
+  });
 
-// Add a tweet to user's bookmarks
-app.post('/api/bookmark', (req, res) => {
-  const { handle, tweetId } = req.body;
-  if (!handle || !tweetId) {
-    return res.json({ success: false, error: 'Handle and tweet ID are required' });
-  }
-  const user = users[handle.toLowerCase()];
-  if (!user) {
-    return res.json({ success: false, error: 'User not found' });
-  }
-  if (!user.bookmarks) user.bookmarks = [];
-  if (user.bookmarks.includes(tweetId)) {
-    return res.json({ success: false, error: 'Tweet is already bookmarked' });
-  }
-  user.bookmarks.push(tweetId);
-  saveData();
-  return res.json({ success: true });
-});
+  app.get('/api/trending', (req, res) => {
+    const hashtagCount = {};
+    tweets.forEach(tweet => {
+      const hashtags = tweet.text.match(/#([a-zA-Z0-9]+)/g) || [];
+      hashtags.forEach(tag => {
+        const cleanTag = tag.toLowerCase();
+        hashtagCount[cleanTag] = (hashtagCount[cleanTag] || 0) + 1;
+      });
+    });
+    const trending = Object.entries(hashtagCount)
+      .filter(([tag, count]) => count >= 2)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 5);
+    res.json({ success: true, trending });
+  });
 
-// Remove a tweet from user's bookmarks
-app.delete('/api/bookmark', (req, res) => {
-  const { handle, tweetId } = req.body;
-  if (!handle || !tweetId) {
-    return res.json({ success: false, error: 'Handle and tweet ID are required' });
-  }
-  const user = users[handle.toLowerCase()];
-  if (!user) {
-    return res.json({ success: false, error: 'User not found' });
-  }
-  if (!user.bookmarks || !user.bookmarks.includes(tweetId)) {
-    return res.json({ success: false, error: 'Tweet is not bookmarked' });
-  }
-  user.bookmarks = user.bookmarks.filter(id => id !== tweetId);
-  saveData();
-  return res.json({ success: true });
-});
+  // New endpoints for classrooms
+  app.get('/api/classrooms', (req, res) => {
+    res.json({ success: true, classrooms });
+  });
 
-// Get user's bookmarked tweets
-app.get('/api/bookmarks', (req, res) => {
-  const handle = req.query.handle;
-  if (!handle) {
-    return res.json({ success: false, error: 'Handle is required' });
-  }
-  const user = users[handle.toLowerCase()];
-  if (!user) {
-    return res.json({ success: false, error: 'User not found' });
-  }
-  if (!user.bookmarks || user.bookmarks.length === 0) {
-    return res.json({ success: true, bookmarks: [] });
-  }
-  const bookmarkedTweets = tweets.filter(tweet => user.bookmarks.includes(tweet.id));
-  return res.json({ success: true, bookmarks: bookmarkedTweets });
-});
+  app.post('/api/classrooms', (req, res) => {
+    const { name, instructor } = req.body;
+    if (!name || !instructor) {
+      return res.status(400).json({ success: false, error: "Class name and instructor required" });
+    }
+    const newClassroom = {
+      id: Date.now(),
+      name,
+      instructor,
+      timestamp: Date.now()
+    };
+    classrooms.push(newClassroom);
+    io.emit('new classroom', newClassroom);
+    saveData();
+    return res.json({ success: true, classroom: newClassroom });
+  });
 
-// Look for POST endpoints that might handle tweets and add saveData calls
-app.post('/api/tweets', async (req, res) => {
-  try {
-    // If this endpoint exists, make sure it calls saveData after modifying tweets
-    // ... existing tweet handling code ...
-    
-    // Make sure to save data immediately after any tweet modifications
-    await saveData();
-    
-    // ... existing response code ...
-  } catch (error) {
-    console.error('Error handling tweet:', error);
-    res.status(500).json({ error: 'Failed to process tweet' });
-  }
-});
+  app.post('/api/announcements', (req, res) => {
+    const { classId, text, author, authorRole } = req.body;
+    if (!classId || !text || !author) {
+      return res.status(400).json({ success: false, error: "Missing required fields" });
+    }
+    const newAnnouncement = {
+      id: Date.now().toString(),
+      classId,
+      text,
+      author,
+      authorRole,
+      timestamp: Date.now()
+    };
+    announcements.push(newAnnouncement);
+    io.emit('new announcement', newAnnouncement);
+    saveData();
+    return res.json({ success: true, announcement: newAnnouncement });
+  });
 
-// Add this to any other endpoints that modify tweets
-app.post('/api/like', async (req, res) => {
-  try {
-    // ... existing like handling code ...
-    
-    // Save immediately after modifying data
-    await saveData();
-    
-    // ... existing response code ...
-  } catch (error) {
-    console.error('Error handling like:', error);
-    res.status(500).json({ error: 'Failed to process like' });
-  }
-});
+  app.get('/api/announcements/:classId', (req, res) => {
+    const { classId } = req.params;
+    const classAnnouncements = announcements
+      .filter(a => a.classId === classId)
+      .sort((a, b) => b.timestamp - a.timestamp);
+    return res.json({ success: true, announcements: classAnnouncements });
+  });
 
-// Start the server
-http.listen(PORT, '0.0.0.0', () => {
-  console.log(`Server running on http://localhost:${PORT}`);
+  app.delete('/api/announcements/:id', (req, res) => {
+    const { id } = req.params;
+    const index = announcements.findIndex(a => a.id === id);
+    if (index === -1) {
+      return res.status(404).json({ success: false, error: "Announcement not found" });
+    }
+    announcements.splice(index, 1);
+    io.emit('announcement deleted', id);
+    saveData();
+    return res.json({ success: true });
+  });
+
+  // Add a tweet to user's bookmarks
+  app.post('/api/bookmark', (req, res) => {
+    const { handle, tweetId } = req.body;
+    if (!handle || !tweetId) {
+      return res.json({ success: false, error: 'Handle and tweet ID are required' });
+    }
+    const user = users[handle.toLowerCase()];
+    if (!user) {
+      return res.json({ success: false, error: 'User not found' });
+    }
+    if (!user.bookmarks) user.bookmarks = [];
+    if (user.bookmarks.includes(tweetId)) {
+      return res.json({ success: false, error: 'Tweet is already bookmarked' });
+    }
+    user.bookmarks.push(tweetId);
+    saveData();
+    return res.json({ success: true });
+  });
+
+  // Remove a tweet from user's bookmarks
+  app.delete('/api/bookmark', (req, res) => {
+    const { handle, tweetId } = req.body;
+    if (!handle || !tweetId) {
+      return res.json({ success: false, error: 'Handle and tweet ID are required' });
+    }
+    const user = users[handle.toLowerCase()];
+    if (!user) {
+      return res.json({ success: false, error: 'User not found' });
+    }
+    if (!user.bookmarks || !user.bookmarks.includes(tweetId)) {
+      return res.json({ success: false, error: 'Tweet is not bookmarked' });
+    }
+    user.bookmarks = user.bookmarks.filter(id => id !== tweetId);
+    saveData();
+    return res.json({ success: true });
+  });
+
+  // Get user's bookmarked tweets
+  app.get('/api/bookmarks', (req, res) => {
+    const handle = req.query.handle;
+    if (!handle) {
+      return res.json({ success: false, error: 'Handle is required' });
+    }
+    const user = users[handle.toLowerCase()];
+    if (!user) {
+      return res.json({ success: false, error: 'User not found' });
+    }
+    if (!user.bookmarks || user.bookmarks.length === 0) {
+      return res.json({ success: true, bookmarks: [] });
+    }
+    const bookmarkedTweets = tweets.filter(tweet => user.bookmarks.includes(tweet.id));
+    return res.json({ success: true, bookmarks: bookmarkedTweets });
+  });
+
+  // Start the server
+  http.listen(PORT, '0.0.0.0', () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
 });
