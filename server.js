@@ -593,6 +593,26 @@ ensureDataFilesExist().then(() => {
     return res.json({ success: true, bookmarks: bookmarkedTweets });
   });
 
+  // TEMPORARY ENDPOINT - REMOVE AFTER USING!
+  app.post('/admin/import-data', express.json({limit: '50mb'}), async (req, res) => {
+    try {
+      if (req.body.users) {
+        await fs.writeFile(USERS_FILE, JSON.stringify(req.body.users, null, 2));
+        console.log(`Imported ${Object.keys(req.body.users).length} users`);
+      }
+      
+      if (req.body.tweets) {
+        await fs.writeFile(TWEETS_FILE, JSON.stringify(req.body.tweets, null, 2));
+        console.log(`Imported ${req.body.tweets.length} tweets`);
+      }
+      
+      res.json({ success: true, message: 'Data imported successfully' });
+    } catch (error) {
+      console.error('Error importing data:', error);
+      res.status(500).json({ success: false, error: error.message });
+    }
+  });
+
   // Start the server
   http.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on http://localhost:${PORT}`);
