@@ -14,8 +14,14 @@ mongoose.connect(process.env.MONGODB_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 })
-.then(() => console.log('Connected to MongoDB'))
-.catch(err => console.error('MongoDB connection error:', err));
+.then(() => {
+  console.log('Successfully connected to MongoDB!');
+  console.log('Connection string used:', process.env.MONGODB_URI ? 'Valid connection string found' : 'No connection string provided');
+})
+.catch(err => {
+  console.error('MongoDB connection error details:', err);
+  console.error('Check if MONGODB_URI environment variable is set correctly in Render');
+});
 
 // Define Tweet schema and model
 const TweetSchema = new mongoose.Schema({
@@ -405,37 +411,17 @@ app.get('/api/tweets', async (req, res) => {
   try {
     const mongoTweets = await Tweet.find().sort({ timestamp: -1 });
     
-    // Convert MongoDB documents to the format your frontend expects
-    const formattedTweets = mongoTweets.map(tweet => ({
-      id: tweet._id,
-      handle: tweet.username, // assuming username in MongoDB = handle in your frontend
-      text: tweet.text,
-      timestamp: tweet.timestamp,
-      likes: tweet.likes || 0,
-      views: tweet.views || 0,
-      replies: tweet.replies || [],
-      profilePicture: tweet.profilePicture || null,
-      verified: tweet.verified || null,
-      // Add any other fields your frontend expects
-    }));
+    console.log(`Retrieved ${mongoTweets.length} tweets from MongoDB`);
     
-    console.log(`Sending ${formattedTweets.length} tweets from MongoDB`);
-    res.json(formattedTweets);
+    // No need to transform - return the documents directly
+    // The schema already matches what the frontend expects (id, handle, etc.)
+    
+    // Update the in-memory tweets array for backward compatibility
+    tweets = mongoTweets.map(tweet => tweet.toObject());
+    
+    res.json(mongoTweets);
   } catch (error) {
-    console.error('Error fetching tweets:', error);
-    res.status(500).json({ error: 'Failed to fetch tweets' });
-  }
-});
-
-// If your app has another endpoint that might be serving tweets, update it too
-// For example, if you have something like this:
-app.get('/tweets', async (req, res) => {
-  try {
-    const mongoTweets = await Tweet.find().sort({ timestamp: -1 });
-    // Same formatting as above
-    res.json(formattedTweets);
-  } catch (error) {
-    console.error('Error fetching tweets:', error);
+    console.error('Error fetching tweets from MongoDB:', error);
     res.status(500).json({ error: 'Failed to fetch tweets' });
   }
 });
