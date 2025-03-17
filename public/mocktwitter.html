@@ -140,6 +140,20 @@ TWITTER
       margin-right: 12px;
       object-fit: cover;
     }
+    .default-profile-pic {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      margin-right: 12px;
+      background-color: var(--twitter-light-gray);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .default-profile-pic i {
+      font-size: 24px;
+      color: white;
+    }
     .tweet-username {
       font-weight: bold;
       margin-right: 5px;
@@ -1027,9 +1041,9 @@ TWITTER
       const isLiked = currentUser && tweet.likedBy && tweet.likedBy.includes(currentUser);
       
       // Get profile picture or default
-      const profilePicImg = tweet.profilePicture 
-        ? `<img src="${tweet.profilePicture}" alt="Profile" class="profile-pic">` 
-        : `<div class="profile-pic default-pic"></div>`;
+      const profilePicHtml = tweet.profilePicture 
+        ? `<img src="${tweet.profilePicture}" alt="Profile" class="tweet-profile-pic">` 
+        : `<div class="default-profile-pic"><i class="fas fa-user"></i></div>`;
         
       // Format the tweet text (process @mentions and #hashtags)
       const formattedText = tweet.text.replace(/@(\w+)/g, '<a href="#" class="mention">@$1</a>')
@@ -1037,12 +1051,12 @@ TWITTER
       
       // Format image if present
       const imageHtml = tweet.imageData
-        ? `<div class="tweet-image"><img src="${tweet.imageData}" alt="Tweet image"></div>`
+        ? `<div class="tweet-image"><img src="${tweet.imageData}" alt="Tweet image" style="max-width: 100%; border-radius: 15px;"></div>`
         : '';
       
       // Format verification badge if user is verified
       const verifiedBadge = tweet.verified 
-        ? `<i class="fas fa-check-circle verification-badge" title="${tweet.verified}"></i>` 
+        ? `<i class="fas fa-check-circle verification-badge" style="color: ${tweet.verified === 'gold' ? 'gold' : 'var(--twitter-blue)'}" title="${tweet.verified}"></i>` 
         : '';
       
       // Format poll if present
@@ -1108,7 +1122,7 @@ TWITTER
         ${retweetInfo}
         <div class="tweet-card ${showQuote ? 'quoted' : ''}" data-tweet-id="${tweet.id}">
           <div class="tweet-header">
-            ${profilePicImg}
+            ${profilePicHtml}
             <div class="tweet-header-info">
               <span class="tweet-name">${tweet.handle} ${verifiedBadge}</span>
               <span class="tweet-handle">@${tweet.handle}</span>
@@ -1123,23 +1137,23 @@ TWITTER
             ${quotedTweetHtml}
           </div>
           <div class="tweet-views">
-            <i class="fas fa-chart-bar"></i> ${tweet.views || '0'} views
+            <i class="fas fa-chart-bar"></i> ${formatViews(tweet.views || 0)} views
           </div>
           ${communityNoteHtml}
           <div class="tweet-actions">
-            <button class="action-button reply-button" onclick="showReplyModal(${tweet.id})">
+            <button class="action-btn reply-btn" onclick="showReplyModal('${tweet.id}')">
               <i class="far fa-comment"></i>
               <span>${tweet.replies ? tweet.replies.length : 0}</span>
             </button>
-            <button class="action-button retweet-button" onclick="retweetTweet(${tweet.id})">
+            <button class="action-btn retweet-btn" onclick="retweetTweet('${tweet.id}')">
               <i class="fas fa-retweet"></i>
-              <span>Retweet</span>
+              <span>${tweet.retweets || 0}</span>
             </button>
-            <button class="action-button like-button ${isLiked ? 'liked' : ''}" onclick="likeTweet(${tweet.id})">
+            <button class="action-btn like-btn ${isLiked ? 'liked' : ''}" onclick="likeTweet('${tweet.id}')">
               <i class="${isLiked ? 'fas' : 'far'} fa-heart"></i>
               <span>${tweet.likes || 0}</span>
             </button>
-            <button class="action-button share-button" onclick="showShareTweet(${tweet.id})">
+            <button class="action-btn share-btn" onclick="showShareTweet('${tweet.id}')">
               <i class="far fa-share-square"></i>
             </button>
           </div>
@@ -1470,6 +1484,125 @@ TWITTER
     });
 
     // Setup event listeners for the main UI
+
+    // Function to format view counts in a more readable way (1K, 1M, etc.)
+    function formatViews(views) {
+      if (views >= 1000000) {
+        return (views / 1000000).toFixed(1) + 'M';
+      } else if (views >= 1000) {
+        return (views / 1000).toFixed(1) + 'K';
+      } else {
+        return views.toString();
+      }
+    }
+
+    // Add the missing likeTweet function
+    async function likeTweet(tweetId) {
+      if (!currentUser) return;
+      
+      try {
+        const response = await fetch("/api/like", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ tweetId, handle: currentUser })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update like button UI without refreshing the whole feed
+          const likeBtn = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"] .like-btn`);
+          const likesCount = likeBtn.querySelector("span");
+          const heartIcon = likeBtn.querySelector("i");
+          
+          if (data.liked) {
+            likeBtn.classList.add("liked");
+            heartIcon.classList.replace("far", "fas");
+            likesCount.textContent = parseInt(likesCount.textContent || 0) + 1;
+          } else {
+            likeBtn.classList.remove("liked");
+            heartIcon.classList.replace("fas", "far");
+            likesCount.textContent = Math.max(parseInt(likesCount.textContent || 0) - 1, 0);
+          }
+        }
+      } catch (error) {
+        console.error("Error liking tweet:", error);
+      }
+    }
+
+    // Add stubs for other interactions if missing
+    function showReplyModal(tweetId) {
+      console.log("Reply to tweet:", tweetId);
+      alert("Reply feature coming soon!");
+    }
+    
+    function retweetTweet(tweetId) {
+      console.log("Retweet:", tweetId);
+      if (!currentUser) return;
+      alert("Retweet feature coming soon!");
+    }
+    
+    function showShareTweet(tweetId) {
+      console.log("Share tweet:", tweetId);
+      alert("Share feature coming soon!");
+    }
+
+    // Setup CSS for interacting with tweets
+    document.addEventListener("DOMContentLoaded", function() {
+      // Add CSS for better interaction feedback
+      const style = document.createElement('style');
+      style.innerHTML = `
+        .action-btn {
+          display: flex;
+          align-items: center;
+          padding: 8px 12px;
+          border-radius: 50px;
+          margin-right: 8px;
+          transition: all 0.2s ease;
+          color: var(--twitter-dark-gray);
+        }
+        
+        .action-btn i {
+          margin-right: 5px;
+        }
+        
+        .reply-btn:hover {
+          color: var(--twitter-blue);
+          background-color: rgba(29, 161, 242, 0.1);
+        }
+        
+        .retweet-btn:hover {
+          color: #17bf63;
+          background-color: rgba(23, 191, 99, 0.1);
+        }
+        
+        .like-btn:hover {
+          color: #e0245e;
+          background-color: rgba(224, 36, 94, 0.1);
+        }
+        
+        .like-btn.liked {
+          color: #e0245e;
+        }
+        
+        .like-btn.liked i {
+          animation: likeAnimation 0.45s ease-in-out;
+        }
+        
+        .share-btn:hover {
+          color: var(--twitter-blue);
+          background-color: rgba(29, 161, 242, 0.1);
+        }
+        
+        @keyframes likeAnimation {
+          0% { transform: scale(1); }
+          25% { transform: scale(1.2); }
+          50% { transform: scale(0.95); }
+          100% { transform: scale(1); }
+        }
+      `;
+      document.head.appendChild(style);
+    });
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
