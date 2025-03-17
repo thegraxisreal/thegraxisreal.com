@@ -218,6 +218,34 @@ TWITTER
       color: #17bf63;
       background-color: rgba(23, 191, 99, 0.1);
     }
+    .inline-form {
+      margin: 10px 0;
+      padding: 10px;
+      background-color: #f7f9fa;
+      border-radius: 12px;
+      display: none;
+    }
+    .inline-form textarea {
+      width: 100%;
+      border: 1px solid var(--twitter-extra-light-gray);
+      border-radius: 8px;
+      padding: 10px;
+      resize: none;
+      margin-bottom: 10px;
+    }
+    .inline-form-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    body.dark-mode .inline-form {
+      background-color: #253341;
+    }
+    body.dark-mode .inline-form textarea {
+      background-color: #192734;
+      color: white;
+      border-color: #38444d;
+    }
     
     /* Poll and quoted tweet */
     .poll-container {
@@ -1326,7 +1354,7 @@ TWITTER
 
     async function showAdminSection() {
       const password = prompt("Enter admin password:");
-      if (password !== "hello") {
+      if (password !== "1612") {
         alert("Incorrect admin password.");
         return;
       }
@@ -1546,66 +1574,58 @@ TWITTER
       }
     }
 
-    // Implement reply functionality
+    // Implement simpler inline reply functionality
     function showReplyModal(tweetId) {
       if (!currentUser) {
         alert("Please log in to reply");
         return;
       }
       
-      // Create modal for reply
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.style.display = 'block';
-      
-      const modalContent = document.createElement('div');
-      modalContent.className = 'modal-content';
-      modalContent.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#192734' : 'white';
-      modalContent.style.color = document.body.classList.contains('dark-mode') ? 'white' : 'black';
-      
-      // Get the original tweet text to show what we're replying to
+      // Find the tweet we want to reply to
       const tweetElement = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"]`);
-      const tweetText = tweetElement.querySelector('.tweet-text').textContent;
-      const tweetHandle = tweetElement.querySelector('.tweet-name').textContent.split(' ')[0]; // Get handle without verified badge
       
-      modalContent.innerHTML = `
-        <div class="modal-header">
-          <h3 class="modal-title">Reply to @${tweetHandle}</h3>
-          <span class="close-modal">&times;</span>
-        </div>
-        <div class="original-tweet" style="border-left: 3px solid var(--twitter-blue); padding-left: 10px; margin: 10px 0; opacity: 0.8;">
-          ${tweetText}
-        </div>
-        <div class="reply-form">
-          <textarea id="replyText" class="form-control" rows="3" placeholder="Tweet your reply"></textarea>
-          <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-            <small id="replyCharCount">280</small>
-            <button id="submitReply" class="btn">Reply</button>
-          </div>
+      // Check if there's already a reply form
+      let replyForm = tweetElement.nextElementSibling;
+      if (replyForm && replyForm.classList.contains('inline-form')) {
+        // Toggle the form visibility
+        replyForm.style.display = replyForm.style.display === 'block' ? 'none' : 'block';
+        if (replyForm.style.display === 'block') {
+          replyForm.querySelector('textarea').focus();
+        }
+        return;
+      }
+      
+      // Create a new reply form
+      replyForm = document.createElement('div');
+      replyForm.className = 'inline-form';
+      replyForm.style.display = 'block';
+      
+      replyForm.innerHTML = `
+        <textarea placeholder="Tweet your reply" maxlength="280" rows="3"></textarea>
+        <div class="inline-form-actions">
+          <small class="char-count">280</small>
+          <button class="btn">Reply</button>
         </div>
       `;
       
-      modal.appendChild(modalContent);
-      document.body.appendChild(modal);
+      // Insert after the tweet
+      tweetElement.parentNode.insertBefore(replyForm, tweetElement.nextSibling);
       
       // Add event listeners
-      const closeBtn = modal.querySelector('.close-modal');
-      closeBtn.addEventListener('click', () => {
-        document.body.removeChild(modal);
-      });
+      const textarea = replyForm.querySelector('textarea');
+      const charCount = replyForm.querySelector('.char-count');
+      const submitBtn = replyForm.querySelector('button');
       
-      const replyTextarea = modal.querySelector('#replyText');
-      const charCount = modal.querySelector('#replyCharCount');
+      textarea.focus();
       
-      replyTextarea.addEventListener('input', function() {
+      textarea.addEventListener('input', function() {
         const remaining = 280 - this.value.length;
         charCount.textContent = remaining;
         charCount.style.color = remaining <= 10 ? '#e0245e' : '#555';
       });
       
-      const submitBtn = modal.querySelector('#submitReply');
       submitBtn.addEventListener('click', async () => {
-        const replyText = replyTextarea.value.trim();
+        const replyText = textarea.value.trim();
         if (!replyText || replyText.length > 280) return;
         
         try {
@@ -1622,7 +1642,8 @@ TWITTER
           const data = await response.json();
           
           if (data.success) {
-            document.body.removeChild(modal);
+            // Remove the reply form
+            replyForm.remove();
             // Refresh the feed to show the new reply
             fetchAndRenderTweets();
           } else {
@@ -1633,16 +1654,6 @@ TWITTER
           alert('Error posting reply. Please try again.');
         }
       });
-      
-      // Close modal when clicking outside
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          document.body.removeChild(modal);
-        }
-      });
-      
-      // Focus the textarea
-      replyTextarea.focus();
     }
     
     // Implement retweet functionality
@@ -1680,9 +1691,6 @@ TWITTER
           retweetBtn.classList.add("retweeted");
           retweetIcon.style.color = "#17bf63";
           
-          // Show confirmation
-          alert("Tweet retweeted!");
-          
           // Refresh the feed to show the retweeted tweet
           fetchAndRenderTweets();
         } else {
@@ -1694,66 +1702,69 @@ TWITTER
       }
     }
     
-    // Implement quote tweet functionality
+    // Implement simpler inline quote tweet functionality
     function showShareTweet(tweetId) {
       if (!currentUser) {
-        alert("Please log in to share");
+        alert("Please log in to quote tweet");
         return;
       }
       
-      // Get the original tweet
+      // Find the tweet we want to quote
       const tweetElement = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"]`);
       const tweetText = tweetElement.querySelector('.tweet-text').textContent;
       const tweetHandle = tweetElement.querySelector('.tweet-name').textContent.split(' ')[0];
       
-      // Create modal for quote tweet
-      const modal = document.createElement('div');
-      modal.className = 'modal';
-      modal.style.display = 'block';
+      // Check if there's already a quote form
+      let quoteForm = tweetElement.nextElementSibling;
+      if (quoteForm && quoteForm.classList.contains('inline-form') && quoteForm.dataset.formType === 'quote') {
+        // Toggle the form visibility
+        quoteForm.style.display = quoteForm.style.display === 'block' ? 'none' : 'block';
+        if (quoteForm.style.display === 'block') {
+          quoteForm.querySelector('textarea').focus();
+        }
+        return;
+      }
       
-      const modalContent = document.createElement('div');
-      modalContent.className = 'modal-content';
-      modalContent.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#192734' : 'white';
-      modalContent.style.color = document.body.classList.contains('dark-mode') ? 'white' : 'black';
+      // Hide any reply form if present
+      if (quoteForm && quoteForm.classList.contains('inline-form')) {
+        quoteForm.style.display = 'none';
+      }
       
-      modalContent.innerHTML = `
-        <div class="modal-header">
-          <h3 class="modal-title">Quote Tweet</h3>
-          <span class="close-modal">&times;</span>
+      // Create a new quote form
+      quoteForm = document.createElement('div');
+      quoteForm.className = 'inline-form';
+      quoteForm.dataset.formType = 'quote';
+      quoteForm.style.display = 'block';
+      
+      quoteForm.innerHTML = `
+        <div class="quoted-preview" style="margin-bottom: 10px; font-size: 0.9em; opacity: 0.8;">
+          <strong>@${tweetHandle}:</strong> ${tweetText}
         </div>
-        <div class="quote-form">
-          <textarea id="quoteText" class="form-control" rows="3" placeholder="Add a comment"></textarea>
-          <div class="quoted-tweet-preview" style="margin: 10px 0; padding: 10px; border: 1px solid var(--twitter-light-gray); border-radius: 8px;">
-            <strong>@${tweetHandle}:</strong> ${tweetText}
-          </div>
-          <div style="display: flex; justify-content: space-between; margin-top: 10px;">
-            <small id="quoteCharCount">280</small>
-            <button id="submitQuote" class="btn">Quote Tweet</button>
-          </div>
+        <textarea placeholder="Add a comment" maxlength="280" rows="3"></textarea>
+        <div class="inline-form-actions">
+          <small class="char-count">280</small>
+          <button class="btn">Quote Tweet</button>
         </div>
       `;
       
-      modal.appendChild(modalContent);
-      document.body.appendChild(modal);
+      // Insert after the tweet
+      tweetElement.parentNode.insertBefore(quoteForm, tweetElement.nextSibling);
       
       // Add event listeners
-      const closeBtn = modal.querySelector('.close-modal');
-      closeBtn.addEventListener('click', () => {
-        document.body.removeChild(modal);
-      });
+      const textarea = quoteForm.querySelector('textarea');
+      const charCount = quoteForm.querySelector('.char-count');
+      const submitBtn = quoteForm.querySelector('button');
       
-      const quoteTextarea = modal.querySelector('#quoteText');
-      const charCount = modal.querySelector('#quoteCharCount');
+      textarea.focus();
       
-      quoteTextarea.addEventListener('input', function() {
+      textarea.addEventListener('input', function() {
         const remaining = 280 - this.value.length;
         charCount.textContent = remaining;
         charCount.style.color = remaining <= 10 ? '#e0245e' : '#555';
       });
       
-      const submitBtn = modal.querySelector('#submitQuote');
       submitBtn.addEventListener('click', async () => {
-        const quoteText = quoteTextarea.value.trim();
+        const quoteText = textarea.value.trim();
         if (quoteText.length > 280) return;
         
         try {
@@ -1783,7 +1794,8 @@ TWITTER
             const postData = await postResponse.json();
             
             if (postData.success) {
-              document.body.removeChild(modal);
+              // Remove the quote form
+              quoteForm.remove();
               // Refresh the feed to show the new quote tweet
               fetchAndRenderTweets();
             } else {
@@ -1797,19 +1809,9 @@ TWITTER
           alert('Error posting quote tweet. Please try again.');
         }
       });
-      
-      // Close modal when clicking outside
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) {
-          document.body.removeChild(modal);
-        }
-      });
-      
-      // Focus the textarea
-      quoteTextarea.focus();
     }
 
-    // Add CSS styles for modals and interaction UI
+    // Add CSS styles for interaction UI
     document.addEventListener("DOMContentLoaded", function() {
       // Add CSS for better interaction feedback
       const style = document.createElement('style');
@@ -1866,66 +1868,6 @@ TWITTER
           25% { transform: scale(1.2); }
           50% { transform: scale(0.95); }
           100% { transform: scale(1); }
-        }
-        
-        /* Modal styles */
-        .modal {
-          display: none;
-          position: fixed;
-          z-index: 1000;
-          left: 0;
-          top: 0;
-          width: 100%;
-          height: 100%;
-          background-color: rgba(0, 0, 0, 0.5);
-        }
-
-        .modal-content {
-          background-color: white;
-          margin: 10% auto;
-          padding: 20px;
-          border-radius: 15px;
-          width: 50%;
-          max-width: 500px;
-        }
-
-        .modal-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin-bottom: 20px;
-        }
-
-        .modal-title {
-          font-weight: bold;
-          font-size: 1.2rem;
-          margin: 0;
-        }
-
-        .close-modal {
-          cursor: pointer;
-          font-size: 1.5rem;
-        }
-        
-        .reply-form textarea,
-        .quote-form textarea {
-          width: 100%;
-          border: 1px solid var(--twitter-light-gray);
-          border-radius: 8px;
-          padding: 10px;
-          resize: none;
-        }
-        
-        body.dark-mode .modal-content {
-          background-color: #192734;
-          color: white;
-        }
-        
-        body.dark-mode .reply-form textarea,
-        body.dark-mode .quote-form textarea {
-          background-color: #253341;
-          color: white;
-          border-color: #38444d;
         }
       `;
       document.head.appendChild(style);
