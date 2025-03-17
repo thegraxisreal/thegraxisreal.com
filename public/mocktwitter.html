@@ -2222,6 +2222,94 @@ TWITTER
     document.addEventListener('DOMContentLoaded', function() {
       checkLoginStatus();
       fetchAndRenderTweets();
+      
+      // Set up all navigation event listeners in one place
+      document.getElementById("profile-link").addEventListener("click", function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        showEditableProfile();
+      });
+
+      document.getElementById("admin-link").addEventListener("click", function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        showAdminSection();
+      });
+
+      document.getElementById("community-notes-link").addEventListener("click", function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        // Show the community notes modal
+        document.getElementById('community-notes-modal').style.display = 'block';
+        document.getElementById('password-error').style.display = 'none';
+        
+        if (!communityNotesVerified) {
+          document.getElementById('community-notes-content').style.display = 'none';
+          document.getElementById('community-notes-password').value = '';
+        } else {
+          loadCommunityNotesContent();
+        }
+      });
+
+      document.getElementById("home-link").addEventListener("click", function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        backToMainFeed();
+      });
+
+      document.getElementById("explore-link").addEventListener("click", function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        // Toggle random order for explore functionality
+        isRandomOrder = true;
+        fetchAndRenderTweets();
+        
+        document.getElementById("tweetSection").style.display = "block";
+        document.getElementById("profileSection").style.display = "none";
+        document.getElementById("userProfileSection").style.display = "none";
+        document.getElementById("adminSection").style.display = "none";
+        document.getElementById("premiumSection").style.display = "none";
+      });
+
+      document.getElementById("bookmarks-link").addEventListener("click", function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        
+        if (!currentUser) {
+          alert('Please log in to view bookmarks');
+          return;
+        }
+        
+        fetch(`/api/bookmarks?handle=${currentUser}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById("tweetSection").style.display = "block";
+              document.getElementById("profileSection").style.display = "none";
+              document.getElementById("premiumSection").style.display = "none";
+              document.getElementById("userProfileSection").style.display = "none";
+              document.getElementById("adminSection").style.display = "none";
+              
+              // Clear and repopulate the feed with bookmarked tweets
+              const tweetFeed = document.querySelector('.tweet-feed');
+              tweetFeed.innerHTML = '<h3>Your Bookmarks</h3>';
+              
+              if (data.bookmarks.length === 0) {
+                tweetFeed.innerHTML += '<p>You have no bookmarked tweets</p>';
+              } else {
+                data.bookmarks.forEach(tweet => {
+                  tweetFeed.appendChild(createTweetElement(tweet));
+                });
+              }
+            }
+          });
+      });
     });
 
     document.getElementById("profilePicUpload").addEventListener("change", async () => {
@@ -2235,72 +2323,6 @@ TWITTER
       });
       document.getElementById("profilePicPreview").src = imageData;
     });
-
-    // Fix sidebar navigation
-    document.getElementById("profile-link").addEventListener("click", function(e) {
-      e.preventDefault();
-      resetNavigationState();
-      this.classList.add('active');
-      showEditableProfile();
-    });
-
-    document.getElementById("admin-link").addEventListener("click", function(e) {
-      e.preventDefault();
-      resetNavigationState();
-      this.classList.add('active');
-      showAdminSection();
-    });
-
-    document.getElementById("community-notes-link").addEventListener("click", function(e) {
-      e.preventDefault();
-      resetNavigationState();
-      this.classList.add('active');
-      // Show the community notes modal
-      document.getElementById('community-notes-modal').style.display = 'block';
-      document.getElementById('password-error').style.display = 'none';
-      
-      if (!communityNotesVerified) {
-        document.getElementById('community-notes-content').style.display = 'none';
-        document.getElementById('community-notes-password').value = '';
-      } else {
-        loadCommunityNotesContent();
-      }
-    });
-
-    document.getElementById("home-link").addEventListener("click", function(e) {
-      e.preventDefault();
-      resetNavigationState();
-      this.classList.add('active');
-      backToMainFeed();
-    });
-
-    document.getElementById("explore-link").addEventListener("click", function(e) {
-      e.preventDefault();
-      resetNavigationState();
-      this.classList.add('active');
-      // Toggle random order for explore functionality
-      isRandomOrder = true;
-      fetchAndRenderTweets();
-      
-      document.getElementById("tweetSection").style.display = "block";
-      document.getElementById("profileSection").style.display = "none";
-      document.getElementById("userProfileSection").style.display = "none";
-      document.getElementById("adminSection").style.display = "none";
-      document.getElementById("premiumSection").style.display = "none";
-    });
-
-    document.getElementById("bookmarks-link").addEventListener("click", function(e) {
-      e.preventDefault();
-      alert("Bookmarks feature not implemented yet");
-    });
-
-    // Helper function to reset all navigation states
-    function resetNavigationState() {
-      // Remove 'active' class from all navigation links
-      document.querySelectorAll('.nav-links a').forEach(link => {
-        link.classList.remove('active');
-      });
-    }
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
