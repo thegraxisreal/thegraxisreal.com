@@ -20,18 +20,13 @@ TWITTER
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--twitter-background);
+      margin: 0;
+      padding: 0;
       color: var(--twitter-black);
-      margin: 0;
-      padding: 0;
     }
-    .container-fluid {
-      padding: 0;
-    }
-    .row {
-      margin: 0;
-    }
-    .col, .col-md-3, .col-md-6, .col-md-9, .col-lg-3, .col-lg-6, .col-lg-9 {
-      padding: 0;
+    .container.main-container {
+      margin-top: 20px;
+      max-width: 1200px;
     }
     
     /* Navigation */
@@ -50,12 +45,9 @@ TWITTER
     
     /* Sidebar */
     .sidebar {
+      padding: 0;
       position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-      border-right: 1px solid var(--twitter-extra-light-gray);
-      padding: 0 12px;
+      top: 70px;
     }
     .sidebar .nav-link {
       padding: 12px 15px;
@@ -225,34 +217,6 @@ TWITTER
     .quote-btn:hover {
       color: #17bf63;
       background-color: rgba(23, 191, 99, 0.1);
-    }
-    .inline-form {
-      margin: 10px 0;
-      padding: 10px;
-      background-color: #f7f9fa;
-      border-radius: 12px;
-      display: none;
-    }
-    .inline-form textarea {
-      width: 100%;
-      border: 1px solid var(--twitter-extra-light-gray);
-      border-radius: 8px;
-      padding: 10px;
-      resize: none;
-      margin-bottom: 10px;
-    }
-    .inline-form-actions {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    body.dark-mode .inline-form {
-      background-color: #253341;
-    }
-    body.dark-mode .inline-form textarea {
-      background-color: #192734;
-      color: white;
-      border-color: #38444d;
     }
     
     /* Poll and quoted tweet */
@@ -655,50 +619,6 @@ TWITTER
     body.dark-mode .tweet-card .community-note-text {
       color: #fff;
     }
-
-    /* Add profile photo editing styles */
-    .profile-photo-container {
-      position: relative;
-      display: inline-block;
-      margin-bottom: 15px;
-    }
-    
-    .profile-photo {
-      width: 150px;
-      height: 150px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid white;
-    }
-    
-    .edit-photo-overlay {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.5);
-      border-radius: 50%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      opacity: 0;
-      transition: opacity 0.3s;
-    }
-    
-    .profile-photo-container:hover .edit-photo-overlay {
-      opacity: 1;
-    }
-    
-    .edit-photo-icon {
-      color: white;
-      font-size: 24px;
-    }
-    
-    #photoInput {
-      display: none;
-    }
   </style>
 </head>
 <body class="light-mode">
@@ -820,12 +740,14 @@ TWITTER
         <!-- Profile Editing -->
         <div id="profileSection" style="display:none;">
           <h2><i class="fas fa-user-edit"></i> My Profile</h2>
-          <div class="profile-photo-container">
-            <img src="https://via.placeholder.com/150" alt="Profile Photo" class="profile-photo" id="profilePhoto">
-            <div class="edit-photo-overlay">
-              <i class="fas fa-camera edit-photo-icon"></i>
+          <div class="text-center mb-4">
+            <img id="profilePicPreview" src="" alt="Profile Picture" style="width:120px; height:120px; border-radius:50%; margin-bottom:15px; object-fit: cover;" />
+            <div class="form-group">
+              <label for="profilePicUpload" class="btn">
+                <i class="fas fa-camera"></i> Change Photo
+              </label>
+              <input type="file" id="profilePicUpload" class="form-control-file d-none" accept="image/*" />
             </div>
-            <input type="file" id="photoInput" accept="image/*">
           </div>
           <div class="form-group">
             <label for="profileBio"><i class="fas fa-info-circle"></i> Bio:</label>
@@ -1295,7 +1217,7 @@ TWITTER
       if (!currentUser) return;
       const profile = await fetchProfile(currentUser);
       if (profile) {
-        document.getElementById("profilePhoto").src = profile.profilePicture || "images/default.png";
+        document.getElementById("profilePicPreview").src = profile.profilePicture || "images/default.png";
         document.getElementById("profileBio").value = profile.bio || "";
       }
       document.getElementById("tweetSection").style.display = "none";
@@ -1379,82 +1301,186 @@ TWITTER
       }
     });
 
-    // Add the profile photo editing functionality
-    function setupProfilePhotoEditing() {
-      const photoInput = document.getElementById('photoInput');
-      const editPhotoOverlay = document.querySelector('.edit-photo-overlay');
+    document.getElementById("updateProfilePic").addEventListener("click", async () => {
+      if (!currentUser) return;
+      const fileInput = document.getElementById("profilePicUpload");
+      if (fileInput.files.length === 0) return;
+      const imageData = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject("Error reading file");
+        reader.readAsDataURL(fileInput.files[0]);
+      });
+      const response = await fetch("/api/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ handle: currentUser, profilePicture: imageData })
+      });
+      const data = await response.json();
+      if (data.success) {
+        document.getElementById("profilePicPreview").src = imageData;
+        document.getElementById("profileMessage").textContent = "Profile picture updated successfully.";
+        fetchAndRenderTweets();
+      }
+    });
+
+    async function showAdminSection() {
+      const password = prompt("Enter admin password:");
+      if (password !== "1612") {
+        alert("Incorrect admin password.");
+        return;
+      }
       
-      if (editPhotoOverlay) {
-        editPhotoOverlay.addEventListener('click', () => {
-          photoInput.click();
+      // Fetch and display user accounts
+      const response = await fetch("/api/users");
+      const data = await response.json();
+      if (data.success) {
+        const accountList = document.getElementById("accountList");
+        accountList.innerHTML = "";
+        data.users.forEach(user => {
+          const entry = document.createElement("div");
+          entry.className = "account-entry";
+          const info = document.createElement("span");
+          info.textContent = `${user.handle} - ${user.password}${user.banned ? " (Banned)" : ""}`;
+          const banBtn = document.createElement("button");
+          banBtn.className = "ban-btn";
+          banBtn.textContent = user.banned ? "Banned" : "Ban";
+          banBtn.disabled = user.banned;
+          banBtn.addEventListener("click", async () => {
+            const banResponse = await fetch("/api/ban", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ handle: user.handle })
+            });
+            const banData = await banResponse.json();
+            if (banData.success) {
+              banBtn.textContent = "Banned";
+              banBtn.disabled = true;
+              info.textContent = `${user.handle} - ${user.password} (Banned)`;
+            }
+          });
+          entry.appendChild(info);
+          entry.appendChild(banBtn);
+          accountList.appendChild(entry);
         });
       }
       
-      if (photoInput) {
-        photoInput.addEventListener('change', (event) => {
-          const file = event.target.files[0];
-          if (file) {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-              const profilePicture = e.target.result;
+      // Load community notes section
+      loadCommunityNotesAdmin();
+      
+      // Hide other sections and show admin section
+      document.getElementById("tweetSection").style.display = "none";
+      document.getElementById("profileSection").style.display = "none";
+      document.getElementById("premiumSection").style.display = "none";
+      document.getElementById("userProfileSection").style.display = "none";
+      document.getElementById("adminSection").style.display = "block";
+    }
+
+    // Community Notes
+    let communityNotesEnabled = false;
+
+    // New function to load community notes in admin panel
+    async function loadCommunityNotesAdmin() {
+      const container = document.getElementById('communityNotesAdminContainer');
+      container.innerHTML = '<p>Loading tweets...</p>';
+      
+      try {
+        const response = await fetch('/api/tweets');
+        const data = await response.json();
+        
+        if (data.success) {
+          container.innerHTML = '';
+          
+          data.tweets.forEach(tweet => {
+            const tweetElement = document.createElement('div');
+            tweetElement.className = 'community-note-item';
+            
+            const noteExists = tweet.communityNotes && tweet.communityNotes.length > 0;
+            
+            tweetElement.innerHTML = `
+              <div class="tweet-header">
+                <span class="tweet-name">${tweet.handle}</span>
+                <span class="tweet-handle">@${tweet.handle}</span>
+              </div>
+              <div class="tweet-text">${tweet.text}</div>
               
-              // Update the image preview
-              const profilePhoto = document.querySelector('.profile-photo');
-              if (profilePhoto) {
-                profilePhoto.src = profilePicture;
-              }
+              ${noteExists ? `
+                <div class="community-note">
+                  <div class="community-note-header">
+                    <div class="people-icon-group">
+                      <i class="fas fa-user people-icon"></i>
+                      <i class="fas fa-user people-icon"></i>
+                      <i class="fas fa-user people-icon"></i>
+                    </div>
+                    Readers added context
+                  </div>
+                  <div class="community-note-text">
+                    ${tweet.communityNotes[0].text}
+                  </div>
+                </div>
+              ` : ''}
               
-              // Get the current user's handle
-              const currentUser = localStorage.getItem('currentUser');
-              if (!currentUser) {
-                alert('You must be logged in to update your profile picture');
-                return;
-              }
-              
-              // Send the update to the server
-              fetch('/api/profile', {
-                method: 'PATCH',
-                headers: {
-                  'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                  handle: currentUser,
-                  profilePicture: profilePicture
-                })
-              })
-              .then(response => response.json())
-              .then(data => {
-                if (data.success) {
-                  // Update the profile pictures throughout the UI
-                  document.querySelectorAll(`.user-${currentUser.toLowerCase()} img`).forEach(img => {
-                    img.src = profilePicture;
-                  });
-                  
-                  console.log('Profile picture updated successfully');
-                } else {
-                  console.error('Failed to update profile picture:', data.error);
-                  alert('Failed to update profile picture: ' + data.error);
-                }
-              })
-              .catch(error => {
-                console.error('Error updating profile picture:', error);
-                alert('Error updating profile picture');
-              });
-            };
-            reader.readAsDataURL(file);
-          }
-        });
+              <div class="community-note-form">
+                <textarea placeholder="Add a community note to provide context..." id="note-${tweet.id}"></textarea>
+                <button onclick="addCommunityNote(${tweet.id})">Submit</button>
+              </div>
+            `;
+            
+            container.appendChild(tweetElement);
+          });
+        } else {
+          container.innerHTML = '<p>Error loading tweets.</p>';
+        }
+      } catch (error) {
+        console.error('Error fetching tweets for community notes:', error);
+        container.innerHTML = '<p>Error loading tweets.</p>';
       }
     }
 
-    // Call the setup function when the DOM is loaded
-    document.addEventListener('DOMContentLoaded', () => {
+    async function addCommunityNote(tweetId) {
+      const noteText = document.getElementById(`note-${tweetId}`).value.trim();
+      
+      if (!noteText) {
+        alert('Please enter a note.');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/community-notes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ tweetId, noteText })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('Community note added successfully!');
+          document.getElementById(`note-${tweetId}`).value = '';
+          
+          // Refresh the displays
+          loadCommunityNotesAdmin(); // Refresh the admin panel
+          fetchAndRenderTweets(); // Refresh the main feed to show the new note
+        } else {
+          alert(`Failed to add note: ${data.error}`);
+        }
+      } catch (error) {
+        console.error('Error adding community note:', error);
+        alert('Failed to add community note. Please try again.');
+      }
+    }
+
+    // Initialize when the DOM is fully loaded
+    document.addEventListener("DOMContentLoaded", function() {
       checkAuthentication();
       setupEventListeners();
       updateThemeDisplay();
       updateCharCount();
       fetchTrendingHashtags();
-      setupProfilePhotoEditing();
+      
+      // Community notes listeners removed since they're now in the admin panel
     });
 
     // Setup event listeners for the main UI
@@ -1520,59 +1546,57 @@ TWITTER
       }
     }
 
-    // Implement simpler inline reply functionality
+    // Implement simplified reply functionality
     function showReplyModal(tweetId) {
       if (!currentUser) {
         alert("Please log in to reply");
         return;
       }
       
-      // Find the tweet we want to reply to
+      // Get the tweet element
       const tweetElement = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"]`);
       
-      // Check if there's already a reply form
-      let replyForm = tweetElement.nextElementSibling;
-      if (replyForm && replyForm.classList.contains('inline-form')) {
-        // Toggle the form visibility
-        replyForm.style.display = replyForm.style.display === 'block' ? 'none' : 'block';
-        if (replyForm.style.display === 'block') {
-          replyForm.querySelector('textarea').focus();
-        }
-        return;
+      // Check if reply form already exists
+      if (tweetElement.querySelector('.reply-form')) {
+        return; // Form already open
       }
       
-      // Create a new reply form
-      replyForm = document.createElement('div');
-      replyForm.className = 'inline-form';
-      replyForm.style.display = 'block';
-      
+      // Create inline reply form
+      const replyForm = document.createElement('div');
+      replyForm.className = 'reply-form';
       replyForm.innerHTML = `
-        <textarea placeholder="Tweet your reply" maxlength="280" rows="3"></textarea>
-        <div class="inline-form-actions">
-          <small class="char-count">280</small>
-          <button class="btn">Reply</button>
+        <div class="reply-input-container">
+          <textarea class="reply-textarea" placeholder="Tweet your reply" maxlength="280"></textarea>
+          <div class="reply-actions">
+            <span class="reply-char-count">280</span>
+            <button class="reply-submit-btn">Reply</button>
+          </div>
         </div>
       `;
       
-      // Insert after the tweet
-      tweetElement.parentNode.insertBefore(replyForm, tweetElement.nextSibling);
+      // Add the form after the tweet actions
+      const tweetActions = tweetElement.querySelector('.tweet-actions');
+      tweetActions.parentNode.insertBefore(replyForm, tweetActions.nextSibling);
       
       // Add event listeners
-      const textarea = replyForm.querySelector('textarea');
-      const charCount = replyForm.querySelector('.char-count');
-      const submitBtn = replyForm.querySelector('button');
+      const textarea = replyForm.querySelector('.reply-textarea');
+      const charCount = replyForm.querySelector('.reply-char-count');
+      const submitBtn = replyForm.querySelector('.reply-submit-btn');
       
+      // Focus the textarea
       textarea.focus();
       
+      // Update character count
       textarea.addEventListener('input', function() {
         const remaining = 280 - this.value.length;
         charCount.textContent = remaining;
-        charCount.style.color = remaining <= 10 ? '#e0245e' : '#555';
+        charCount.style.color = remaining <= 20 ? '#e0245e' : '';
       });
       
-      submitBtn.addEventListener('click', async () => {
+      // Handle submit
+      submitBtn.addEventListener('click', async function() {
         const replyText = textarea.value.trim();
-        if (!replyText || replyText.length > 280) return;
+        if (!replyText) return;
         
         try {
           const response = await fetch('/api/tweet/reply', {
@@ -1590,6 +1614,7 @@ TWITTER
           if (data.success) {
             // Remove the reply form
             replyForm.remove();
+            
             // Refresh the feed to show the new reply
             fetchAndRenderTweets();
           } else {
@@ -1600,118 +1625,75 @@ TWITTER
           alert('Error posting reply. Please try again.');
         }
       });
-    }
-    
-    // Implement retweet functionality
-    async function retweetTweet(tweetId) {
-      if (!currentUser) {
-        alert("Please log in to retweet");
-        return;
-      }
       
-      try {
-        const response = await fetch('/api/tweet/retweet', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            tweetId: parseInt(tweetId),
-            handle: currentUser
-          })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          // Update retweet count in UI
-          const retweetBtn = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"] .retweet-btn`);
-          const retweetCount = retweetBtn.querySelector("span");
-          
-          // If count exists, increment it
-          if (retweetCount) {
-            const currentCount = parseInt(retweetCount.textContent || 0);
-            retweetCount.textContent = currentCount + 1;
-          }
-          
-          // Add visual feedback
-          const retweetIcon = retweetBtn.querySelector("i");
-          retweetBtn.classList.add("retweeted");
-          retweetIcon.style.color = "#17bf63";
-          
-          // Refresh the feed to show the retweeted tweet
-          fetchAndRenderTweets();
-        } else {
-          alert('Error retweeting: ' + (data.error || 'Unknown error'));
-        }
-      } catch (error) {
-        console.error('Error retweeting:', error);
-        alert('Error retweeting. Please try again.');
-      }
+      // Add cancel button
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'reply-cancel-btn';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.addEventListener('click', function() {
+        replyForm.remove();
+      });
+      
+      replyForm.querySelector('.reply-actions').appendChild(cancelBtn);
     }
     
-    // Implement simpler inline quote tweet functionality
+    // Implement simplified quote tweet functionality
     function showShareTweet(tweetId) {
       if (!currentUser) {
         alert("Please log in to quote tweet");
         return;
       }
       
-      // Find the tweet we want to quote
+      // Get the tweet element
       const tweetElement = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"]`);
+      
+      // Check if quote form already exists
+      if (tweetElement.querySelector('.quote-form')) {
+        return; // Form already open
+      }
+      
+      // Get the original tweet text
       const tweetText = tweetElement.querySelector('.tweet-text').textContent;
       const tweetHandle = tweetElement.querySelector('.tweet-name').textContent.split(' ')[0];
       
-      // Check if there's already a quote form
-      let quoteForm = tweetElement.nextElementSibling;
-      if (quoteForm && quoteForm.classList.contains('inline-form') && quoteForm.dataset.formType === 'quote') {
-        // Toggle the form visibility
-        quoteForm.style.display = quoteForm.style.display === 'block' ? 'none' : 'block';
-        if (quoteForm.style.display === 'block') {
-          quoteForm.querySelector('textarea').focus();
-        }
-        return;
-      }
-      
-      // Hide any reply form if present
-      if (quoteForm && quoteForm.classList.contains('inline-form')) {
-        quoteForm.style.display = 'none';
-      }
-      
-      // Create a new quote form
-      quoteForm = document.createElement('div');
-      quoteForm.className = 'inline-form';
-      quoteForm.dataset.formType = 'quote';
-      quoteForm.style.display = 'block';
-      
+      // Create inline quote form
+      const quoteForm = document.createElement('div');
+      quoteForm.className = 'quote-form';
       quoteForm.innerHTML = `
-        <div class="quoted-preview" style="margin-bottom: 10px; font-size: 0.9em; opacity: 0.8;">
-          <strong>@${tweetHandle}:</strong> ${tweetText}
-        </div>
-        <textarea placeholder="Add a comment" maxlength="280" rows="3"></textarea>
-        <div class="inline-form-actions">
-          <small class="char-count">280</small>
-          <button class="btn">Quote Tweet</button>
+        <div class="quote-input-container">
+          <textarea class="quote-textarea" placeholder="Add a comment" maxlength="280"></textarea>
+          <div class="quoted-preview">
+            <strong>@${tweetHandle}:</strong> ${tweetText}
+          </div>
+          <div class="quote-actions">
+            <span class="quote-char-count">280</span>
+            <button class="quote-submit-btn">Quote Tweet</button>
+          </div>
         </div>
       `;
       
-      // Insert after the tweet
-      tweetElement.parentNode.insertBefore(quoteForm, tweetElement.nextSibling);
+      // Add the form after the tweet actions
+      const tweetActions = tweetElement.querySelector('.tweet-actions');
+      tweetActions.parentNode.insertBefore(quoteForm, tweetActions.nextSibling);
       
       // Add event listeners
-      const textarea = quoteForm.querySelector('textarea');
-      const charCount = quoteForm.querySelector('.char-count');
-      const submitBtn = quoteForm.querySelector('button');
+      const textarea = quoteForm.querySelector('.quote-textarea');
+      const charCount = quoteForm.querySelector('.quote-char-count');
+      const submitBtn = quoteForm.querySelector('.quote-submit-btn');
       
+      // Focus the textarea
       textarea.focus();
       
+      // Update character count
       textarea.addEventListener('input', function() {
         const remaining = 280 - this.value.length;
         charCount.textContent = remaining;
-        charCount.style.color = remaining <= 10 ? '#e0245e' : '#555';
+        charCount.style.color = remaining <= 20 ? '#e0245e' : '';
       });
       
-      submitBtn.addEventListener('click', async () => {
+      // Handle submit
+      submitBtn.addEventListener('click', async function() {
         const quoteText = textarea.value.trim();
-        if (quoteText.length > 280) return;
         
         try {
           // First, get the full tweet object
@@ -1742,6 +1724,7 @@ TWITTER
             if (postData.success) {
               // Remove the quote form
               quoteForm.remove();
+              
               // Refresh the feed to show the new quote tweet
               fetchAndRenderTweets();
             } else {
@@ -1755,9 +1738,19 @@ TWITTER
           alert('Error posting quote tweet. Please try again.');
         }
       });
+      
+      // Add cancel button
+      const cancelBtn = document.createElement('button');
+      cancelBtn.className = 'quote-cancel-btn';
+      cancelBtn.textContent = 'Cancel';
+      cancelBtn.addEventListener('click', function() {
+        quoteForm.remove();
+      });
+      
+      quoteForm.querySelector('.quote-actions').appendChild(cancelBtn);
     }
 
-    // Add CSS styles for interaction UI
+    // Add CSS styles for inline reply and quote forms
     document.addEventListener("DOMContentLoaded", function() {
       // Add CSS for better interaction feedback
       const style = document.createElement('style');
@@ -1814,6 +1807,76 @@ TWITTER
           25% { transform: scale(1.2); }
           50% { transform: scale(0.95); }
           100% { transform: scale(1); }
+        }
+        
+        /* Inline reply and quote forms */
+        .reply-form, .quote-form {
+          margin: 10px 0;
+          padding: 10px;
+          border-top: 1px solid var(--twitter-extra-light-gray);
+        }
+        
+        .reply-input-container, .quote-input-container {
+          display: flex;
+          flex-direction: column;
+          gap: 10px;
+        }
+        
+        .reply-textarea, .quote-textarea {
+          width: 100%;
+          min-height: 80px;
+          padding: 10px;
+          border: 1px solid var(--twitter-light-gray);
+          border-radius: 8px;
+          resize: none;
+          font-family: inherit;
+          font-size: 1rem;
+        }
+        
+        .reply-actions, .quote-actions {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+        }
+        
+        .reply-submit-btn, .quote-submit-btn {
+          background-color: var(--twitter-blue);
+          color: white;
+          border: none;
+          border-radius: 50px;
+          padding: 8px 16px;
+          font-weight: bold;
+          cursor: pointer;
+        }
+        
+        .reply-cancel-btn, .quote-cancel-btn {
+          background-color: transparent;
+          color: var(--twitter-dark-gray);
+          border: 1px solid var(--twitter-light-gray);
+          border-radius: 50px;
+          padding: 8px 16px;
+          margin-right: 10px;
+          cursor: pointer;
+        }
+        
+        .quoted-preview {
+          padding: 10px;
+          border: 1px solid var(--twitter-light-gray);
+          border-radius: 8px;
+          background-color: rgba(0, 0, 0, 0.02);
+          margin: 5px 0;
+        }
+        
+        body.dark-mode .reply-textarea,
+        body.dark-mode .quote-textarea {
+          background-color: #253341;
+          color: white;
+          border-color: #38444d;
+        }
+        
+        body.dark-mode .quoted-preview {
+          background-color: rgba(255, 255, 255, 0.05);
+          border-color: #38444d;
         }
       `;
       document.head.appendChild(style);
