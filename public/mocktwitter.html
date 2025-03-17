@@ -613,14 +613,6 @@ TWITTER
             <h3><i class="fas fa-chart-line"></i> Trending</h3>
             <ul id="trendingList" class="trending-list"></ul>
           </div>
-          <li><a href="#" id="communityNotesBtn">
-            <div class="people-icon-group">
-              <i class="fas fa-user people-icon"></i>
-              <i class="fas fa-user people-icon"></i>
-              <i class="fas fa-user people-icon"></i>
-            </div>
-            Community Notes
-          </a></li>
         </div>
       </div>
       <!-- Main Content -->
@@ -737,11 +729,34 @@ TWITTER
         </div>
         <!-- Admin Panel -->
         <div id="adminSection" style="display:none;">
-          <h2><i class="fas fa-shield-alt"></i> Admin Panel</h2>
-          <button class="btn mb-3" onclick="backToMainFeed()">
-            <i class="fas fa-arrow-left"></i> Back to Feed
-          </button>
-          <div id="accountList"></div>
+          <h2>Admin Panel</h2>
+          <div class="d-flex justify-content-between mb-4">
+            <button class="btn btn-light" onclick="fetchAndRenderTweets()">
+              <i class="fas fa-arrow-left"></i> Back to Home
+            </button>
+          </div>
+          <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+            <li class="nav-item">
+              <a class="nav-link active" id="accounts-tab" data-toggle="tab" href="#accounts" role="tab">Accounts</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" id="communitynotes-tab" data-toggle="tab" href="#communitynotes" role="tab">Community Notes</a>
+            </li>
+          </ul>
+          <div class="tab-content" id="adminTabContent">
+            <!-- Accounts tab -->
+            <div class="tab-pane fade show active" id="accounts" role="tabpanel">
+              <h3>Manage User Accounts</h3>
+              <div id="accountList"></div>
+            </div>
+            <!-- Community Notes tab -->
+            <div class="tab-pane fade" id="communitynotes" role="tabpanel">
+              <h3>Manage Community Notes</h3>
+              <p>Add context to tweets that will be visible to all users.</p>
+              <p class="text-muted mb-4">Community notes appear under tweets to provide additional context or fact-checking information.</p>
+              <div id="communityNotesAdminContainer"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -1492,6 +1507,8 @@ TWITTER
         alert("Incorrect admin password.");
         return;
       }
+      
+      // Fetch and display user accounts
       const response = await fetch("/api/users");
       const data = await response.json();
       if (data.success) {
@@ -1524,6 +1541,11 @@ TWITTER
           accountList.appendChild(entry);
         });
       }
+      
+      // Load community notes section
+      loadCommunityNotesAdmin();
+      
+      // Hide other sections and show admin section
       document.getElementById("tweetSection").style.display = "none";
       document.getElementById("profileSection").style.display = "none";
       document.getElementById("premiumSection").style.display = "none";
@@ -1531,47 +1553,9 @@ TWITTER
       document.getElementById("adminSection").style.display = "block";
     }
 
-    // Community Notes
-    let communityNotesPassword = null;
-    let communityNotesEnabled = false;
-
-    function openCommunityNotes() {
-      if (!communityNotesEnabled) {
-        document.getElementById('passwordModal').style.display = 'block';
-      }
-    }
-
-    async function verifyPassword() {
-      const password = document.getElementById('notesPassword').value;
-      
-      try {
-        const response = await fetch('/api/community-notes/verify-password', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ password })
-        });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          document.getElementById('passwordModal').style.display = 'none';
-          document.getElementById('passwordError').style.display = 'none';
-          document.getElementById('notesPassword').value = '';
-          communityNotesEnabled = true;
-          showCommunityNotesPanel();
-        } else {
-          document.getElementById('passwordError').style.display = 'block';
-        }
-      } catch (error) {
-        console.error('Error verifying password:', error);
-        document.getElementById('passwordError').style.display = 'block';
-      }
-    }
-
-    async function showCommunityNotesPanel() {
-      const container = document.getElementById('communityNotesContainer');
+    // New function to load community notes in admin panel
+    async function loadCommunityNotesAdmin() {
+      const container = document.getElementById('communityNotesAdminContainer');
       container.innerHTML = '<p>Loading tweets...</p>';
       
       try {
@@ -1625,8 +1609,6 @@ TWITTER
         console.error('Error fetching tweets for community notes:', error);
         container.innerHTML = '<p>Error loading tweets.</p>';
       }
-      
-      document.getElementById('communityNotesModal').style.display = 'block';
     }
 
     async function addCommunityNote(tweetId) {
@@ -1652,8 +1634,8 @@ TWITTER
           alert('Community note added successfully!');
           document.getElementById(`note-${tweetId}`).value = '';
           
-          // Refresh the display
-          showCommunityNotesPanel();
+          // Refresh the displays
+          loadCommunityNotesAdmin(); // Refresh the admin panel
           fetchAndRenderTweets(); // Refresh the main feed to show the new note
         } else {
           alert(`Failed to add note: ${data.error}`);
@@ -1672,21 +1654,7 @@ TWITTER
       updateCharCount();
       fetchTrendingHashtags();
       
-      // Set up community notes button event listener
-      document.getElementById('communityNotesBtn').addEventListener('click', function(e) {
-        e.preventDefault();
-        openCommunityNotes();
-      });
-      
-      document.getElementById('closePasswordModal').addEventListener('click', function() {
-        document.getElementById('passwordModal').style.display = 'none';
-      });
-      
-      document.getElementById('closeCommunityModal').addEventListener('click', function() {
-        document.getElementById('communityNotesModal').style.display = 'none';
-      });
-      
-      document.getElementById('verifyPasswordBtn').addEventListener('click', verifyPassword);
+      // Community notes listeners removed since they're now in the admin panel
     });
 
     // Setup event listeners for the main UI
