@@ -360,6 +360,23 @@ async function loadData() {
       await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
     }
     
+    // Load community notes
+    try {
+      const communityNotesData = await fs.readFile(
+        process.env.NODE_ENV === 'production' ? '/data/communitynotes.json' : './communitynotes.json', 
+        'utf8'
+      );
+      communityNotes = JSON.parse(communityNotesData);
+      console.log(`Loaded ${communityNotes.length} community notes`);
+    } catch (error) {
+      console.log('communitynotes.json not found or invalid, creating empty array');
+      communityNotes = [];
+      await fs.writeFile(
+        process.env.NODE_ENV === 'production' ? '/data/communitynotes.json' : './communitynotes.json',
+        JSON.stringify(communityNotes, null, 2)
+      );
+    }
+    
   } catch (err) {
     console.error('Error in loadData function:', err);
   }
@@ -595,6 +612,10 @@ debugFileSystem().then(() => {
           
           const enrichedTweets = tweets.map(tweet => {
             console.log(`Processing tweet by ${tweet.handle}`);
+            
+            // Find community notes for this tweet
+            const tweetNotes = communityNotes.filter(note => note.tweetId === tweet.id);
+            
             return {
               ...tweet,
               profilePicture: users[tweet.handle.toLowerCase()]?.profilePicture || null,
@@ -608,7 +629,8 @@ debugFileSystem().then(() => {
                 ...tweet.quotedTweet,
                 profilePicture: users[tweet.quotedTweet.handle?.toLowerCase()]?.profilePicture || null,
                 verified: users[tweet.quotedTweet.handle?.toLowerCase()]?.verified || null
-              } : null
+              } : null,
+              communityNotes: tweetNotes
             };
           });
           
@@ -823,6 +845,115 @@ debugFileSystem().then(() => {
         }
         const bookmarkedTweets = tweets.filter(tweet => user.bookmarks.includes(tweet.id));
         return res.json({ success: true, bookmarks: bookmarkedTweets });
+      });
+
+      // Community Notes endpoints
+      app.get('/api/community-notes', (req, res) => {
+        try {
+          res.json({ success: true, notes: communityNotes });
+        } catch (error) {
+          console.error('Error getting community notes:', error);
+          res.status(500).json({ success: false, error: error.message });
+        }
+      });
+      
+      app.post('/api/community-notes', (req, res) => {
+        try {
+          const { tweetId, noteText } = req.body;
+          
+          if (!tweetId || !noteText) {
+            return res.status(400).json({ 
+              success: false, 
+              error: 'Tweet ID and note text are required' 
+            });
+          }
+          
+          // Check if the tweet exists
+          const tweet = tweets.find(t => t.id === tweetId);
+          if (!tweet) {
+            return res.status(404).json({ 
+              success: false, 
+              error: 'Tweet not found' 
+            });
+          }
+          
+          const newNote = {
+            id: Date.now(),
+            tweetId,
+            text: noteText,
+            timestamp: Date.now()
+          };
+          
+          communityNotes.push(newNote);
+          saveData();
+          
+          res.json({ 
+            success: true, 
+            note: newNote 
+          });
+        } catch (error) {
+          console.error('Error adding community note:', error);
+          res.status(500).json({ success: false, error: error.message });
+        }
+      });
+      
+      // Delete a community note
+      app.delete('/api/community-notes/:id', (req, res) => {
+        try {
+          const noteId = parseInt(req.params.id);
+          const noteIndex = communityNotes.findIndex(n => n.id === noteId);
+          
+          if (noteIndex === -1) {
+            return res.status(404).json({ 
+              success: false, 
+              error: 'Community note not found' 
+            });
+          }
+          
+          communityNotes.splice(noteIndex, 1);
+          saveData();
+          
+          res.json({ 
+            success: true, 
+            message: 'Community note deleted' 
+          });
+        } catch (error) {
+          console.error('Error deleting community note:', error);
+          res.status(500).json({ success: false, error: error.message });
+        }
+      });
+      
+      // Get community notes for a specific tweet
+      app.get('/api/tweets/:tweetId/community-notes', (req, res) => {
+        try {
+          const tweetId = parseInt(req.params.tweetId);
+          const notesForTweet = communityNotes.filter(n => n.tweetId === tweetId);
+          
+          res.json({ 
+            success: true, 
+            notes: notesForTweet 
+          });
+        } catch (error) {
+          console.error('Error getting community notes for tweet:', error);
+          res.status(500).json({ success: false, error: error.message });
+        }
+      });
+      
+      // Verify community notes password
+      app.post('/api/community-notes/verify-password', (req, res) => {
+        const { password } = req.body;
+        
+        if (password === "b@rnD00rex!t") {
+          res.json({ 
+            success: true, 
+            message: 'Password verified' 
+          });
+        } else {
+          res.status(401).json({ 
+            success: false, 
+            error: 'Incorrect password' 
+          });
+        }
       });
 
       // Debug endpoint to check and fix data issues
