@@ -45,30 +45,69 @@ TWITTER
     
     /* Sidebar */
     .sidebar {
-      padding: 0;
+      padding: 20px;
+      height: 100%;
       position: sticky;
-      top: 70px;
+      top: 20px;
     }
-    .sidebar .nav-link {
-      padding: 12px 15px;
-      color: var(--twitter-black);
-      font-weight: 500;
-      font-size: 1.1rem;
-      border-radius: 30px;
-      margin-bottom: 5px;
+    .logo {
+      margin-bottom: 30px;
+    }
+    .logo img {
+      width: 40px;
+    }
+    .nav-links {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+    .nav-links a {
       display: flex;
       align-items: center;
+      color: var(--twitter-black);
+      text-decoration: none;
+      font-size: 1.1rem;
+      font-weight: 500;
+      padding: 12px 15px;
+      border-radius: 30px;
+      transition: background-color 0.2s;
     }
-    .sidebar .nav-link i {
+    body.dark-mode .nav-links a {
+      color: #fff;
+    }
+    .nav-links a i {
       margin-right: 15px;
       font-size: 1.3rem;
       width: 24px;
       text-align: center;
     }
-    .sidebar .nav-link:hover {
+    .nav-links a:hover {
       background-color: rgba(29, 161, 242, 0.1);
       color: var(--twitter-blue);
-      text-decoration: none;
+    }
+    body.dark-mode .nav-links a:hover {
+      background-color: rgba(29, 161, 242, 0.2);
+      color: var(--twitter-blue);
+    }
+    .nav-links a.active {
+      font-weight: 700;
+      color: var(--twitter-blue);
+    }
+    .tweet-btn {
+      background-color: var(--twitter-blue);
+      color: white;
+      border: none;
+      padding: 12px 0;
+      width: 100%;
+      border-radius: 30px;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+    .tweet-btn:hover {
+      background-color: #1a91da;
     }
     
     /* Forms and sections */
@@ -1916,78 +1955,112 @@ TWITTER
     });
 
     // Sidebar navigation event listeners
-    document.getElementById('home-link').addEventListener('click', function(e) {
-      e.preventDefault();
-      backToMainFeed();
-    });
+    document.addEventListener('DOMContentLoaded', function() {
+      // Make sure all sidebar links work and update active state correctly
+      document.getElementById('home-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        backToMainFeed();
+      });
 
-    document.getElementById('explore-link').addEventListener('click', function(e) {
-      e.preventDefault();
-      // Toggle random order for explore functionality
-      isRandomOrder = true;
-      fetchAndRenderTweets();
-      backToMainFeed();
-    });
+      document.getElementById('explore-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        // Toggle random order for explore functionality
+        isRandomOrder = true;
+        fetchAndRenderTweets();
+        
+        document.getElementById("tweetSection").style.display = "block";
+        document.getElementById("profileSection").style.display = "block";
+        document.getElementById("userProfileSection").style.display = "none";
+        document.getElementById("adminSection").style.display = "none";
+        if (document.getElementById("premiumSection")) {
+          document.getElementById("premiumSection").style.display = "none";
+        }
+      });
 
-    document.getElementById('bookmarks-link').addEventListener('click', function(e) {
-      e.preventDefault();
-      if (!currentUser) {
-        alert('Please log in to view bookmarks');
-        return;
-      }
-      fetch(`/api/bookmarks?handle=${currentUser}`)
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            document.getElementById("tweetSection").style.display = "none";
-            document.getElementById("profileSection").style.display = "none";
-            document.getElementById("premiumSection").style.display = "none";
-            document.getElementById("userProfileSection").style.display = "none";
-            document.getElementById("adminSection").style.display = "none";
-            
-            // Clear and repopulate the feed with bookmarked tweets
-            const tweetFeed = document.querySelector('.tweet-feed');
-            tweetFeed.innerHTML = '<h3>Your Bookmarks</h3>';
-            
-            if (data.bookmarks.length === 0) {
-              tweetFeed.innerHTML += '<p>You have no bookmarked tweets</p>';
-            } else {
-              data.bookmarks.forEach(tweet => {
-                tweetFeed.appendChild(createTweetElement(tweet));
-              });
+      document.getElementById('bookmarks-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        
+        if (!currentUser) {
+          alert('Please log in to view bookmarks');
+          return;
+        }
+        
+        fetch(`/api/bookmarks?handle=${currentUser}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.success) {
+              document.getElementById("tweetSection").style.display = "block";
+              document.getElementById("profileSection").style.display = "none";
+              document.getElementById("premiumSection").style.display = "none";
+              document.getElementById("userProfileSection").style.display = "none";
+              document.getElementById("adminSection").style.display = "none";
+              
+              // Clear and repopulate the feed with bookmarked tweets
+              const tweetFeed = document.querySelector('.tweet-feed');
+              tweetFeed.innerHTML = '<h3>Your Bookmarks</h3>';
+              
+              if (data.bookmarks.length === 0) {
+                tweetFeed.innerHTML += '<p>You have no bookmarked tweets</p>';
+              } else {
+                data.bookmarks.forEach(tweet => {
+                  tweetFeed.appendChild(createTweetElement(tweet));
+                });
+              }
             }
-            
-            document.getElementById("tweetSection").style.display = "block";
-          }
-        });
-    });
+          });
+      });
 
-    // Update the existing profile-link event listener
-    document.getElementById('profile-link').addEventListener('click', function(e) {
-      e.preventDefault();
-      if (currentUser) {
-        loadUserProfile(currentUser);
-      } else {
-        alert('Please log in to view your profile');
-      }
-    });
+      document.getElementById('profile-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        
+        if (currentUser) {
+          loadUserProfile(currentUser);
+        } else {
+          alert('Please log in to view your profile');
+        }
+      });
 
-    // Add event listener for admin panel
-    document.getElementById('admin-link').addEventListener('click', function(e) {
-      e.preventDefault();
-      showAdminSection();
-    });
+      document.getElementById('community-notes-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        
+        document.getElementById('community-notes-modal').style.display = 'block';
+        document.getElementById('password-error').style.display = 'none';
+        
+        if (!communityNotesVerified) {
+          document.getElementById('community-notes-content').style.display = 'none';
+          document.getElementById('community-notes-password').value = '';
+        } else {
+          loadCommunityNotesContent();
+        }
+      });
 
-    // Make the sidebar tweet button work
-    document.getElementById('sidebar-tweet-btn').addEventListener('click', function() {
-      if (!currentUser) {
-        alert('Please log in to tweet');
-        return;
-      }
-      // Focus on the tweet text area
-      document.getElementById('tweetText').focus();
-      // Make sure we're on the main feed
-      backToMainFeed();
+      document.getElementById('admin-link').addEventListener('click', function(e) {
+        e.preventDefault();
+        resetNavigationState();
+        this.classList.add('active');
+        showAdminSection();
+      });
+
+      document.getElementById('sidebar-tweet-btn').addEventListener('click', function() {
+        if (!currentUser) {
+          alert('Please log in to tweet');
+          return;
+        }
+        // Focus on the tweet text area
+        document.getElementById('tweetText').focus();
+        // Make sure we're on the main feed
+        backToMainFeed();
+      });
     });
 
     // Helper function to reset all navigation states
@@ -1997,6 +2070,12 @@ TWITTER
         link.classList.remove('active');
       });
     }
+
+    // Make sure the loadTweets function is called on page load to initialize feed
+    document.addEventListener('DOMContentLoaded', function() {
+      checkLoginStatus();
+      fetchAndRenderTweets();
+    });
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
