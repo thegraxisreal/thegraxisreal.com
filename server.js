@@ -79,18 +79,24 @@ async function debugFileSystem() {
 }
 
 // Use persistent disk storage for production
-const USERS_FILE = process.env.NODE_ENV === 'production' 
-  ? '/data/users.json' 
-  : './users.json';
+const ORIGINAL_USERS_FILE = './users.json';  // Original from GitHub, never modified
+const ORIGINAL_TWEETS_FILE = './tweets.json'; // Original from GitHub, never modified
+
+// Files for new data
+const NEW_USERS_FILE = process.env.NODE_ENV === 'production' 
+  ? '/data/newusers.json' 
+  : './newusers.json';
   
-const TWEETS_FILE = process.env.NODE_ENV === 'production'
-  ? '/data/tweets.json'
-  : './tweets.json';
+const NEW_TWEETS_FILE = process.env.NODE_ENV === 'production'
+  ? '/data/newtweets.json'
+  : './newtweets.json';
 
 // Log the file paths being used
 console.log('Using file paths:');
-console.log('- USERS_FILE:', USERS_FILE);
-console.log('- TWEETS_FILE:', TWEETS_FILE);
+console.log('- ORIGINAL_USERS_FILE:', ORIGINAL_USERS_FILE);
+console.log('- ORIGINAL_TWEETS_FILE:', ORIGINAL_TWEETS_FILE);
+console.log('- NEW_USERS_FILE:', NEW_USERS_FILE);
+console.log('- NEW_TWEETS_FILE:', NEW_TWEETS_FILE);
 
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public
 app.use(express.json());
@@ -201,36 +207,34 @@ let tweets = [];
 let classrooms = [];
 let announcements = [];
 
-// Function to save data to JSON files
+// Variables to track original data
+let originalUsers = {};
+let originalTweetIds = new Set();
+
+// Function to save data to JSON files - only saves NEW data, not original
 async function saveData() {
   console.log('Saving data to JSON files...');
   try {
-    await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
-    console.log(`Saved ${Object.keys(users).length} users to ${USERS_FILE}`);
+    // Only save new users (we don't modify the original users.json)
+    let newUsers = {};
+    for (const [handle, userData] of Object.entries(users)) {
+      // Skip any users that were in the original file - we only save new ones
+      if (!originalUsers[handle.toLowerCase()]) {
+        newUsers[handle.toLowerCase()] = userData;
+      }
+    }
     
-    await fs.writeFile(TWEETS_FILE, JSON.stringify(tweets, null, 2));
-    console.log(`Saved ${tweets.length} tweets to ${TWEETS_FILE}`);
+    await fs.writeFile(NEW_USERS_FILE, JSON.stringify(newUsers, null, 2));
+    console.log(`Saved ${Object.keys(newUsers).length} new users to ${NEW_USERS_FILE}`);
+    
+    // Only save new tweets (we don't modify the original tweets.json)
+    const newTweets = tweets.filter(tweet => !originalTweetIds.has(tweet.id));
+    await fs.writeFile(NEW_TWEETS_FILE, JSON.stringify(newTweets, null, 2));
+    console.log(`Saved ${newTweets.length} new tweets to ${NEW_TWEETS_FILE}`);
     
     await fs.writeFile('classrooms.json', JSON.stringify(classrooms, null, 2));
     await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
     console.log('Data auto-saved to JSON files');
-    
-    // Verify the files were saved correctly
-    try {
-      const savedUsersData = await fs.readFile(USERS_FILE, 'utf8');
-      const savedUsers = JSON.parse(savedUsersData);
-      console.log(`Verified: ${Object.keys(savedUsers).length} users in ${USERS_FILE}`);
-    } catch (err) {
-      console.error(`Error verifying ${USERS_FILE}:`, err);
-    }
-    
-    try {
-      const savedTweetsData = await fs.readFile(TWEETS_FILE, 'utf8');
-      const savedTweets = JSON.parse(savedTweetsData);
-      console.log(`Verified: ${savedTweets.length} tweets in ${TWEETS_FILE}`);
-    } catch (err) {
-      console.error(`Error verifying ${TWEETS_FILE}:`, err);
-    }
   } catch (err) {
     console.error('Error saving data:', err);
   }
@@ -239,22 +243,22 @@ async function saveData() {
 // Ensure data files exist
 async function ensureDataFilesExist() {
   try {
-    // Check if users file exists, create if not
+    // Check if new users file exists, create if not
     try {
-      await fs.access(USERS_FILE);
-      console.log(`${USERS_FILE} exists`);
+      await fs.access(NEW_USERS_FILE);
+      console.log(`${NEW_USERS_FILE} exists`);
     } catch {
-      console.log(`${USERS_FILE} not found, creating empty file`);
-      await fs.writeFile(USERS_FILE, JSON.stringify({}));
+      console.log(`${NEW_USERS_FILE} not found, creating empty file`);
+      await fs.writeFile(NEW_USERS_FILE, JSON.stringify({}));
     }
     
-    // Check if tweets file exists, create if not
+    // Check if new tweets file exists, create if not
     try {
-      await fs.access(TWEETS_FILE);
-      console.log(`${TWEETS_FILE} exists`);
+      await fs.access(NEW_TWEETS_FILE);
+      console.log(`${NEW_TWEETS_FILE} exists`);
     } catch {
-      console.log(`${TWEETS_FILE} not found, creating empty file`);
-      await fs.writeFile(TWEETS_FILE, JSON.stringify([]));
+      console.log(`${NEW_TWEETS_FILE} not found, creating empty file`);
+      await fs.writeFile(NEW_TWEETS_FILE, JSON.stringify([]));
     }
   } catch (err) {
     console.error('Error ensuring data files exist:', err);
@@ -264,46 +268,69 @@ async function ensureDataFilesExist() {
 // Function to load data from JSON files with better error handling
 async function loadData() {
   try {
-    // Load users.json
+    // First load original users (from GitHub)
     try {
-      const usersData = await fs.readFile(USERS_FILE, 'utf8');
-      users = JSON.parse(usersData);
-      console.log(`Loaded ${Object.keys(users).length} users from ${USERS_FILE}`);
+      const originalUsersData = await fs.readFile(ORIGINAL_USERS_FILE, 'utf8');
+      originalUsers = JSON.parse(originalUsersData);
+      console.log(`Loaded ${Object.keys(originalUsers).length} original users from ${ORIGINAL_USERS_FILE}`);
+      
+      // Start with original users
+      users = {...originalUsers};
     } catch (error) {
-      console.log(`${USERS_FILE} not found or invalid, creating empty users object`);
+      console.log(`${ORIGINAL_USERS_FILE} not found or invalid, starting with empty users`);
+      originalUsers = {};
       users = {};
-      await fs.writeFile(USERS_FILE, JSON.stringify(users, null, 2));
     }
     
-    // Load tweets.json
+    // Then load new users and merge them in
     try {
-      const tweetsData = await fs.readFile(TWEETS_FILE, 'utf8');
-      tweets = JSON.parse(tweetsData);
-      console.log(`Loaded ${tweets.length} tweets from ${TWEETS_FILE}`);
-      // Log the first tweet for debugging
-      if (tweets.length > 0) {
-        console.log('First tweet:', JSON.stringify(tweets[0]).substring(0, 200) + '...');
+      const newUsersData = await fs.readFile(NEW_USERS_FILE, 'utf8');
+      const newUsers = JSON.parse(newUsersData);
+      console.log(`Loaded ${Object.keys(newUsers).length} new users from ${NEW_USERS_FILE}`);
+      
+      // Merge new users - they override original users with same handle
+      users = {...users, ...newUsers};
+      console.log(`Total users after merge: ${Object.keys(users).length}`);
+    } catch (error) {
+      console.log(`${NEW_USERS_FILE} not found or invalid, continuing with original users only`);
+    }
+    
+    // First load original tweets (from GitHub)
+    try {
+      const originalTweetsData = await fs.readFile(ORIGINAL_TWEETS_FILE, 'utf8');
+      const originalTweets = JSON.parse(originalTweetsData);
+      console.log(`Loaded ${originalTweets.length} original tweets from ${ORIGINAL_TWEETS_FILE}`);
+      
+      // Start with original tweets
+      tweets = [...originalTweets];
+      
+      // Track IDs of original tweets to avoid duplicates later
+      originalTweets.forEach(tweet => originalTweetIds.add(tweet.id));
+      
+      if (originalTweets.length > 0) {
+        console.log('First original tweet:', JSON.stringify(originalTweets[0]).substring(0, 200) + '...');
       }
     } catch (error) {
-      console.log(`${TWEETS_FILE} not found or invalid, creating empty tweets array`);
+      console.log(`${ORIGINAL_TWEETS_FILE} not found or invalid, starting with empty tweets`);
       tweets = [];
-      await fs.writeFile(TWEETS_FILE, JSON.stringify(tweets, null, 2));
+      originalTweetIds = new Set();
+    }
+    
+    // Then load new tweets and merge them in
+    try {
+      const newTweetsData = await fs.readFile(NEW_TWEETS_FILE, 'utf8');
+      const newTweets = JSON.parse(newTweetsData);
+      console.log(`Loaded ${newTweets.length} new tweets from ${NEW_TWEETS_FILE}`);
       
-      // Add a sample tweet if we had to create a new file
-      console.log('Adding a sample tweet to the newly created tweets file...');
-      const sampleTweet = {
-        id: Date.now(),
-        handle: "system",
-        text: "Welcome to our platform! This is a sample tweet to get you started.",
-        timestamp: Date.now(),
-        likes: 0,
-        replies: [],
-        views: "123",
-        profilePicture: null 
-      };
-      tweets.push(sampleTweet);
-      await fs.writeFile(TWEETS_FILE, JSON.stringify(tweets, null, 2));
-      console.log('Added sample tweet:', sampleTweet);
+      // Add new tweets to the collection
+      tweets = [...tweets, ...newTweets];
+      console.log(`Total tweets after merge: ${tweets.length}`);
+      
+      if (newTweets.length > 0) {
+        console.log('First new tweet:', JSON.stringify(newTweets[0]).substring(0, 200) + '...');
+      }
+    } catch (error) {
+      console.log(`${NEW_TWEETS_FILE} not found or invalid, continuing with original tweets only`);
     }
     
     // Load classrooms and announcements
@@ -800,8 +827,8 @@ debugFileSystem().then(() => {
           const result = {
             environment: process.env.NODE_ENV || 'development',
             filePaths: {
-              usersFile: USERS_FILE,
-              tweetsFile: TWEETS_FILE
+              usersFile: NEW_USERS_FILE,
+              tweetsFile: NEW_TWEETS_FILE
             },
             memoryData: {
               usersCount: Object.keys(users).length,
@@ -844,38 +871,38 @@ debugFileSystem().then(() => {
       app.post('/admin/import-data', express.json({limit: '50mb'}), async (req, res) => {
         try {
           if (req.body.users) {
-            await fs.writeFile(USERS_FILE, JSON.stringify(req.body.users, null, 2));
-            console.log(`Imported ${Object.keys(req.body.users).length} users to ${USERS_FILE}`);
+            await fs.writeFile(NEW_USERS_FILE, JSON.stringify(req.body.users, null, 2));
+            console.log(`Imported ${Object.keys(req.body.users).length} users to ${NEW_USERS_FILE}`);
             users = req.body.users; // Update in-memory data immediately
           }
           
           if (req.body.tweets) {
-            await fs.writeFile(TWEETS_FILE, JSON.stringify(req.body.tweets, null, 2));
-            console.log(`Imported ${req.body.tweets.length} tweets to ${TWEETS_FILE}`);
+            await fs.writeFile(NEW_TWEETS_FILE, JSON.stringify(req.body.tweets, null, 2));
+            console.log(`Imported ${req.body.tweets.length} tweets to ${NEW_TWEETS_FILE}`);
             tweets = req.body.tweets; // Update in-memory data immediately
           }
           
           // Verify the files were saved correctly
           try {
-            const savedUsersData = await fs.readFile(USERS_FILE, 'utf8');
+            const savedUsersData = await fs.readFile(NEW_USERS_FILE, 'utf8');
             const savedUsers = JSON.parse(savedUsersData);
-            console.log(`Verified: ${Object.keys(savedUsers).length} users in ${USERS_FILE}`);
+            console.log(`Verified: ${Object.keys(savedUsers).length} users in ${NEW_USERS_FILE}`);
           } catch (err) {
-            console.error(`Error verifying ${USERS_FILE}:`, err);
+            console.error(`Error verifying ${NEW_USERS_FILE}:`, err);
           }
           
           try {
-            const savedTweetsData = await fs.readFile(TWEETS_FILE, 'utf8');
+            const savedTweetsData = await fs.readFile(NEW_TWEETS_FILE, 'utf8');
             const savedTweets = JSON.parse(savedTweetsData);
-            console.log(`Verified: ${savedTweets.length} tweets in ${TWEETS_FILE}`);
+            console.log(`Verified: ${savedTweets.length} tweets in ${NEW_TWEETS_FILE}`);
           } catch (err) {
-            console.error(`Error verifying ${TWEETS_FILE}:`, err);
+            console.error(`Error verifying ${NEW_TWEETS_FILE}:`, err);
           }
           
           res.json({ 
             success: true, 
             message: 'Data imported successfully',
-            location: USERS_FILE,
+            location: NEW_USERS_FILE,
             usersCount: Object.keys(req.body.users || {}).length,
             tweetsCount: (req.body.tweets || []).length
           });
