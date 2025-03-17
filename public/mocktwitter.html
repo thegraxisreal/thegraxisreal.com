@@ -1,4 +1,4 @@
-
+TWITTER 
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1170,6 +1170,21 @@
         tweetDiv.innerHTML = formatTweet(tweet);
         feed.appendChild(tweetDiv);
       });
+      
+      // Add event listeners to tweet buttons after rendering
+      document.querySelectorAll('.tweet-card').forEach(tweet => {
+        const tweetId = tweet.getAttribute('data-tweet-id');
+        
+        // Share/Quote button
+        const shareBtn = tweet.querySelector('.share-btn');
+        if (shareBtn) {
+          shareBtn.onclick = function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            showShareTweet(tweetId);
+          };
+        }
+      });
     }
 
     function renderTrendingHashtags(tweets) {
@@ -1648,8 +1663,10 @@
       const tweetElement = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"]`);
       
       // Check if quote form already exists
-      if (tweetElement.querySelector('.quote-form')) {
-        return; // Form already open
+      let quoteForm = tweetElement.querySelector('.quote-form');
+      if (quoteForm) {
+        quoteForm.remove();
+        return; // Toggle form visibility
       }
       
       // Get the original tweet text
@@ -1657,7 +1674,7 @@
       const tweetHandle = tweetElement.querySelector('.tweet-name').textContent.split(' ')[0];
       
       // Create inline quote form
-      const quoteForm = document.createElement('div');
+      quoteForm = document.createElement('div');
       quoteForm.className = 'quote-form';
       quoteForm.innerHTML = `
         <div class="quote-input-container">
@@ -1668,6 +1685,7 @@
           <div class="quote-actions">
             <span class="quote-char-count">280</span>
             <button class="quote-submit-btn">Quote Tweet</button>
+            <button class="quote-cancel-btn">Cancel</button>
           </div>
         </div>
       `;
@@ -1680,6 +1698,7 @@
       const textarea = quoteForm.querySelector('.quote-textarea');
       const charCount = quoteForm.querySelector('.quote-char-count');
       const submitBtn = quoteForm.querySelector('.quote-submit-btn');
+      const cancelBtn = quoteForm.querySelector('.quote-cancel-btn');
       
       // Focus the textarea
       textarea.focus();
@@ -1696,7 +1715,7 @@
         const quoteText = textarea.value.trim();
         
         try {
-          // First, get the full tweet object
+          // Get the tweet ID we're quoting
           const response = await fetch('/api/tweets');
           const data = await response.json();
           
@@ -1708,13 +1727,14 @@
               return;
             }
             
-            // Now post the quote tweet
+            // Post the quote tweet
             const postResponse = await fetch('/api/tweet', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 handle: currentUser,
                 text: quoteText,
+                timestamp: Date.now(),
                 quotedTweet: originalTweet
               })
             });
@@ -1739,15 +1759,10 @@
         }
       });
       
-      // Add cancel button
-      const cancelBtn = document.createElement('button');
-      cancelBtn.className = 'quote-cancel-btn';
-      cancelBtn.textContent = 'Cancel';
+      // Cancel button
       cancelBtn.addEventListener('click', function() {
         quoteForm.remove();
       });
-      
-      quoteForm.querySelector('.quote-actions').appendChild(cancelBtn);
     }
 
     // Add CSS styles for inline reply and quote forms
