@@ -91,12 +91,17 @@ const NEW_TWEETS_FILE = process.env.NODE_ENV === 'production'
   ? '/data/newtweets.json'
   : './newtweets.json';
 
+const COMMUNITY_NOTES_FILE = process.env.NODE_ENV === 'production'
+  ? '/data/communitynotes.json'
+  : './communitynotes.json';
+
 // Log the file paths being used
 console.log('Using file paths:');
 console.log('- ORIGINAL_USERS_FILE:', ORIGINAL_USERS_FILE);
 console.log('- ORIGINAL_TWEETS_FILE:', ORIGINAL_TWEETS_FILE);
 console.log('- NEW_USERS_FILE:', NEW_USERS_FILE);
 console.log('- NEW_TWEETS_FILE:', NEW_TWEETS_FILE);
+console.log('- COMMUNITY_NOTES_FILE:', COMMUNITY_NOTES_FILE);
 
 app.use(express.static(path.join(__dirname, 'public'))); // Serve static files from public
 app.use(express.json());
@@ -233,9 +238,12 @@ async function saveData() {
     await fs.writeFile(NEW_TWEETS_FILE, JSON.stringify(newTweets, null, 2));
     console.log(`Saved ${newTweets.length} new tweets to ${NEW_TWEETS_FILE}`);
     
+    // Save community notes
+    await fs.writeFile(COMMUNITY_NOTES_FILE, JSON.stringify(communityNotes, null, 2));
+    console.log(`Saved ${communityNotes.length} community notes to ${COMMUNITY_NOTES_FILE}`);
+    
     await fs.writeFile('classrooms.json', JSON.stringify(classrooms, null, 2));
     await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
-    await fs.writeFile('communityNotes.json', JSON.stringify(communityNotes, null, 2)); // Save community notes
     console.log('Data auto-saved to JSON files');
   } catch (err) {
     console.error('Error saving data:', err);
@@ -261,6 +269,15 @@ async function ensureDataFilesExist() {
     } catch {
       console.log(`${NEW_TWEETS_FILE} not found, creating empty file`);
       await fs.writeFile(NEW_TWEETS_FILE, JSON.stringify([]));
+    }
+    
+    // Check if community notes file exists, create if not
+    try {
+      await fs.access(COMMUNITY_NOTES_FILE);
+      console.log(`${COMMUNITY_NOTES_FILE} exists`);
+    } catch {
+      console.log(`${COMMUNITY_NOTES_FILE} not found, creating empty file`);
+      await fs.writeFile(COMMUNITY_NOTES_FILE, JSON.stringify([]));
     }
   } catch (err) {
     console.error('Error ensuring data files exist:', err);
@@ -358,13 +375,13 @@ async function loadData() {
     
     // Load community notes
     try {
-      const communityNotesData = await fs.readFile('communityNotes.json', 'utf8');
+      const communityNotesData = await fs.readFile(COMMUNITY_NOTES_FILE, 'utf8');
       communityNotes = JSON.parse(communityNotesData);
-      console.log('Community notes loaded from communityNotes.json');
+      console.log(`Loaded ${communityNotes.length} community notes from ${COMMUNITY_NOTES_FILE}`);
     } catch (error) {
-      console.log('communityNotes.json not found or invalid, creating empty community notes array');
+      console.log(`${COMMUNITY_NOTES_FILE} not found or invalid, starting with empty community notes`);
       communityNotes = [];
-      await fs.writeFile('communityNotes.json', JSON.stringify(communityNotes, null, 2));
+      await fs.writeFile(COMMUNITY_NOTES_FILE, JSON.stringify(communityNotes, null, 2));
     }
     
   } catch (err) {
@@ -602,6 +619,11 @@ debugFileSystem().then(() => {
           
           const enrichedTweets = tweets.map(tweet => {
             console.log(`Processing tweet by ${tweet.handle}`);
+            
+            // Find community notes for this tweet
+            const tweetNotes = communityNotes
+              .filter(note => note.tweetId === tweet.id && note.status === 'approved');
+            
             return {
               ...tweet,
               profilePicture: users[tweet.handle.toLowerCase()]?.profilePicture || null,
@@ -615,7 +637,8 @@ debugFileSystem().then(() => {
                 ...tweet.quotedTweet,
                 profilePicture: users[tweet.quotedTweet.handle?.toLowerCase()]?.profilePicture || null,
                 verified: users[tweet.quotedTweet.handle?.toLowerCase()]?.verified || null
-              } : null
+              } : null,
+              communityNotes: tweetNotes
             };
           });
           
@@ -832,6 +855,73 @@ debugFileSystem().then(() => {
         return res.json({ success: true, bookmarks: bookmarkedTweets });
       });
 
+      // Community Notes API endpoints
+      app.get('/api/community-notes', (req, res) => {
+        // Verify password if provided
+        const password = req.query.password;
+        const isAdmin = password === "b@rnD00rex!t";
+        
+        // Return all notes or just approved ones based on admin status
+        const notes = isAdmin 
+          ? communityNotes 
+          : communityNotes.filter(note => note.status === 'approved');
+          
+        return res.json({ success: true, notes, isAdmin });
+      });
+      
+      app.post('/api/community-notes', (req, res) => {
+        const { password, tweetId, noteText } = req.body;
+        
+        // Verify password
+        if (password !== "b@rnD00rex!t") {
+          return res.status(403).json({ success: false, error: "Invalid password" });
+        }
+        
+        if (!tweetId || !noteText) {
+          return res.status(400).json({ success: false, error: "Tweet ID and note text are required" });
+        }
+        
+        // Find the tweet
+        const tweet = tweets.find(t => t.id === tweetId);
+        if (!tweet) {
+          return res.status(404).json({ success: false, error: "Tweet not found" });
+        }
+        
+        // Create new community note
+        const newNote = {
+          id: Date.now(),
+          tweetId,
+          text: noteText,
+          timestamp: Date.now(),
+          status: 'approved' // Auto-approve for now
+        };
+        
+        communityNotes.push(newNote);
+        saveData();
+        
+        return res.json({ success: true, note: newNote });
+      });
+      
+      app.delete('/api/community-notes/:id', (req, res) => {
+        const { id } = req.params;
+        const { password } = req.body;
+        
+        // Verify password
+        if (password !== "b@rnD00rex!t") {
+          return res.status(403).json({ success: false, error: "Invalid password" });
+        }
+        
+        const noteIndex = communityNotes.findIndex(note => note.id === parseInt(id));
+        if (noteIndex === -1) {
+          return res.status(404).json({ success: false, error: "Community note not found" });
+        }
+        
+        communityNotes.splice(noteIndex, 1);
+        saveData();
+        
+        return res.json({ success: true, message: "Community note deleted" });
+      });
+
       // Debug endpoint to check and fix data issues
       app.get('/admin/debug', async (req, res) => {
         try {
@@ -923,76 +1013,6 @@ debugFileSystem().then(() => {
           console.error('Error importing data:', error);
           res.status(500).json({ success: false, error: error.message });
         }
-      });
-
-      // Get all community notes
-      app.get('/api/community-notes', (req, res) => {
-        res.json({ success: true, communityNotes });
-      });
-
-      // Get community notes for a specific tweet
-      app.get('/api/community-notes/:tweetId', (req, res) => {
-        const { tweetId } = req.params;
-        const tweetIdNum = parseInt(tweetId, 10);
-        const notesForTweet = communityNotes.filter(note => note.tweetId === tweetIdNum);
-        res.json({ success: true, notes: notesForTweet });
-      });
-
-      // Add a new community note
-      app.post('/api/community-notes', (req, res) => {
-        const { tweetId, text, password } = req.body;
-        
-        // Verify password
-        if (password !== "b@rnD00rex!t") {
-          return res.status(401).json({ success: false, error: "Incorrect password" });
-        }
-        
-        if (!tweetId || !text) {
-          return res.status(400).json({ success: false, error: "Tweet ID and note text are required" });
-        }
-        
-        const tweetIdNum = parseInt(tweetId, 10);
-        const tweet = tweets.find(t => t.id === tweetIdNum);
-        if (!tweet) {
-          return res.status(404).json({ success: false, error: "Tweet not found" });
-        }
-        
-        const newNote = {
-          id: Date.now(),
-          tweetId: tweetIdNum,
-          text,
-          timestamp: Date.now()
-        };
-        
-        communityNotes.push(newNote);
-        saveData();
-        io.emit('new community note', newNote);
-        
-        return res.json({ success: true, note: newNote });
-      });
-
-      // Delete a community note
-      app.delete('/api/community-notes/:noteId', (req, res) => {
-        const { noteId } = req.params;
-        const { password } = req.body;
-        
-        // Verify password
-        if (password !== "b@rnD00rex!t") {
-          return res.status(401).json({ success: false, error: "Incorrect password" });
-        }
-        
-        const noteIdNum = parseInt(noteId, 10);
-        const index = communityNotes.findIndex(note => note.id === noteIdNum);
-        
-        if (index === -1) {
-          return res.status(404).json({ success: false, error: "Community note not found" });
-        }
-        
-        communityNotes.splice(index, 1);
-        saveData();
-        io.emit('community note deleted', noteIdNum);
-        
-        return res.json({ success: true });
       });
 
       // Start the server
