@@ -101,6 +101,100 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+// Add an upload page for importing data
+app.get('/admin/upload', (req, res) => {
+  const html = `
+  <!DOCTYPE html>
+  <html>
+  <head>
+    <title>Import Data to Render</title>
+    <style>
+      body { font-family: Arial; max-width: 800px; margin: 0 auto; padding: 20px; }
+      .container { margin-bottom: 20px; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+      button { padding: 10px 15px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+      #result { margin-top: 20px; padding: 10px; background: #f5f5f5; white-space: pre-wrap; }
+    </style>
+  </head>
+  <body>
+    <h1>Import Data to Render</h1>
+    
+    <div class="container">
+      <h2>Select Files</h2>
+      <form id="uploadForm">
+        <div>
+          <label for="usersFile">users.json:</label>
+          <input type="file" id="usersFile" name="usersFile">
+        </div>
+        <div style="margin-top: 10px;">
+          <label for="tweetsFile">tweets.json:</label>
+          <input type="file" id="tweetsFile" name="tweetsFile">
+        </div>
+        <button type="button" onclick="importData()" style="margin-top: 15px;">Import Data</button>
+      </form>
+    </div>
+    
+    <div id="result"></div>
+    
+    <script>
+      async function importData() {
+        document.getElementById('result').textContent = 'Importing data...';
+        
+        const data = {};
+        
+        // Read users file if selected
+        const usersFile = document.getElementById('usersFile').files[0];
+        if (usersFile) {
+          try {
+            const usersText = await usersFile.text();
+            data.users = JSON.parse(usersText);
+            console.log(\`Loaded \${Object.keys(data.users).length} users\`);
+          } catch (error) {
+            document.getElementById('result').textContent = \`Error parsing users.json: \${error.message}\`;
+            return;
+          }
+        }
+        
+        // Read tweets file if selected
+        const tweetsFile = document.getElementById('tweetsFile').files[0];
+        if (tweetsFile) {
+          try {
+            const tweetsText = await tweetsFile.text();
+            data.tweets = JSON.parse(tweetsText);
+            console.log(\`Loaded \${data.tweets.length} tweets\`);
+          } catch (error) {
+            document.getElementById('result').textContent = \`Error parsing tweets.json: \${error.message}\`;
+            return;
+          }
+        }
+        
+        if (!data.users && !data.tweets) {
+          document.getElementById('result').textContent = 'No files selected';
+          return;
+        }
+        
+        try {
+          // Send to server
+          const response = await fetch('/admin/import-data', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+          });
+          
+          const result = await response.json();
+          document.getElementById('result').textContent = 'Import result:\\n' + JSON.stringify(result, null, 2);
+        } catch (error) {
+          document.getElementById('result').textContent = \`Error sending data: \${error.message}\`;
+        }
+      }
+    </script>
+  </body>
+  </html>
+  `;
+  res.send(html);
+});
+
 // In-memory storage (will be loaded from/saved to files)
 let users = {};
 let tweets = [];
