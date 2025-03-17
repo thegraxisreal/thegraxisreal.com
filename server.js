@@ -206,6 +206,7 @@ let users = {};
 let tweets = [];
 let classrooms = [];
 let announcements = [];
+let communityNotes = []; // Add community notes array
 
 // Variables to track original data
 let originalUsers = {};
@@ -234,6 +235,7 @@ async function saveData() {
     
     await fs.writeFile('classrooms.json', JSON.stringify(classrooms, null, 2));
     await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
+    await fs.writeFile('communityNotes.json', JSON.stringify(communityNotes, null, 2)); // Save community notes
     console.log('Data auto-saved to JSON files');
   } catch (err) {
     console.error('Error saving data:', err);
@@ -352,6 +354,17 @@ async function loadData() {
       console.log('announcements.json not found or invalid, creating empty announcements array');
       announcements = [];
       await fs.writeFile('announcements.json', JSON.stringify(announcements, null, 2));
+    }
+    
+    // Load community notes
+    try {
+      const communityNotesData = await fs.readFile('communityNotes.json', 'utf8');
+      communityNotes = JSON.parse(communityNotesData);
+      console.log('Community notes loaded from communityNotes.json');
+    } catch (error) {
+      console.log('communityNotes.json not found or invalid, creating empty community notes array');
+      communityNotes = [];
+      await fs.writeFile('communityNotes.json', JSON.stringify(communityNotes, null, 2));
     }
     
   } catch (err) {
@@ -910,6 +923,76 @@ debugFileSystem().then(() => {
           console.error('Error importing data:', error);
           res.status(500).json({ success: false, error: error.message });
         }
+      });
+
+      // Get all community notes
+      app.get('/api/community-notes', (req, res) => {
+        res.json({ success: true, communityNotes });
+      });
+
+      // Get community notes for a specific tweet
+      app.get('/api/community-notes/:tweetId', (req, res) => {
+        const { tweetId } = req.params;
+        const tweetIdNum = parseInt(tweetId, 10);
+        const notesForTweet = communityNotes.filter(note => note.tweetId === tweetIdNum);
+        res.json({ success: true, notes: notesForTweet });
+      });
+
+      // Add a new community note
+      app.post('/api/community-notes', (req, res) => {
+        const { tweetId, text, password } = req.body;
+        
+        // Verify password
+        if (password !== "b@rnD00rex!t") {
+          return res.status(401).json({ success: false, error: "Incorrect password" });
+        }
+        
+        if (!tweetId || !text) {
+          return res.status(400).json({ success: false, error: "Tweet ID and note text are required" });
+        }
+        
+        const tweetIdNum = parseInt(tweetId, 10);
+        const tweet = tweets.find(t => t.id === tweetIdNum);
+        if (!tweet) {
+          return res.status(404).json({ success: false, error: "Tweet not found" });
+        }
+        
+        const newNote = {
+          id: Date.now(),
+          tweetId: tweetIdNum,
+          text,
+          timestamp: Date.now()
+        };
+        
+        communityNotes.push(newNote);
+        saveData();
+        io.emit('new community note', newNote);
+        
+        return res.json({ success: true, note: newNote });
+      });
+
+      // Delete a community note
+      app.delete('/api/community-notes/:noteId', (req, res) => {
+        const { noteId } = req.params;
+        const { password } = req.body;
+        
+        // Verify password
+        if (password !== "b@rnD00rex!t") {
+          return res.status(401).json({ success: false, error: "Incorrect password" });
+        }
+        
+        const noteIdNum = parseInt(noteId, 10);
+        const index = communityNotes.findIndex(note => note.id === noteIdNum);
+        
+        if (index === -1) {
+          return res.status(404).json({ success: false, error: "Community note not found" });
+        }
+        
+        communityNotes.splice(index, 1);
+        saveData();
+        io.emit('community note deleted', noteIdNum);
+        
+        return res.json({ success: true });
       });
 
       // Start the server
