@@ -447,6 +447,133 @@ TWITTER
       margin-right: 5px;
       font-size: 0.9rem;
     }
+    
+    /* Community Notes Styles */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+    
+    .modal-content {
+      background-color: white;
+      margin: 10% auto;
+      padding: 20px;
+      border-radius: 15px;
+      width: 50%;
+      max-width: 500px;
+    }
+    
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    
+    .modal-title {
+      font-weight: bold;
+      font-size: 1.2rem;
+    }
+    
+    .close-modal {
+      cursor: pointer;
+      font-size: 1.5rem;
+    }
+    
+    .community-notes-container {
+      max-height: 70vh;
+      overflow-y: auto;
+      padding: 10px 0;
+    }
+    
+    .community-note-item {
+      margin-bottom: 20px;
+      border-bottom: 1px solid var(--twitter-extra-light-gray);
+      padding-bottom: 20px;
+    }
+    
+    .community-note-form {
+      margin-top: 15px;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .community-note-form textarea {
+      width: 100%;
+      border: 1px solid var(--twitter-light-gray);
+      border-radius: 5px;
+      resize: none;
+      padding: 10px;
+      margin-bottom: 10px;
+      min-height: 80px;
+    }
+    
+    .community-note-form button {
+      background-color: var(--twitter-blue);
+      color: white;
+      border: none;
+      border-radius: 30px;
+      font-weight: bold;
+      padding: 8px 16px;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+    
+    .community-note {
+      background-color: rgba(29, 161, 242, 0.1);
+      border: 1px solid rgba(29, 161, 242, 0.3);
+      border-radius: 10px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 0.95rem;
+    }
+    
+    .community-note-header {
+      display: flex;
+      align-items: center;
+      color: var(--twitter-blue);
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+    
+    .community-note-icon {
+      margin-right: 8px;
+      color: var(--twitter-blue);
+    }
+    
+    .people-icon-group {
+      position: relative;
+      width: 24px;
+      height: 24px;
+      margin-right: 10px;
+    }
+    
+    .people-icon {
+      position: absolute;
+      font-size: 0.8em;
+    }
+    
+    .people-icon:nth-child(1) {
+      top: 0;
+      left: 0;
+    }
+    
+    .people-icon:nth-child(2) {
+      top: 0;
+      right: 0;
+    }
+    
+    .people-icon:nth-child(3) {
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
   </style>
 </head>
 <body class="light-mode">
@@ -486,6 +613,14 @@ TWITTER
             <h3><i class="fas fa-chart-line"></i> Trending</h3>
             <ul id="trendingList" class="trending-list"></ul>
           </div>
+          <li><a href="#" id="communityNotesBtn">
+            <div class="people-icon-group">
+              <i class="fas fa-user people-icon"></i>
+              <i class="fas fa-user people-icon"></i>
+              <i class="fas fa-user people-icon"></i>
+            </div>
+            Community Notes
+          </a></li>
         </div>
       </div>
       <!-- Main Content -->
@@ -1394,6 +1529,139 @@ TWITTER
       document.getElementById("premiumSection").style.display = "none";
       document.getElementById("userProfileSection").style.display = "none";
       document.getElementById("adminSection").style.display = "block";
+    }
+
+    // Community Notes
+    let communityNotesPassword = null;
+    let communityNotesEnabled = false;
+
+    function openCommunityNotes() {
+      if (!communityNotesEnabled) {
+        document.getElementById('passwordModal').style.display = 'block';
+      }
+    }
+
+    async function verifyPassword() {
+      const password = document.getElementById('notesPassword').value;
+      
+      try {
+        const response = await fetch('/api/community-notes/verify-password', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ password })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          document.getElementById('passwordModal').style.display = 'none';
+          document.getElementById('passwordError').style.display = 'none';
+          document.getElementById('notesPassword').value = '';
+          communityNotesEnabled = true;
+          showCommunityNotesPanel();
+        } else {
+          document.getElementById('passwordError').style.display = 'block';
+        }
+      } catch (error) {
+        console.error('Error verifying password:', error);
+        document.getElementById('passwordError').style.display = 'block';
+      }
+    }
+
+    async function showCommunityNotesPanel() {
+      const container = document.getElementById('communityNotesContainer');
+      container.innerHTML = '<p>Loading tweets...</p>';
+      
+      try {
+        const response = await fetch('/api/tweets');
+        const data = await response.json();
+        
+        if (data.success) {
+          container.innerHTML = '';
+          
+          data.tweets.forEach(tweet => {
+            const tweetElement = document.createElement('div');
+            tweetElement.className = 'community-note-item';
+            
+            const noteExists = tweet.communityNotes && tweet.communityNotes.length > 0;
+            
+            tweetElement.innerHTML = `
+              <div class="tweet-header">
+                <span class="tweet-name">${tweet.handle}</span>
+                <span class="tweet-handle">@${tweet.handle}</span>
+              </div>
+              <div class="tweet-text">${tweet.text}</div>
+              
+              ${noteExists ? `
+                <div class="community-note">
+                  <div class="community-note-header">
+                    <div class="people-icon-group">
+                      <i class="fas fa-user people-icon"></i>
+                      <i class="fas fa-user people-icon"></i>
+                      <i class="fas fa-user people-icon"></i>
+                    </div>
+                    Readers added context
+                  </div>
+                  <div class="community-note-text">
+                    ${tweet.communityNotes[0].text}
+                  </div>
+                </div>
+              ` : ''}
+              
+              <div class="community-note-form">
+                <textarea placeholder="Add a community note to provide context..." id="note-${tweet.id}"></textarea>
+                <button onclick="addCommunityNote(${tweet.id})">Submit</button>
+              </div>
+            `;
+            
+            container.appendChild(tweetElement);
+          });
+        } else {
+          container.innerHTML = '<p>Error loading tweets.</p>';
+        }
+      } catch (error) {
+        console.error('Error fetching tweets for community notes:', error);
+        container.innerHTML = '<p>Error loading tweets.</p>';
+      }
+      
+      document.getElementById('communityNotesModal').style.display = 'block';
+    }
+
+    async function addCommunityNote(tweetId) {
+      const noteText = document.getElementById(`note-${tweetId}`).value.trim();
+      
+      if (!noteText) {
+        alert('Please enter a note.');
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/community-notes', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ tweetId, noteText })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          alert('Community note added successfully!');
+          document.getElementById(`note-${tweetId}`).value = '';
+          
+          // Refresh the display
+          showCommunityNotesPanel();
+          fetchAndRenderTweets(); // Refresh the main feed to show the new note
+        } else {
+          alert(`Failed to add note: ${data.error}`);
+        }
+      } catch (error) {
+        console.error('Error adding community note:', error);
+        alert('Failed to add community note. Please try again.');
+      }
     }
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
