@@ -447,108 +447,6 @@ TWITTER
       margin-right: 5px;
       font-size: 0.9rem;
     }
-
-    /* Community Notes Styles */
-    .community-notes-container {
-      margin-top: 10px;
-      border: 1px solid #e1e8ed;
-      border-radius: 12px;
-      padding: 12px;
-      background-color: #f7f9fa;
-    }
-
-    .community-notes-header {
-      font-weight: bold;
-      margin-bottom: 8px;
-      color: #536471;
-    }
-
-    .community-notes-header i {
-      margin-right: 5px;
-    }
-
-    .community-note {
-      color: #0f1419;
-      line-height: 1.3;
-    }
-
-    /* Community Notes Admin View */
-    .community-notes-tweets {
-      margin-top: 15px;
-    }
-
-    .community-notes-tweet {
-      border: 1px solid #e1e8ed;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 15px;
-      background-color: white;
-    }
-
-    .community-notes-tweet-content {
-      margin-bottom: 10px;
-    }
-
-    .existing-notes {
-      margin: 10px 0;
-      padding: 10px;
-      background-color: #f7f9fa;
-      border-radius: 8px;
-    }
-
-    .existing-note {
-      padding: 5px 0;
-      border-bottom: 1px solid #e1e8ed;
-    }
-
-    .existing-note:last-child {
-      border-bottom: none;
-    }
-
-    .add-note-btn {
-      background-color: #1DA1F2;
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .add-note-btn:hover {
-      background-color: #1a91da;
-    }
-
-    .selected-tweet {
-      border: 1px solid #e1e8ed;
-      border-radius: 12px;
-      padding: 15px;
-      margin-bottom: 15px;
-      background-color: white;
-    }
-
-    #communityNoteText {
-      width: 100%;
-      padding: 10px;
-      border: 1px solid #e1e8ed;
-      border-radius: 8px;
-      margin: 10px 0;
-      resize: vertical;
-    }
-
-    #submitCommunityNote {
-      background-color: #1DA1F2;
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 8px 16px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    #submitCommunityNote:hover {
-      background-color: #1a91da;
-    }
   </style>
 </head>
 <body class="light-mode">
@@ -566,21 +464,28 @@ TWITTER
       <!-- Sidebar -->
       <div class="col-md-3">
         <div class="sidebar">
-          <div class="logo">
-            <img src="twitter-logo.png" alt="Twitter Logo">
+          <a href="#" class="nav-link" onclick="fetchAndRenderTweets()">
+            <i class="fas fa-home"></i>Home
+          </a>
+          <a href="#" class="nav-link" onclick="showEditableProfile()">
+            <i class="fas fa-user"></i>Profile
+          </a>
+          <a href="#" class="nav-link" onclick="showPremiumSection()">
+            <i class="fas fa-star"></i>Premium
+          </a>
+          <a href="#" class="nav-link" onclick="showAdminSection()">
+            <i class="fas fa-shield-alt"></i>Admin
+          </a>
+          <a href="#" class="nav-link" onclick="logout()">
+            <i class="fas fa-sign-out-alt"></i>Logout
+          </a>
+          <a href="twitter.html" class="nav-link">
+            <i class="fas fa-arrow-left"></i>Back to Klanite
+          </a>
+          <div id="trendingHashtags" class="trending-section">
+            <h3><i class="fas fa-chart-line"></i> Trending</h3>
+            <ul id="trendingList" class="trending-list"></ul>
           </div>
-          <div class="nav-links">
-            <a href="#" class="active" id="homeLink"><i class="fas fa-home"></i> Home</a>
-            <a href="#" id="exploreLink"><i class="fas fa-hashtag"></i> Explore</a>
-            <a href="#" id="notificationsLink"><i class="fas fa-bell"></i> Notifications</a>
-            <a href="#" id="messagesLink"><i class="fas fa-envelope"></i> Messages</a>
-            <a href="#" id="bookmarksLink"><i class="fas fa-bookmark"></i> Bookmarks</a>
-            <a href="#" id="listsLink"><i class="fas fa-list-alt"></i> Lists</a>
-            <a href="#" id="profileLink"><i class="fas fa-user"></i> Profile</a>
-            <a href="#" id="moreLink"><i class="fas fa-ellipsis-h"></i> More</a>
-            <a href="#" id="communityNotesLink"><i class="fas fa-users"></i> Community Notes</a>
-          </div>
-          <button class="tweet-btn">Tweet</button>
         </div>
       </div>
       <!-- Main Content -->
@@ -704,32 +609,6 @@ TWITTER
           <div id="accountList"></div>
         </div>
       </div>
-    </div>
-  </div>
-  <!-- Add Community Notes Modal -->
-  <div id="communityNotesModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Community Notes</h2>
-      <div id="communityNotesAuth">
-        <p>Enter password to access Community Notes:</p>
-        <input type="password" id="communityNotesPassword" placeholder="Password">
-        <button id="communityNotesLogin">Login</button>
-      </div>
-      <div id="communityNotesList" style="display: none;">
-        <div id="communityNotesContainer"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Add Community Note Modal -->
-  <div id="addCommunityNoteModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <h2>Add Community Note</h2>
-      <div id="selectedTweetForNote"></div>
-      <textarea id="communityNoteText" placeholder="Add context that you think people might want to know..." rows="4"></textarea>
-      <button id="submitCommunityNote">Submit Note</button>
     </div>
   </div>
   <script>
@@ -1516,203 +1395,6 @@ TWITTER
       document.getElementById("userProfileSection").style.display = "none";
       document.getElementById("adminSection").style.display = "block";
     }
-
-    // Community Notes functionality
-    let communityNotesPassword = "";
-    let selectedTweetForNote = null;
-    
-    // Community Notes Modal
-    const communityNotesModal = document.getElementById('communityNotesModal');
-    const communityNotesLink = document.getElementById('communityNotesLink');
-    const communityNotesLogin = document.getElementById('communityNotesLogin');
-    const communityNotesAuth = document.getElementById('communityNotesAuth');
-    const communityNotesList = document.getElementById('communityNotesList');
-    const communityNotesContainer = document.getElementById('communityNotesContainer');
-    
-    // Add Community Note Modal
-    const addCommunityNoteModal = document.getElementById('addCommunityNoteModal');
-    const selectedTweetForNoteContainer = document.getElementById('selectedTweetForNote');
-    const communityNoteText = document.getElementById('communityNoteText');
-    const submitCommunityNote = document.getElementById('submitCommunityNote');
-    
-    // Open Community Notes Modal
-    communityNotesLink.addEventListener('click', () => {
-      communityNotesModal.style.display = 'block';
-      communityNotesAuth.style.display = 'block';
-      communityNotesList.style.display = 'none';
-      document.getElementById('communityNotesPassword').value = '';
-    });
-    
-    // Close modals when clicking on X
-    document.querySelectorAll('.close').forEach(closeBtn => {
-      closeBtn.addEventListener('click', () => {
-        communityNotesModal.style.display = 'none';
-        addCommunityNoteModal.style.display = 'none';
-      });
-    });
-    
-    // Close modals when clicking outside
-    window.addEventListener('click', (event) => {
-      if (event.target === communityNotesModal) {
-        communityNotesModal.style.display = 'none';
-      }
-      if (event.target === addCommunityNoteModal) {
-        addCommunityNoteModal.style.display = 'none';
-      }
-    });
-    
-    // Login to Community Notes
-    communityNotesLogin.addEventListener('click', () => {
-      const password = document.getElementById('communityNotesPassword').value;
-      if (password === "b@rnD00rex!t") {
-        communityNotesPassword = password;
-        communityNotesAuth.style.display = 'none';
-        communityNotesList.style.display = 'block';
-        loadCommunityNotes();
-      } else {
-        alert("Incorrect password");
-      }
-    });
-    
-    // Load Community Notes
-    async function loadCommunityNotes() {
-      try {
-        const response = await fetch(`/api/community-notes?password=${encodeURIComponent(communityNotesPassword)}`);
-        const data = await response.json();
-        
-        if (data.success) {
-          renderCommunityNotesAdmin(data.notes);
-        } else {
-          alert("Error loading community notes");
-        }
-      } catch (error) {
-        console.error("Error loading community notes:", error);
-        alert("Error loading community notes");
-      }
-    }
-    
-    // Render Community Notes Admin View
-    function renderCommunityNotesAdmin(notes) {
-      communityNotesContainer.innerHTML = '';
-      
-      // Get all tweets
-      fetch('/api/tweets')
-        .then(response => response.json())
-        .then(data => {
-          if (data.success) {
-            const tweetsContainer = document.createElement('div');
-            tweetsContainer.className = 'community-notes-tweets';
-            
-            data.tweets.forEach(tweet => {
-              const tweetElement = document.createElement('div');
-              tweetElement.className = 'community-notes-tweet';
-              
-              // Tweet content
-              const tweetContent = document.createElement('div');
-              tweetContent.className = 'community-notes-tweet-content';
-              tweetContent.innerHTML = `
-                <div class="tweet-header">
-                  <img src="${tweet.profilePicture || 'default-profile.png'}" alt="Profile" class="profile-pic">
-                  <span class="handle">${tweet.handle}</span>
-                  ${tweet.verified ? '<span class="verified">✓</span>' : ''}
-                </div>
-                <div class="tweet-text">${tweet.text}</div>
-              `;
-              tweetElement.appendChild(tweetContent);
-              
-              // Existing notes for this tweet
-              const tweetNotes = notes.filter(note => note.tweetId === tweet.id);
-              if (tweetNotes.length > 0) {
-                const notesContainer = document.createElement('div');
-                notesContainer.className = 'existing-notes';
-                notesContainer.innerHTML = '<h4>Existing Notes:</h4>';
-                
-                tweetNotes.forEach(note => {
-                  const noteElement = document.createElement('div');
-                  noteElement.className = 'existing-note';
-                  noteElement.textContent = note.text;
-                  notesContainer.appendChild(noteElement);
-                });
-                
-                tweetElement.appendChild(notesContainer);
-              }
-              
-              // Add note button
-              const addNoteBtn = document.createElement('button');
-              addNoteBtn.className = 'add-note-btn';
-              addNoteBtn.textContent = 'Add Community Note';
-              addNoteBtn.addEventListener('click', () => {
-                openAddNoteModal(tweet);
-              });
-              tweetElement.appendChild(addNoteBtn);
-              
-              tweetsContainer.appendChild(tweetElement);
-            });
-            
-            communityNotesContainer.appendChild(tweetsContainer);
-          }
-        });
-    }
-    
-    // Open Add Note Modal
-    function openAddNoteModal(tweet) {
-      selectedTweetForNote = tweet;
-      
-      // Display the selected tweet
-      selectedTweetForNoteContainer.innerHTML = `
-        <div class="selected-tweet">
-          <div class="tweet-header">
-            <img src="${tweet.profilePicture || 'default-profile.png'}" alt="Profile" class="profile-pic">
-            <span class="handle">${tweet.handle}</span>
-            ${tweet.verified ? '<span class="verified">✓</span>' : ''}
-          </div>
-          <div class="tweet-text">${tweet.text}</div>
-        </div>
-      `;
-      
-      communityNoteText.value = '';
-      addCommunityNoteModal.style.display = 'block';
-    }
-    
-    // Submit Community Note
-    submitCommunityNote.addEventListener('click', async () => {
-      if (!selectedTweetForNote) {
-        alert("No tweet selected");
-        return;
-      }
-      
-      const noteText = communityNoteText.value.trim();
-      if (!noteText) {
-        alert("Please enter a note");
-        return;
-      }
-      
-      try {
-        const response = await fetch('/api/community-notes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            password: communityNotesPassword,
-            tweetId: selectedTweetForNote.id,
-            noteText: noteText
-          })
-        });
-        
-        const data = await response.json();
-        if (data.success) {
-          addCommunityNoteModal.style.display = 'none';
-          loadCommunityNotes();
-          fetchAndRenderTweets(); // Refresh the main timeline to show the new note
-        } else {
-          alert("Error adding community note: " + data.error);
-        }
-      } catch (error) {
-        console.error("Error adding community note:", error);
-        alert("Error adding community note");
-      }
-    });
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
