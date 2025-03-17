@@ -2223,6 +2223,84 @@ TWITTER
       checkLoginStatus();
       fetchAndRenderTweets();
     });
+
+    document.getElementById("profilePicUpload").addEventListener("change", async () => {
+      const fileInput = document.getElementById("profilePicUpload");
+      if (fileInput.files.length === 0) return;
+      const imageData = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => reject("Error reading file");
+        reader.readAsDataURL(fileInput.files[0]);
+      });
+      document.getElementById("profilePicPreview").src = imageData;
+    });
+
+    // Fix sidebar navigation
+    document.getElementById("profile-link").addEventListener("click", function(e) {
+      e.preventDefault();
+      resetNavigationState();
+      this.classList.add('active');
+      showEditableProfile();
+    });
+
+    document.getElementById("admin-link").addEventListener("click", function(e) {
+      e.preventDefault();
+      resetNavigationState();
+      this.classList.add('active');
+      showAdminSection();
+    });
+
+    document.getElementById("community-notes-link").addEventListener("click", function(e) {
+      e.preventDefault();
+      resetNavigationState();
+      this.classList.add('active');
+      // Show the community notes modal
+      document.getElementById('community-notes-modal').style.display = 'block';
+      document.getElementById('password-error').style.display = 'none';
+      
+      if (!communityNotesVerified) {
+        document.getElementById('community-notes-content').style.display = 'none';
+        document.getElementById('community-notes-password').value = '';
+      } else {
+        loadCommunityNotesContent();
+      }
+    });
+
+    document.getElementById("home-link").addEventListener("click", function(e) {
+      e.preventDefault();
+      resetNavigationState();
+      this.classList.add('active');
+      backToMainFeed();
+    });
+
+    document.getElementById("explore-link").addEventListener("click", function(e) {
+      e.preventDefault();
+      resetNavigationState();
+      this.classList.add('active');
+      // Toggle random order for explore functionality
+      isRandomOrder = true;
+      fetchAndRenderTweets();
+      
+      document.getElementById("tweetSection").style.display = "block";
+      document.getElementById("profileSection").style.display = "none";
+      document.getElementById("userProfileSection").style.display = "none";
+      document.getElementById("adminSection").style.display = "none";
+      document.getElementById("premiumSection").style.display = "none";
+    });
+
+    document.getElementById("bookmarks-link").addEventListener("click", function(e) {
+      e.preventDefault();
+      alert("Bookmarks feature not implemented yet");
+    });
+
+    // Helper function to reset all navigation states
+    function resetNavigationState() {
+      // Remove 'active' class from all navigation links
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        link.classList.remove('active');
+      });
+    }
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
