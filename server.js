@@ -27,6 +27,21 @@ async function debugFileSystem() {
     console.log('Error reading current directory:', err.message);
   }
   
+  try {
+    console.log('Files in /data directory:');
+    const dataFiles = await fs.readdir('/data');
+    for (const file of dataFiles) {
+      try {
+        const stats = await fs.stat(`/data/${file}`);
+        console.log(`- ${file} (${stats.size} bytes, ${stats.isDirectory() ? 'directory' : 'file'})`);
+      } catch (err) {
+        console.log(`- ${file} (error getting stats: ${err.message})`);
+      }
+    }
+  } catch (err) {
+    console.log('Error reading /data directory:', err.message);
+  }
+  
   // Check file contents
   try {
     const usersData = await fs.readFile('./users.json', 'utf8');
@@ -44,12 +59,33 @@ async function debugFileSystem() {
     console.log('./tweets.json error:', err.message);
   }
   
+  try {
+    const usersData = await fs.readFile('/data/users.json', 'utf8');
+    const users = JSON.parse(usersData);
+    console.log(`/data/users.json: ${usersData.length} chars, ${Object.keys(users).length} users`);
+  } catch (err) {
+    console.log('/data/users.json error:', err.message);
+  }
+  
+  try {
+    const tweetsData = await fs.readFile('/data/tweets.json', 'utf8');
+    const tweets = JSON.parse(tweetsData);
+    console.log(`/data/tweets.json: ${tweetsData.length} chars, ${tweets.length} tweets`);
+  } catch (err) {
+    console.log('/data/tweets.json error:', err.message);
+  }
+  
   console.log('========== END DEBUG ==========');
 }
 
-// Always use the GitHub repository files
-const USERS_FILE = './users.json';
-const TWEETS_FILE = './tweets.json';
+// Use persistent disk storage for production
+const USERS_FILE = process.env.NODE_ENV === 'production' 
+  ? '/data/users.json' 
+  : './users.json';
+  
+const TWEETS_FILE = process.env.NODE_ENV === 'production'
+  ? '/data/tweets.json'
+  : './tweets.json';
 
 // Log the file paths being used
 console.log('Using file paths:');
@@ -715,15 +751,40 @@ debugFileSystem().then(() => {
         try {
           if (req.body.users) {
             await fs.writeFile(USERS_FILE, JSON.stringify(req.body.users, null, 2));
-            console.log(`Imported ${Object.keys(req.body.users).length} users`);
+            console.log(`Imported ${Object.keys(req.body.users).length} users to ${USERS_FILE}`);
+            users = req.body.users; // Update in-memory data immediately
           }
           
           if (req.body.tweets) {
             await fs.writeFile(TWEETS_FILE, JSON.stringify(req.body.tweets, null, 2));
-            console.log(`Imported ${req.body.tweets.length} tweets`);
+            console.log(`Imported ${req.body.tweets.length} tweets to ${TWEETS_FILE}`);
+            tweets = req.body.tweets; // Update in-memory data immediately
           }
           
-          res.json({ success: true, message: 'Data imported successfully' });
+          // Verify the files were saved correctly
+          try {
+            const savedUsersData = await fs.readFile(USERS_FILE, 'utf8');
+            const savedUsers = JSON.parse(savedUsersData);
+            console.log(`Verified: ${Object.keys(savedUsers).length} users in ${USERS_FILE}`);
+          } catch (err) {
+            console.error(`Error verifying ${USERS_FILE}:`, err);
+          }
+          
+          try {
+            const savedTweetsData = await fs.readFile(TWEETS_FILE, 'utf8');
+            const savedTweets = JSON.parse(savedTweetsData);
+            console.log(`Verified: ${savedTweets.length} tweets in ${TWEETS_FILE}`);
+          } catch (err) {
+            console.error(`Error verifying ${TWEETS_FILE}:`, err);
+          }
+          
+          res.json({ 
+            success: true, 
+            message: 'Data imported successfully',
+            location: USERS_FILE,
+            usersCount: Object.keys(req.body.users || {}).length,
+            tweetsCount: (req.body.tweets || []).length
+          });
         } catch (error) {
           console.error('Error importing data:', error);
           res.status(500).json({ success: false, error: error.message });
