@@ -1873,6 +1873,105 @@ TWITTER
       document.head.appendChild(style);
     });
   </script>
+  <script>
+    // Profile photo upload confirmation functionality
+    document.addEventListener('DOMContentLoaded', function() {
+      // We'll add this logic to handle when users select a profile photo
+      const body = document.querySelector('body');
+      
+      // Listen for changes to the profile picture input element
+      body.addEventListener('change', function(e) {
+        // Check if this is the profile picture input
+        if (e.target && e.target.id === 'profile-picture-input') {
+          // Get the confirm button or create it if it doesn't exist
+          let confirmBtn = document.getElementById('confirm-profile-picture');
+          const profilePicPreview = document.getElementById('profile-pic-preview');
+          
+          if (!confirmBtn) {
+            // Create confirm button if it doesn't exist
+            confirmBtn = document.createElement('button');
+            confirmBtn.id = 'confirm-profile-picture';
+            confirmBtn.className = 'btn btn-primary mt-2';
+            confirmBtn.innerText = 'Save Profile Picture';
+            
+            // Add style for the button
+            confirmBtn.style.display = 'block';
+            confirmBtn.style.width = '100%';
+            
+            // Append it after the profile picture preview
+            if (profilePicPreview && profilePicPreview.parentNode) {
+              profilePicPreview.parentNode.insertBefore(confirmBtn, profilePicPreview.nextSibling);
+            }
+          } else {
+            // Make sure it's visible if it exists
+            confirmBtn.style.display = 'block';
+          }
+          
+          // Add save functionality to the confirm button
+          confirmBtn.onclick = function() {
+            const handle = localStorage.getItem('handle');
+            if (!handle) {
+              alert('You must be logged in to update your profile picture');
+              return;
+            }
+            
+            const profilePictureInput = document.getElementById('profile-picture-input');
+            if (profilePictureInput && profilePictureInput.files && profilePictureInput.files[0]) {
+              const file = profilePictureInput.files[0];
+              const reader = new FileReader();
+              
+              reader.onload = function(e) {
+                const profilePicture = e.target.result;
+                
+                // Save the profile picture to the server
+                fetch('/api/profile', {
+                  method: 'PATCH',
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ handle, profilePicture }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                  if (data.success) {
+                    // Show success message
+                    const successMsg = document.createElement('div');
+                    successMsg.className = 'alert alert-success mt-2';
+                    successMsg.innerText = 'Profile picture updated successfully!';
+                    confirmBtn.parentNode.insertBefore(successMsg, confirmBtn.nextSibling);
+                    
+                    // Remove success message after 3 seconds
+                    setTimeout(() => {
+                      successMsg.remove();
+                    }, 3000);
+                    
+                    // Hide the confirm button after saving
+                    confirmBtn.style.display = 'none';
+                    
+                    // Update profile pictures displayed on the page
+                    const profilePics = document.querySelectorAll('.profile-pic-display');
+                    profilePics.forEach(pic => {
+                      if (pic.getAttribute('data-handle').toLowerCase() === handle.toLowerCase()) {
+                        pic.src = profilePicture;
+                      }
+                    });
+                  } else {
+                    alert('Error updating profile picture: ' + (data.error || 'Unknown error'));
+                  }
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  alert('Error updating profile picture. Please try again.');
+                });
+              };
+              
+              reader.readAsDataURL(file);
+            }
+          };
+        }
+      });
+    });
+  </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
