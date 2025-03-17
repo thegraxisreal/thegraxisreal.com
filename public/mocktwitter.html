@@ -1663,9 +1663,65 @@ TWITTER
         alert('Failed to add community note. Please try again.');
       }
     }
+
+    // Initialize when the DOM is fully loaded
+    document.addEventListener("DOMContentLoaded", function() {
+      checkAuthentication();
+      setupEventListeners();
+      updateThemeDisplay();
+      updateCharCount();
+      fetchTrendingHashtags();
+      
+      // Set up community notes button event listener
+      document.getElementById('communityNotesBtn').addEventListener('click', function(e) {
+        e.preventDefault();
+        openCommunityNotes();
+      });
+      
+      document.getElementById('closePasswordModal').addEventListener('click', function() {
+        document.getElementById('passwordModal').style.display = 'none';
+      });
+      
+      document.getElementById('closeCommunityModal').addEventListener('click', function() {
+        document.getElementById('communityNotesModal').style.display = 'none';
+      });
+      
+      document.getElementById('verifyPasswordBtn').addEventListener('click', verifyPassword);
+    });
+
+    // Setup event listeners for the main UI
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <!-- Password Modal -->
+  <div id="passwordModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title">Community Notes Access</div>
+        <span class="close-modal" id="closePasswordModal">&times;</span>
+      </div>
+      <p>Please enter the password to access Community Notes:</p>
+      <div class="community-note-form">
+        <input type="password" id="notesPassword" placeholder="Enter password">
+        <button id="verifyPasswordBtn">Submit</button>
+        <p id="passwordError" style="color: red; margin-top: 10px; display: none;">Incorrect password</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Community Notes Modal -->
+  <div id="communityNotesModal" class="modal">
+    <div class="modal-content" style="width: 70%; max-width: 800px;">
+      <div class="modal-header">
+        <div class="modal-title">Community Notes</div>
+        <span class="close-modal" id="closeCommunityModal">&times;</span>
+      </div>
+      <div class="community-notes-container" id="communityNotesContainer">
+        <!-- Community notes will be loaded here -->
+      </div>
+    </div>
+  </div>
 </body>
 </html>
 
