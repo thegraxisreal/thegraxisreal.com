@@ -1496,33 +1496,49 @@ TWITTER
       }
     }
 
-    // Add the missing likeTweet function
+    // Update the likeTweet function to match the server endpoint
     async function likeTweet(tweetId) {
       if (!currentUser) return;
       
       try {
-        const response = await fetch("/api/like", {
-          method: "POST",
+        // Get the current tweet element
+        const tweetElement = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"]`);
+        const likeBtn = tweetElement.querySelector(".like-btn");
+        const likesCount = likeBtn.querySelector("span");
+        const heartIcon = likeBtn.querySelector("i");
+        
+        // Determine current liked state and new like count
+        const isCurrentlyLiked = likeBtn.classList.contains("liked");
+        const currentLikes = parseInt(likesCount.textContent || 0);
+        const newLikes = isCurrentlyLiked ? Math.max(currentLikes - 1, 0) : currentLikes + 1;
+        
+        // Make the API call to update likes on server
+        const response = await fetch("/api/tweet/like", {
+          method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ tweetId, handle: currentUser })
+          body: JSON.stringify({ 
+            id: tweetId, 
+            likes: newLikes 
+          })
         });
         
         const data = await response.json();
         
         if (data.success) {
-          // Update like button UI without refreshing the whole feed
-          const likeBtn = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"] .like-btn`);
-          const likesCount = likeBtn.querySelector("span");
-          const heartIcon = likeBtn.querySelector("i");
-          
-          if (data.liked) {
-            likeBtn.classList.add("liked");
-            heartIcon.classList.replace("far", "fas");
-            likesCount.textContent = parseInt(likesCount.textContent || 0) + 1;
-          } else {
+          // Update the UI
+          if (isCurrentlyLiked) {
             likeBtn.classList.remove("liked");
             heartIcon.classList.replace("fas", "far");
-            likesCount.textContent = Math.max(parseInt(likesCount.textContent || 0) - 1, 0);
+            likesCount.textContent = newLikes;
+          } else {
+            likeBtn.classList.add("liked");
+            heartIcon.classList.replace("far", "fas");
+            likesCount.textContent = newLikes;
+            // Add like animation
+            heartIcon.style.animation = 'none';
+            setTimeout(() => {
+              heartIcon.style.animation = 'likeAnimation 0.45s ease-in-out';
+            }, 10);
           }
         }
       } catch (error) {
@@ -1530,24 +1546,270 @@ TWITTER
       }
     }
 
-    // Add stubs for other interactions if missing
+    // Implement reply functionality
     function showReplyModal(tweetId) {
-      console.log("Reply to tweet:", tweetId);
-      alert("Reply feature coming soon!");
+      if (!currentUser) {
+        alert("Please log in to reply");
+        return;
+      }
+      
+      // Create modal for reply
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.style.display = 'block';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal-content';
+      modalContent.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#192734' : 'white';
+      modalContent.style.color = document.body.classList.contains('dark-mode') ? 'white' : 'black';
+      
+      // Get the original tweet text to show what we're replying to
+      const tweetElement = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"]`);
+      const tweetText = tweetElement.querySelector('.tweet-text').textContent;
+      const tweetHandle = tweetElement.querySelector('.tweet-name').textContent.split(' ')[0]; // Get handle without verified badge
+      
+      modalContent.innerHTML = `
+        <div class="modal-header">
+          <h3 class="modal-title">Reply to @${tweetHandle}</h3>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="original-tweet" style="border-left: 3px solid var(--twitter-blue); padding-left: 10px; margin: 10px 0; opacity: 0.8;">
+          ${tweetText}
+        </div>
+        <div class="reply-form">
+          <textarea id="replyText" class="form-control" rows="3" placeholder="Tweet your reply"></textarea>
+          <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+            <small id="replyCharCount">280</small>
+            <button id="submitReply" class="btn">Reply</button>
+          </div>
+        </div>
+      `;
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+      
+      // Add event listeners
+      const closeBtn = modal.querySelector('.close-modal');
+      closeBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      const replyTextarea = modal.querySelector('#replyText');
+      const charCount = modal.querySelector('#replyCharCount');
+      
+      replyTextarea.addEventListener('input', function() {
+        const remaining = 280 - this.value.length;
+        charCount.textContent = remaining;
+        charCount.style.color = remaining <= 10 ? '#e0245e' : '#555';
+      });
+      
+      const submitBtn = modal.querySelector('#submitReply');
+      submitBtn.addEventListener('click', async () => {
+        const replyText = replyTextarea.value.trim();
+        if (!replyText || replyText.length > 280) return;
+        
+        try {
+          const response = await fetch('/api/tweet/reply', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              tweetId: parseInt(tweetId),
+              handle: currentUser,
+              text: replyText
+            })
+          });
+          
+          const data = await response.json();
+          
+          if (data.success) {
+            document.body.removeChild(modal);
+            // Refresh the feed to show the new reply
+            fetchAndRenderTweets();
+          } else {
+            alert('Error posting reply: ' + (data.error || 'Unknown error'));
+          }
+        } catch (error) {
+          console.error('Error posting reply:', error);
+          alert('Error posting reply. Please try again.');
+        }
+      });
+      
+      // Close modal when clicking outside
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          document.body.removeChild(modal);
+        }
+      });
+      
+      // Focus the textarea
+      replyTextarea.focus();
     }
     
-    function retweetTweet(tweetId) {
-      console.log("Retweet:", tweetId);
-      if (!currentUser) return;
-      alert("Retweet feature coming soon!");
+    // Implement retweet functionality
+    async function retweetTweet(tweetId) {
+      if (!currentUser) {
+        alert("Please log in to retweet");
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/tweet/retweet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tweetId: parseInt(tweetId),
+            handle: currentUser
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update retweet count in UI
+          const retweetBtn = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"] .retweet-btn`);
+          const retweetCount = retweetBtn.querySelector("span");
+          
+          // If count exists, increment it
+          if (retweetCount) {
+            const currentCount = parseInt(retweetCount.textContent || 0);
+            retweetCount.textContent = currentCount + 1;
+          }
+          
+          // Add visual feedback
+          const retweetIcon = retweetBtn.querySelector("i");
+          retweetBtn.classList.add("retweeted");
+          retweetIcon.style.color = "#17bf63";
+          
+          // Show confirmation
+          alert("Tweet retweeted!");
+          
+          // Refresh the feed to show the retweeted tweet
+          fetchAndRenderTweets();
+        } else {
+          alert('Error retweeting: ' + (data.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error retweeting:', error);
+        alert('Error retweeting. Please try again.');
+      }
     }
     
+    // Implement quote tweet functionality
     function showShareTweet(tweetId) {
-      console.log("Share tweet:", tweetId);
-      alert("Share feature coming soon!");
+      if (!currentUser) {
+        alert("Please log in to share");
+        return;
+      }
+      
+      // Get the original tweet
+      const tweetElement = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"]`);
+      const tweetText = tweetElement.querySelector('.tweet-text').textContent;
+      const tweetHandle = tweetElement.querySelector('.tweet-name').textContent.split(' ')[0];
+      
+      // Create modal for quote tweet
+      const modal = document.createElement('div');
+      modal.className = 'modal';
+      modal.style.display = 'block';
+      
+      const modalContent = document.createElement('div');
+      modalContent.className = 'modal-content';
+      modalContent.style.backgroundColor = document.body.classList.contains('dark-mode') ? '#192734' : 'white';
+      modalContent.style.color = document.body.classList.contains('dark-mode') ? 'white' : 'black';
+      
+      modalContent.innerHTML = `
+        <div class="modal-header">
+          <h3 class="modal-title">Quote Tweet</h3>
+          <span class="close-modal">&times;</span>
+        </div>
+        <div class="quote-form">
+          <textarea id="quoteText" class="form-control" rows="3" placeholder="Add a comment"></textarea>
+          <div class="quoted-tweet-preview" style="margin: 10px 0; padding: 10px; border: 1px solid var(--twitter-light-gray); border-radius: 8px;">
+            <strong>@${tweetHandle}:</strong> ${tweetText}
+          </div>
+          <div style="display: flex; justify-content: space-between; margin-top: 10px;">
+            <small id="quoteCharCount">280</small>
+            <button id="submitQuote" class="btn">Quote Tweet</button>
+          </div>
+        </div>
+      `;
+      
+      modal.appendChild(modalContent);
+      document.body.appendChild(modal);
+      
+      // Add event listeners
+      const closeBtn = modal.querySelector('.close-modal');
+      closeBtn.addEventListener('click', () => {
+        document.body.removeChild(modal);
+      });
+      
+      const quoteTextarea = modal.querySelector('#quoteText');
+      const charCount = modal.querySelector('#quoteCharCount');
+      
+      quoteTextarea.addEventListener('input', function() {
+        const remaining = 280 - this.value.length;
+        charCount.textContent = remaining;
+        charCount.style.color = remaining <= 10 ? '#e0245e' : '#555';
+      });
+      
+      const submitBtn = modal.querySelector('#submitQuote');
+      submitBtn.addEventListener('click', async () => {
+        const quoteText = quoteTextarea.value.trim();
+        if (quoteText.length > 280) return;
+        
+        try {
+          // First, get the full tweet object
+          const response = await fetch('/api/tweets');
+          const data = await response.json();
+          
+          if (data.success) {
+            const originalTweet = data.tweets.find(t => t.id == tweetId);
+            
+            if (!originalTweet) {
+              alert('Error: Original tweet not found');
+              return;
+            }
+            
+            // Now post the quote tweet
+            const postResponse = await fetch('/api/tweet', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                handle: currentUser,
+                text: quoteText,
+                quotedTweet: originalTweet
+              })
+            });
+            
+            const postData = await postResponse.json();
+            
+            if (postData.success) {
+              document.body.removeChild(modal);
+              // Refresh the feed to show the new quote tweet
+              fetchAndRenderTweets();
+            } else {
+              alert('Error posting quote tweet: ' + (postData.error || 'Unknown error'));
+            }
+          } else {
+            alert('Error fetching original tweet: ' + (data.error || 'Unknown error'));
+          }
+        } catch (error) {
+          console.error('Error posting quote tweet:', error);
+          alert('Error posting quote tweet. Please try again.');
+        }
+      });
+      
+      // Close modal when clicking outside
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          document.body.removeChild(modal);
+        }
+      });
+      
+      // Focus the textarea
+      quoteTextarea.focus();
     }
 
-    // Setup CSS for interacting with tweets
+    // Add CSS styles for modals and interaction UI
     document.addEventListener("DOMContentLoaded", function() {
       // Add CSS for better interaction feedback
       const style = document.createElement('style');
@@ -1576,6 +1838,11 @@ TWITTER
           background-color: rgba(23, 191, 99, 0.1);
         }
         
+        .retweet-btn.retweeted,
+        .retweet-btn.retweeted:hover {
+          color: #17bf63;
+        }
+        
         .like-btn:hover {
           color: #e0245e;
           background-color: rgba(224, 36, 94, 0.1);
@@ -1599,6 +1866,66 @@ TWITTER
           25% { transform: scale(1.2); }
           50% { transform: scale(0.95); }
           100% { transform: scale(1); }
+        }
+        
+        /* Modal styles */
+        .modal {
+          display: none;
+          position: fixed;
+          z-index: 1000;
+          left: 0;
+          top: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+          background-color: white;
+          margin: 10% auto;
+          padding: 20px;
+          border-radius: 15px;
+          width: 50%;
+          max-width: 500px;
+        }
+
+        .modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 20px;
+        }
+
+        .modal-title {
+          font-weight: bold;
+          font-size: 1.2rem;
+          margin: 0;
+        }
+
+        .close-modal {
+          cursor: pointer;
+          font-size: 1.5rem;
+        }
+        
+        .reply-form textarea,
+        .quote-form textarea {
+          width: 100%;
+          border: 1px solid var(--twitter-light-gray);
+          border-radius: 8px;
+          padding: 10px;
+          resize: none;
+        }
+        
+        body.dark-mode .modal-content {
+          background-color: #192734;
+          color: white;
+        }
+        
+        body.dark-mode .reply-form textarea,
+        body.dark-mode .quote-form textarea {
+          background-color: #253341;
+          color: white;
+          border-color: #38444d;
         }
       `;
       document.head.appendChild(style);
