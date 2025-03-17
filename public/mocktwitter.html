@@ -1,4 +1,4 @@
-TWITTER 
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1880,7 +1880,100 @@ TWITTER
         }
       `;
       document.head.appendChild(style);
+      
+      // Fetch tweets initially
+      fetchAndRenderTweets();
     });
+
+    // Make sure to add event listeners after the tweets are rendered
+    function addEventListeners() {
+      // Find all tweet buttons and add event listeners directly to them
+      document.querySelectorAll('.tweet-card').forEach(tweet => {
+        const tweetId = tweet.getAttribute('data-tweet-id');
+        
+        // Reply button
+        const replyBtn = tweet.querySelector('.reply-btn');
+        if (replyBtn) {
+          replyBtn.onclick = function(e) {
+            e.preventDefault();
+            showReplyModal(tweetId);
+          };
+        }
+        
+        // Retweet button
+        const retweetBtn = tweet.querySelector('.retweet-btn');
+        if (retweetBtn) {
+          retweetBtn.onclick = function(e) {
+            e.preventDefault();
+            retweetTweet(tweetId);
+          };
+        }
+        
+        // Like button
+        const likeBtn = tweet.querySelector('.like-btn');
+        if (likeBtn) {
+          likeBtn.onclick = function(e) {
+            e.preventDefault();
+            likeTweet(tweetId);
+          };
+        }
+        
+        // Share/Quote button
+        const shareBtn = tweet.querySelector('.share-btn');
+        if (shareBtn) {
+          shareBtn.onclick = function(e) {
+            e.preventDefault();
+            showShareTweet(tweetId);
+          };
+        }
+      });
+    }
+
+    // Implement retweet functionality
+    async function retweetTweet(tweetId) {
+      if (!currentUser) {
+        alert("Please log in to retweet");
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/tweet/retweet', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            tweetId: parseInt(tweetId),
+            handle: currentUser
+          })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          // Update retweet count in UI without refreshing the whole feed
+          const retweetBtn = document.querySelector(`.tweet-card[data-tweet-id="${tweetId}"] .retweet-btn`);
+          const retweetCount = retweetBtn.querySelector("span");
+          
+          // If count exists, increment it
+          if (retweetCount) {
+            const currentCount = parseInt(retweetCount.textContent || 0);
+            retweetCount.textContent = currentCount + 1;
+          }
+          
+          // Add visual feedback
+          const retweetIcon = retweetBtn.querySelector("i");
+          retweetBtn.classList.add("retweeted");
+          retweetIcon.style.color = "#17bf63";
+          
+          // Refresh the feed to show the retweeted tweet at the top
+          fetchAndRenderTweets();
+        } else {
+          alert('Error retweeting: ' + (data.error || 'Unknown error'));
+        }
+      } catch (error) {
+        console.error('Error retweeting:', error);
+        alert('Error retweeting. Please try again.');
+      }
+    }
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
