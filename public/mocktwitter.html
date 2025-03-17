@@ -20,13 +20,18 @@ TWITTER
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-color: var(--twitter-background);
+      color: var(--twitter-black);
       margin: 0;
       padding: 0;
-      color: var(--twitter-black);
     }
-    .container.main-container {
-      margin-top: 20px;
-      max-width: 1200px;
+    .container-fluid {
+      padding: 0;
+    }
+    .row {
+      margin: 0;
+    }
+    .col, .col-md-3, .col-md-6, .col-md-9, .col-lg-3, .col-lg-6, .col-lg-9 {
+      padding: 0;
     }
     
     /* Navigation */
@@ -45,9 +50,12 @@ TWITTER
     
     /* Sidebar */
     .sidebar {
-      padding: 0;
       position: sticky;
-      top: 70px;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      border-right: 1px solid var(--twitter-extra-light-gray);
+      padding: 0 12px;
     }
     .sidebar .nav-link {
       padding: 12px 15px;
@@ -647,6 +655,50 @@ TWITTER
     body.dark-mode .tweet-card .community-note-text {
       color: #fff;
     }
+
+    /* Add profile photo editing styles */
+    .profile-photo-container {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 15px;
+    }
+    
+    .profile-photo {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 4px solid white;
+    }
+    
+    .edit-photo-overlay {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    
+    .profile-photo-container:hover .edit-photo-overlay {
+      opacity: 1;
+    }
+    
+    .edit-photo-icon {
+      color: white;
+      font-size: 24px;
+    }
+    
+    #photoInput {
+      display: none;
+    }
   </style>
 </head>
 <body class="light-mode">
@@ -768,14 +820,12 @@ TWITTER
         <!-- Profile Editing -->
         <div id="profileSection" style="display:none;">
           <h2><i class="fas fa-user-edit"></i> My Profile</h2>
-          <div class="text-center mb-4">
-            <img id="profilePicPreview" src="" alt="Profile Picture" style="width:120px; height:120px; border-radius:50%; margin-bottom:15px; object-fit: cover;" />
-            <div class="form-group">
-              <label for="profilePicUpload" class="btn">
-                <i class="fas fa-camera"></i> Change Photo
-              </label>
-              <input type="file" id="profilePicUpload" class="form-control-file d-none" accept="image/*" />
+          <div class="profile-photo-container">
+            <img src="https://via.placeholder.com/150" alt="Profile Photo" class="profile-photo" id="profilePhoto">
+            <div class="edit-photo-overlay">
+              <i class="fas fa-camera edit-photo-icon"></i>
             </div>
+            <input type="file" id="photoInput" accept="image/*">
           </div>
           <div class="form-group">
             <label for="profileBio"><i class="fas fa-info-circle"></i> Bio:</label>
@@ -1245,7 +1295,7 @@ TWITTER
       if (!currentUser) return;
       const profile = await fetchProfile(currentUser);
       if (profile) {
-        document.getElementById("profilePicPreview").src = profile.profilePicture || "images/default.png";
+        document.getElementById("profilePhoto").src = profile.profilePicture || "images/default.png";
         document.getElementById("profileBio").value = profile.bio || "";
       }
       document.getElementById("tweetSection").style.display = "none";
@@ -1329,186 +1379,82 @@ TWITTER
       }
     });
 
-    document.getElementById("updateProfilePic").addEventListener("click", async () => {
-      if (!currentUser) return;
-      const fileInput = document.getElementById("profilePicUpload");
-      if (fileInput.files.length === 0) return;
-      const imageData = await new Promise((resolve, reject) => {
-        const reader = new FileReader();
-        reader.onload = () => resolve(reader.result);
-        reader.onerror = () => reject("Error reading file");
-        reader.readAsDataURL(fileInput.files[0]);
-      });
-      const response = await fetch("/api/profile", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ handle: currentUser, profilePicture: imageData })
-      });
-      const data = await response.json();
-      if (data.success) {
-        document.getElementById("profilePicPreview").src = imageData;
-        document.getElementById("profileMessage").textContent = "Profile picture updated successfully.";
-        fetchAndRenderTweets();
-      }
-    });
-
-    async function showAdminSection() {
-      const password = prompt("Enter admin password:");
-      if (password !== "1612") {
-        alert("Incorrect admin password.");
-        return;
-      }
+    // Add the profile photo editing functionality
+    function setupProfilePhotoEditing() {
+      const photoInput = document.getElementById('photoInput');
+      const editPhotoOverlay = document.querySelector('.edit-photo-overlay');
       
-      // Fetch and display user accounts
-      const response = await fetch("/api/users");
-      const data = await response.json();
-      if (data.success) {
-        const accountList = document.getElementById("accountList");
-        accountList.innerHTML = "";
-        data.users.forEach(user => {
-          const entry = document.createElement("div");
-          entry.className = "account-entry";
-          const info = document.createElement("span");
-          info.textContent = `${user.handle} - ${user.password}${user.banned ? " (Banned)" : ""}`;
-          const banBtn = document.createElement("button");
-          banBtn.className = "ban-btn";
-          banBtn.textContent = user.banned ? "Banned" : "Ban";
-          banBtn.disabled = user.banned;
-          banBtn.addEventListener("click", async () => {
-            const banResponse = await fetch("/api/ban", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ handle: user.handle })
-            });
-            const banData = await banResponse.json();
-            if (banData.success) {
-              banBtn.textContent = "Banned";
-              banBtn.disabled = true;
-              info.textContent = `${user.handle} - ${user.password} (Banned)`;
-            }
-          });
-          entry.appendChild(info);
-          entry.appendChild(banBtn);
-          accountList.appendChild(entry);
+      if (editPhotoOverlay) {
+        editPhotoOverlay.addEventListener('click', () => {
+          photoInput.click();
         });
       }
       
-      // Load community notes section
-      loadCommunityNotesAdmin();
-      
-      // Hide other sections and show admin section
-      document.getElementById("tweetSection").style.display = "none";
-      document.getElementById("profileSection").style.display = "none";
-      document.getElementById("premiumSection").style.display = "none";
-      document.getElementById("userProfileSection").style.display = "none";
-      document.getElementById("adminSection").style.display = "block";
-    }
-
-    // Community Notes
-    let communityNotesEnabled = false;
-
-    // New function to load community notes in admin panel
-    async function loadCommunityNotesAdmin() {
-      const container = document.getElementById('communityNotesAdminContainer');
-      container.innerHTML = '<p>Loading tweets...</p>';
-      
-      try {
-        const response = await fetch('/api/tweets');
-        const data = await response.json();
-        
-        if (data.success) {
-          container.innerHTML = '';
-          
-          data.tweets.forEach(tweet => {
-            const tweetElement = document.createElement('div');
-            tweetElement.className = 'community-note-item';
-            
-            const noteExists = tweet.communityNotes && tweet.communityNotes.length > 0;
-            
-            tweetElement.innerHTML = `
-              <div class="tweet-header">
-                <span class="tweet-name">${tweet.handle}</span>
-                <span class="tweet-handle">@${tweet.handle}</span>
-              </div>
-              <div class="tweet-text">${tweet.text}</div>
+      if (photoInput) {
+        photoInput.addEventListener('change', (event) => {
+          const file = event.target.files[0];
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+              const profilePicture = e.target.result;
               
-              ${noteExists ? `
-                <div class="community-note">
-                  <div class="community-note-header">
-                    <div class="people-icon-group">
-                      <i class="fas fa-user people-icon"></i>
-                      <i class="fas fa-user people-icon"></i>
-                      <i class="fas fa-user people-icon"></i>
-                    </div>
-                    Readers added context
-                  </div>
-                  <div class="community-note-text">
-                    ${tweet.communityNotes[0].text}
-                  </div>
-                </div>
-              ` : ''}
+              // Update the image preview
+              const profilePhoto = document.querySelector('.profile-photo');
+              if (profilePhoto) {
+                profilePhoto.src = profilePicture;
+              }
               
-              <div class="community-note-form">
-                <textarea placeholder="Add a community note to provide context..." id="note-${tweet.id}"></textarea>
-                <button onclick="addCommunityNote(${tweet.id})">Submit</button>
-              </div>
-            `;
-            
-            container.appendChild(tweetElement);
-          });
-        } else {
-          container.innerHTML = '<p>Error loading tweets.</p>';
-        }
-      } catch (error) {
-        console.error('Error fetching tweets for community notes:', error);
-        container.innerHTML = '<p>Error loading tweets.</p>';
-      }
-    }
-
-    async function addCommunityNote(tweetId) {
-      const noteText = document.getElementById(`note-${tweetId}`).value.trim();
-      
-      if (!noteText) {
-        alert('Please enter a note.');
-        return;
-      }
-      
-      try {
-        const response = await fetch('/api/community-notes', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ tweetId, noteText })
+              // Get the current user's handle
+              const currentUser = localStorage.getItem('currentUser');
+              if (!currentUser) {
+                alert('You must be logged in to update your profile picture');
+                return;
+              }
+              
+              // Send the update to the server
+              fetch('/api/profile', {
+                method: 'PATCH',
+                headers: {
+                  'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                  handle: currentUser,
+                  profilePicture: profilePicture
+                })
+              })
+              .then(response => response.json())
+              .then(data => {
+                if (data.success) {
+                  // Update the profile pictures throughout the UI
+                  document.querySelectorAll(`.user-${currentUser.toLowerCase()} img`).forEach(img => {
+                    img.src = profilePicture;
+                  });
+                  
+                  console.log('Profile picture updated successfully');
+                } else {
+                  console.error('Failed to update profile picture:', data.error);
+                  alert('Failed to update profile picture: ' + data.error);
+                }
+              })
+              .catch(error => {
+                console.error('Error updating profile picture:', error);
+                alert('Error updating profile picture');
+              });
+            };
+            reader.readAsDataURL(file);
+          }
         });
-        
-        const data = await response.json();
-        
-        if (data.success) {
-          alert('Community note added successfully!');
-          document.getElementById(`note-${tweetId}`).value = '';
-          
-          // Refresh the displays
-          loadCommunityNotesAdmin(); // Refresh the admin panel
-          fetchAndRenderTweets(); // Refresh the main feed to show the new note
-        } else {
-          alert(`Failed to add note: ${data.error}`);
-        }
-      } catch (error) {
-        console.error('Error adding community note:', error);
-        alert('Failed to add community note. Please try again.');
       }
     }
 
-    // Initialize when the DOM is fully loaded
-    document.addEventListener("DOMContentLoaded", function() {
+    // Call the setup function when the DOM is loaded
+    document.addEventListener('DOMContentLoaded', () => {
       checkAuthentication();
       setupEventListeners();
       updateThemeDisplay();
       updateCharCount();
       fetchTrendingHashtags();
-      
-      // Community notes listeners removed since they're now in the admin panel
+      setupProfilePhotoEditing();
     });
 
     // Setup event listeners for the main UI
@@ -1871,105 +1817,6 @@ TWITTER
         }
       `;
       document.head.appendChild(style);
-    });
-  </script>
-  <script>
-    // Profile photo upload confirmation functionality
-    document.addEventListener('DOMContentLoaded', function() {
-      // We'll add this logic to handle when users select a profile photo
-      const body = document.querySelector('body');
-      
-      // Listen for changes to the profile picture input element
-      body.addEventListener('change', function(e) {
-        // Check if this is the profile picture input
-        if (e.target && e.target.id === 'profile-picture-input') {
-          // Get the confirm button or create it if it doesn't exist
-          let confirmBtn = document.getElementById('confirm-profile-picture');
-          const profilePicPreview = document.getElementById('profile-pic-preview');
-          
-          if (!confirmBtn) {
-            // Create confirm button if it doesn't exist
-            confirmBtn = document.createElement('button');
-            confirmBtn.id = 'confirm-profile-picture';
-            confirmBtn.className = 'btn btn-primary mt-2';
-            confirmBtn.innerText = 'Save Profile Picture';
-            
-            // Add style for the button
-            confirmBtn.style.display = 'block';
-            confirmBtn.style.width = '100%';
-            
-            // Append it after the profile picture preview
-            if (profilePicPreview && profilePicPreview.parentNode) {
-              profilePicPreview.parentNode.insertBefore(confirmBtn, profilePicPreview.nextSibling);
-            }
-          } else {
-            // Make sure it's visible if it exists
-            confirmBtn.style.display = 'block';
-          }
-          
-          // Add save functionality to the confirm button
-          confirmBtn.onclick = function() {
-            const handle = localStorage.getItem('handle');
-            if (!handle) {
-              alert('You must be logged in to update your profile picture');
-              return;
-            }
-            
-            const profilePictureInput = document.getElementById('profile-picture-input');
-            if (profilePictureInput && profilePictureInput.files && profilePictureInput.files[0]) {
-              const file = profilePictureInput.files[0];
-              const reader = new FileReader();
-              
-              reader.onload = function(e) {
-                const profilePicture = e.target.result;
-                
-                // Save the profile picture to the server
-                fetch('/api/profile', {
-                  method: 'PATCH',
-                  headers: {
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ handle, profilePicture }),
-                })
-                .then(response => response.json())
-                .then(data => {
-                  if (data.success) {
-                    // Show success message
-                    const successMsg = document.createElement('div');
-                    successMsg.className = 'alert alert-success mt-2';
-                    successMsg.innerText = 'Profile picture updated successfully!';
-                    confirmBtn.parentNode.insertBefore(successMsg, confirmBtn.nextSibling);
-                    
-                    // Remove success message after 3 seconds
-                    setTimeout(() => {
-                      successMsg.remove();
-                    }, 3000);
-                    
-                    // Hide the confirm button after saving
-                    confirmBtn.style.display = 'none';
-                    
-                    // Update profile pictures displayed on the page
-                    const profilePics = document.querySelectorAll('.profile-pic-display');
-                    profilePics.forEach(pic => {
-                      if (pic.getAttribute('data-handle').toLowerCase() === handle.toLowerCase()) {
-                        pic.src = profilePicture;
-                      }
-                    });
-                  } else {
-                    alert('Error updating profile picture: ' + (data.error || 'Unknown error'));
-                  }
-                })
-                .catch(error => {
-                  console.error('Error:', error);
-                  alert('Error updating profile picture. Please try again.');
-                });
-              };
-              
-              reader.readAsDataURL(file);
-            }
-          };
-        }
-      });
     });
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
