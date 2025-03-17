@@ -478,16 +478,14 @@ debugFileSystem().then(() => {
       function generateViewCount() {
         const roll = Math.random() * 100; // Roll 0-100
         
-        if (roll < 33.33) { // ~33.33% chance for small tweet (0-900 views)
-          return Math.floor(Math.random() * 901).toString(); // Return as string for consistency
-        } else if (roll < 66.66) { // ~33.33% chance for medium tweet (1k-500k)
-          const views = Math.floor(Math.random() * 499000) + 1000;
-          return Math.floor(views / 1000) + 'K'; // Convert to K format (e.g., 5K)
-        } else { // ~33.33% chance for big tweet (500k-100M)
-          const views = Math.floor(Math.random() * 99500000) + 500000;
-          const millionViews = views / 1000000;
-          // Ensure we're dealing with a valid number and format to 1 decimal place
-          return (Math.floor(millionViews * 10) / 10).toFixed(1) + 'M'; // Convert to M format with 1 decimal (e.g., 2.5M)
+        if (roll < 33.33) { // ~33.33% chance for small tweet (1-999 views)
+          return Math.floor(Math.random() * 999) + 1 + ''; // Just a number as string
+        } else if (roll < 66.66) { // ~33.33% chance for medium tweet (1K-999K)
+          const num = Math.floor(Math.random() * 999) + 1;
+          return num + 'K'; // Number + K
+        } else { // ~33.33% chance for big tweet (1M-999M)
+          const num = Math.floor(Math.random() * 999) + 1;
+          return num + 'M'; // Number + M
         }
       }
 
