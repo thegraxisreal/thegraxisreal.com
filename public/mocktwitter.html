@@ -822,7 +822,7 @@ TWITTER
           <h2><i class="fas fa-user-edit"></i> My Profile</h2>
           <div class="profile-photo-container">
             <img src="https://via.placeholder.com/150" alt="Profile Photo" class="profile-photo" id="profilePhoto">
-            <div class="edit-photo-overlay" id="editPhotoOverlay">
+            <div class="edit-photo-overlay">
               <i class="fas fa-camera edit-photo-icon"></i>
             </div>
             <input type="file" id="photoInput" accept="image/*">
@@ -1405,13 +1405,11 @@ TWITTER
               }
               
               // Get the current user's handle
+              const currentUser = localStorage.getItem('currentUser');
               if (!currentUser) {
                 alert('You must be logged in to update your profile picture');
                 return;
               }
-              
-              // Show loading message
-              document.getElementById("profileMessage").textContent = "Updating profile picture...";
               
               // Send the update to the server
               fetch('/api/profile', {
@@ -1432,21 +1430,15 @@ TWITTER
                     img.src = profilePicture;
                   });
                   
-                  // Show success message
-                  document.getElementById("profileMessage").textContent = "Profile picture updated successfully!";
-                  setTimeout(() => document.getElementById("profileMessage").textContent = "", 3000);
-                  
                   console.log('Profile picture updated successfully');
                 } else {
                   console.error('Failed to update profile picture:', data.error);
-                  document.getElementById("profileMessage").textContent = "Failed to update profile picture: " + data.error;
-                  setTimeout(() => document.getElementById("profileMessage").textContent = "", 3000);
+                  alert('Failed to update profile picture: ' + data.error);
                 }
               })
               .catch(error => {
                 console.error('Error updating profile picture:', error);
-                document.getElementById("profileMessage").textContent = "Error updating profile picture";
-                setTimeout(() => document.getElementById("profileMessage").textContent = "", 3000);
+                alert('Error updating profile picture');
               });
             };
             reader.readAsDataURL(file);
