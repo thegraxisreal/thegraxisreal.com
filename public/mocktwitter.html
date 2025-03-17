@@ -464,28 +464,21 @@ TWITTER
       <!-- Sidebar -->
       <div class="col-md-3">
         <div class="sidebar">
-          <a href="#" class="nav-link" onclick="fetchAndRenderTweets()">
-            <i class="fas fa-home"></i>Home
-          </a>
-          <a href="#" class="nav-link" onclick="showEditableProfile()">
-            <i class="fas fa-user"></i>Profile
-          </a>
-          <a href="#" class="nav-link" onclick="showPremiumSection()">
-            <i class="fas fa-star"></i>Premium
-          </a>
-          <a href="#" class="nav-link" onclick="showAdminSection()">
-            <i class="fas fa-shield-alt"></i>Admin
-          </a>
-          <a href="#" class="nav-link" onclick="logout()">
-            <i class="fas fa-sign-out-alt"></i>Logout
-          </a>
-          <a href="twitter.html" class="nav-link">
-            <i class="fas fa-arrow-left"></i>Back to Klanite
-          </a>
-          <div id="trendingHashtags" class="trending-section">
-            <h3><i class="fas fa-chart-line"></i> Trending</h3>
-            <ul id="trendingList" class="trending-list"></ul>
+          <div class="logo">
+            <img src="twitter-logo.png" alt="Twitter Logo">
           </div>
+          <div class="nav-links">
+            <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
+            <a href="#"><i class="fas fa-search"></i> Explore</a>
+            <a href="#"><i class="fas fa-bell"></i> Notifications</a>
+            <a href="#"><i class="fas fa-envelope"></i> Messages</a>
+            <a href="#"><i class="fas fa-bookmark"></i> Bookmarks</a>
+            <a href="#"><i class="fas fa-list-alt"></i> Lists</a>
+            <a href="#" id="profile-link"><i class="fas fa-user"></i> Profile</a>
+            <a href="#" id="community-notes-link"><i class="fas fa-users"></i> Community Notes</a>
+            <a href="#" id="more-link"><i class="fas fa-ellipsis-h"></i> More</a>
+          </div>
+          <button class="tweet-btn">Tweet</button>
         </div>
       </div>
       <!-- Main Content -->
@@ -607,6 +600,22 @@ TWITTER
             <i class="fas fa-arrow-left"></i> Back to Feed
           </button>
           <div id="accountList"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="community-notes-modal" class="modal">
+    <div class="modal-content" style="width: 80%; max-width: 800px; max-height: 80vh; overflow-y: auto;">
+      <span class="close">&times;</span>
+      <h2>Community Notes</h2>
+      <div class="password-section">
+        <input type="password" id="community-notes-password" placeholder="Enter password">
+        <button id="verify-password-btn">Verify</button>
+        <p id="password-error" style="color: red; display: none;">Incorrect password</p>
+      </div>
+      <div id="community-notes-content" style="display: none;">
+        <div id="community-notes-list">
+          <!-- Tweets with add note buttons will be displayed here -->
         </div>
       </div>
     </div>
@@ -1395,6 +1404,509 @@ TWITTER
       document.getElementById("userProfileSection").style.display = "none";
       document.getElementById("adminSection").style.display = "block";
     }
+
+    // Community Notes Functionality
+    let communityNotesPassword = "b@rnD00rex!t";
+    let communityNotesVerified = false;
+
+    // Open Community Notes Modal
+    document.getElementById('community-notes-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      document.getElementById('community-notes-modal').style.display = 'block';
+      document.getElementById('password-error').style.display = 'none';
+      
+      if (!communityNotesVerified) {
+        document.getElementById('community-notes-content').style.display = 'none';
+        document.getElementById('community-notes-password').value = '';
+      } else {
+        loadCommunityNotesContent();
+      }
+    });
+
+    // Close Community Notes Modal
+    document.querySelector('#community-notes-modal .close').addEventListener('click', function() {
+      document.getElementById('community-notes-modal').style.display = 'none';
+    });
+
+    // Verify Password
+    document.getElementById('verify-password-btn').addEventListener('click', function() {
+      const password = document.getElementById('community-notes-password').value;
+      
+      if (password === communityNotesPassword) {
+        communityNotesVerified = true;
+        document.getElementById('password-error').style.display = 'none';
+        document.getElementById('community-notes-content').style.display = 'block';
+        loadCommunityNotesContent();
+      } else {
+        document.getElementById('password-error').style.display = 'block';
+      }
+    });
+
+    // Load Community Notes Content
+    function loadCommunityNotesContent() {
+      // Get all tweets and display them with add note buttons
+      fetch('/api/tweets')
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            const tweetsList = document.getElementById('community-notes-list');
+            tweetsList.innerHTML = '';
+            
+            data.tweets.forEach(tweet => {
+              // Fetch existing notes for this tweet
+              fetch(`/api/community-notes/${tweet.id}`)
+                .then(response => response.json())
+                .then(notesData => {
+                  const notes = notesData.notes || [];
+                  
+                  const tweetElement = document.createElement('div');
+                  tweetElement.className = 'tweet community-notes-tweet';
+                  tweetElement.style.borderBottom = '1px solid #e6ecf0';
+                  tweetElement.style.padding = '15px';
+                  tweetElement.style.marginBottom = '10px';
+                  
+                  // Display tweet content
+                  tweetElement.innerHTML = `
+                    <div class="tweet-header">
+                      <img src="${tweet.profilePicture || 'default-profile.png'}" alt="Profile Picture" class="profile-pic">
+                      <div class="tweet-user-info">
+                        <span class="name">${tweet.handle} ${tweet.verified ? '<i class="fas fa-check-circle verified"></i>' : ''}</span>
+                        <span class="handle">@${tweet.handle}</span>
+                      </div>
+                    </div>
+                    <div class="tweet-content">
+                      <p>${formatTweetText(tweet.text)}</p>
+                      ${tweet.imageData ? `<img src="${tweet.imageData}" alt="Tweet Image" class="tweet-image">` : ''}
+                    </div>
+                    <div class="existing-notes">
+                      <h4>Existing Notes (${notes.length}):</h4>
+                      <ul style="list-style-type: none; padding-left: 0;">
+                        ${notes.map(note => `
+                          <li style="margin-bottom: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">
+                            ${note.text}
+                            <button class="delete-note-btn" data-note-id="${note.id}" style="margin-left: 10px; color: red;">Delete</button>
+                          </li>
+                        `).join('')}
+                      </ul>
+                    </div>
+                    <div class="add-note-section">
+                      <textarea class="note-text" placeholder="Add a community note..." rows="3" style="width: 100%; margin-top: 10px;"></textarea>
+                      <button class="add-note-btn" data-tweet-id="${tweet.id}" style="margin-top: 10px;">Add Note</button>
+                    </div>
+                  `;
+                  
+                  tweetsList.appendChild(tweetElement);
+                  
+                  // Add event listeners for the add note buttons
+                  tweetElement.querySelector('.add-note-btn').addEventListener('click', function() {
+                    const noteText = tweetElement.querySelector('.note-text').value.trim();
+                    const tweetId = this.getAttribute('data-tweet-id');
+                    
+                    if (noteText) {
+                      addCommunityNote(tweetId, noteText);
+                    }
+                  });
+                  
+                  // Add event listeners for delete note buttons
+                  tweetElement.querySelectorAll('.delete-note-btn').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                      const noteId = this.getAttribute('data-note-id');
+                      deleteCommunityNote(noteId);
+                    });
+                  });
+                });
+            });
+          }
+        });
+    }
+
+    // Add Community Note
+    function addCommunityNote(tweetId, text) {
+      fetch('/api/community-notes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          tweetId,
+          text,
+          password: communityNotesPassword
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          loadCommunityNotesContent();
+          loadTweets(); // Refresh the main timeline to show the new note
+        }
+      });
+    }
+
+    // Delete Community Note
+    function deleteCommunityNote(noteId) {
+      fetch(`/api/community-notes/${noteId}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          password: communityNotesPassword
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.success) {
+          loadCommunityNotesContent();
+          loadTweets(); // Refresh the main timeline
+        }
+      });
+    }
+
+    // Modify the createTweetElement function to display community notes
+    function createTweetElement(tweet) {
+      const tweetElement = document.createElement('div');
+      tweetElement.className = 'tweet';
+      tweetElement.id = `tweet-${tweet.id}`;
+      
+      // Create the tweet header with user info
+      const tweetHeader = document.createElement('div');
+      tweetHeader.className = 'tweet-header';
+      
+      const profilePic = document.createElement('img');
+      profilePic.src = tweet.profilePicture || 'default-profile.png';
+      profilePic.alt = 'Profile Picture';
+      profilePic.className = 'profile-pic';
+      
+      const userInfo = document.createElement('div');
+      userInfo.className = 'tweet-user-info';
+      
+      const nameSpan = document.createElement('span');
+      nameSpan.className = 'name';
+      nameSpan.innerHTML = tweet.handle;
+      
+      if (tweet.verified) {
+        const verifiedIcon = document.createElement('i');
+        verifiedIcon.className = 'fas fa-check-circle verified';
+        nameSpan.appendChild(verifiedIcon);
+      }
+      
+      const handleSpan = document.createElement('span');
+      handleSpan.className = 'handle';
+      handleSpan.textContent = `@${tweet.handle}`;
+      
+      userInfo.appendChild(nameSpan);
+      userInfo.appendChild(handleSpan);
+      
+      tweetHeader.appendChild(profilePic);
+      tweetHeader.appendChild(userInfo);
+      
+      // Create the tweet content
+      const tweetContent = document.createElement('div');
+      tweetContent.className = 'tweet-content';
+      
+      const tweetText = document.createElement('p');
+      tweetText.innerHTML = formatTweetText(tweet.text);
+      
+      tweetContent.appendChild(tweetText);
+      
+      // Add image if present
+      if (tweet.imageData) {
+        const tweetImage = document.createElement('img');
+        tweetImage.src = tweet.imageData;
+        tweetImage.alt = 'Tweet Image';
+        tweetImage.className = 'tweet-image';
+        tweetContent.appendChild(tweetImage);
+      }
+      
+      // Add quoted tweet if present
+      if (tweet.quotedTweet) {
+        const quotedTweetElement = document.createElement('div');
+        quotedTweetElement.className = 'quoted-tweet';
+        
+        const quotedHeader = document.createElement('div');
+        quotedHeader.className = 'tweet-header';
+        
+        const quotedProfilePic = document.createElement('img');
+        quotedProfilePic.src = tweet.quotedTweet.profilePicture || 'default-profile.png';
+        quotedProfilePic.alt = 'Profile Picture';
+        quotedProfilePic.className = 'profile-pic';
+        
+        const quotedUserInfo = document.createElement('div');
+        quotedUserInfo.className = 'tweet-user-info';
+        
+        const quotedNameSpan = document.createElement('span');
+        quotedNameSpan.className = 'name';
+        quotedNameSpan.innerHTML = tweet.quotedTweet.handle;
+        
+        if (tweet.quotedTweet.verified) {
+          const verifiedIcon = document.createElement('i');
+          verifiedIcon.className = 'fas fa-check-circle verified';
+          quotedNameSpan.appendChild(verifiedIcon);
+        }
+        
+        const quotedHandleSpan = document.createElement('span');
+        quotedHandleSpan.className = 'handle';
+        quotedHandleSpan.textContent = `@${tweet.quotedTweet.handle}`;
+        
+        quotedUserInfo.appendChild(quotedNameSpan);
+        quotedUserInfo.appendChild(quotedHandleSpan);
+        
+        quotedHeader.appendChild(quotedProfilePic);
+        quotedHeader.appendChild(quotedUserInfo);
+        
+        const quotedContent = document.createElement('div');
+        quotedContent.className = 'tweet-content';
+        
+        const quotedText = document.createElement('p');
+        quotedText.innerHTML = formatTweetText(tweet.quotedTweet.text);
+        
+        quotedContent.appendChild(quotedText);
+        
+        if (tweet.quotedTweet.imageData) {
+          const quotedImage = document.createElement('img');
+          quotedImage.src = tweet.quotedTweet.imageData;
+          quotedImage.alt = 'Tweet Image';
+          quotedImage.className = 'tweet-image';
+          quotedContent.appendChild(quotedImage);
+        }
+        
+        quotedTweetElement.appendChild(quotedHeader);
+        quotedTweetElement.appendChild(quotedContent);
+        
+        tweetContent.appendChild(quotedTweetElement);
+      }
+      
+      // Add poll if present
+      if (tweet.poll) {
+        const pollElement = document.createElement('div');
+        pollElement.className = 'poll';
+        
+        const totalVotes = tweet.poll.options.reduce((sum, option) => sum + option.votes, 0);
+        
+        tweet.poll.options.forEach(option => {
+          const percentage = totalVotes > 0 ? Math.round((option.votes / totalVotes) * 100) : 0;
+          
+          const optionElement = document.createElement('div');
+          optionElement.className = 'poll-option';
+          optionElement.setAttribute('data-option', option.text);
+          
+          const optionBar = document.createElement('div');
+          optionBar.className = 'poll-option-bar';
+          optionBar.style.width = `${percentage}%`;
+          
+          const optionText = document.createElement('div');
+          optionText.className = 'poll-option-text';
+          optionText.textContent = `${option.text} · ${percentage}%`;
+          
+          optionElement.appendChild(optionBar);
+          optionElement.appendChild(optionText);
+          pollElement.appendChild(optionElement);
+        });
+        
+        const pollFooter = document.createElement('div');
+        pollFooter.className = 'poll-footer';
+        pollFooter.textContent = `${totalVotes} votes`;
+        
+        pollElement.appendChild(pollFooter);
+        tweetContent.appendChild(pollElement);
+      }
+      
+      // Create the tweet actions
+      const tweetActions = document.createElement('div');
+      tweetActions.className = 'tweet-actions';
+      
+      const replyAction = document.createElement('div');
+      replyAction.className = 'tweet-action reply-action';
+      replyAction.innerHTML = '<i class="far fa-comment"></i>';
+      replyAction.addEventListener('click', function() {
+        openReplyModal(tweet);
+      });
+      
+      const retweetAction = document.createElement('div');
+      retweetAction.className = 'tweet-action retweet-action';
+      retweetAction.innerHTML = '<i class="fas fa-retweet"></i>';
+      retweetAction.addEventListener('click', function() {
+        if (currentUser) {
+          retweetTweet(tweet.id);
+        } else {
+          alert('Please log in to retweet');
+        }
+      });
+      
+      const likeAction = document.createElement('div');
+      likeAction.className = 'tweet-action like-action';
+      likeAction.innerHTML = `<i class="far fa-heart"></i> <span class="like-count">${tweet.likes}</span>`;
+      likeAction.addEventListener('click', function() {
+        if (currentUser) {
+          likeTweet(tweet.id, tweet.likes + 1);
+        } else {
+          alert('Please log in to like tweets');
+        }
+      });
+      
+      const viewsAction = document.createElement('div');
+      viewsAction.className = 'tweet-action views-action';
+      viewsAction.innerHTML = `<i class="far fa-eye"></i> <span class="views-count">${tweet.views}</span>`;
+      
+      const bookmarkAction = document.createElement('div');
+      bookmarkAction.className = 'tweet-action bookmark-action';
+      bookmarkAction.innerHTML = '<i class="far fa-bookmark"></i>';
+      bookmarkAction.addEventListener('click', function() {
+        if (currentUser) {
+          bookmarkTweet(tweet.id);
+        } else {
+          alert('Please log in to bookmark tweets');
+        }
+      });
+      
+      tweetActions.appendChild(replyAction);
+      tweetActions.appendChild(retweetAction);
+      tweetActions.appendChild(likeAction);
+      tweetActions.appendChild(viewsAction);
+      tweetActions.appendChild(bookmarkAction);
+      
+      // Add retweeted by info if applicable
+      if (tweet.last_retweeted_by) {
+        const retweetInfo = document.createElement('div');
+        retweetInfo.className = 'retweet-info';
+        retweetInfo.innerHTML = `<i class="fas fa-retweet"></i> Retweeted by @${tweet.last_retweeted_by}`;
+        tweetElement.appendChild(retweetInfo);
+      }
+      
+      tweetElement.appendChild(tweetHeader);
+      tweetElement.appendChild(tweetContent);
+      tweetElement.appendChild(tweetActions);
+      
+      // Add community notes section
+      fetch(`/api/community-notes/${tweet.id}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success && data.notes && data.notes.length > 0) {
+            const communityNotesSection = document.createElement('div');
+            communityNotesSection.className = 'community-notes-section';
+            communityNotesSection.style.marginTop = '10px';
+            communityNotesSection.style.padding = '10px';
+            communityNotesSection.style.backgroundColor = '#f8f9fa';
+            communityNotesSection.style.borderRadius = '5px';
+            
+            const notesHeader = document.createElement('div');
+            notesHeader.className = 'community-notes-header';
+            notesHeader.innerHTML = '<i class="fas fa-users" style="color: #1DA1F2;"></i> <span style="color: #1DA1F2; font-weight: bold;">Readers added context</span>';
+            
+            communityNotesSection.appendChild(notesHeader);
+            
+            data.notes.forEach(note => {
+              const noteElement = document.createElement('div');
+              noteElement.className = 'community-note';
+              noteElement.style.marginTop = '5px';
+              noteElement.textContent = note.text;
+              
+              communityNotesSection.appendChild(noteElement);
+            });
+            
+            tweetElement.appendChild(communityNotesSection);
+          }
+        });
+      
+      // Add replies section if there are any
+      if (tweet.replies && tweet.replies.length > 0) {
+        const repliesSection = document.createElement('div');
+        repliesSection.className = 'replies-section';
+        
+        const repliesHeader = document.createElement('div');
+        repliesHeader.className = 'replies-header';
+        repliesHeader.textContent = 'Replies';
+        
+        repliesSection.appendChild(repliesHeader);
+        
+        tweet.replies.forEach(reply => {
+          const replyElement = document.createElement('div');
+          replyElement.className = 'reply';
+          
+          const replyHeader = document.createElement('div');
+          replyHeader.className = 'tweet-header';
+          
+          const replyProfilePic = document.createElement('img');
+          replyProfilePic.src = reply.profilePicture || 'default-profile.png';
+          replyProfilePic.alt = 'Profile Picture';
+          replyProfilePic.className = 'profile-pic';
+          
+          const replyUserInfo = document.createElement('div');
+          replyUserInfo.className = 'tweet-user-info';
+          
+          const replyNameSpan = document.createElement('span');
+          replyNameSpan.className = 'name';
+          replyNameSpan.innerHTML = reply.handle;
+          
+          if (reply.verified) {
+            const verifiedIcon = document.createElement('i');
+            verifiedIcon.className = 'fas fa-check-circle verified';
+            replyNameSpan.appendChild(verifiedIcon);
+          }
+          
+          const replyHandleSpan = document.createElement('span');
+          replyHandleSpan.className = 'handle';
+          replyHandleSpan.textContent = `@${reply.handle}`;
+          
+          replyUserInfo.appendChild(replyNameSpan);
+          replyUserInfo.appendChild(replyHandleSpan);
+          
+          replyHeader.appendChild(replyProfilePic);
+          replyHeader.appendChild(replyUserInfo);
+          
+          const replyContent = document.createElement('div');
+          replyContent.className = 'tweet-content';
+          
+          const replyText = document.createElement('p');
+          replyText.innerHTML = formatTweetText(reply.text);
+          
+          replyContent.appendChild(replyText);
+          
+          if (reply.imageData) {
+            const replyImage = document.createElement('img');
+            replyImage.src = reply.imageData;
+            replyImage.alt = 'Reply Image';
+            replyImage.className = 'tweet-image';
+            replyContent.appendChild(replyImage);
+          }
+          
+          const replyActions = document.createElement('div');
+          replyActions.className = 'tweet-actions';
+          
+          const replyLikeAction = document.createElement('div');
+          replyLikeAction.className = 'tweet-action like-action';
+          replyLikeAction.innerHTML = `<i class="far fa-heart"></i> <span class="like-count">${reply.likes}</span>`;
+          replyLikeAction.addEventListener('click', function() {
+            if (currentUser) {
+              likeReply(tweet.id, reply.id, reply.likes + 1);
+            } else {
+              alert('Please log in to like replies');
+            }
+          });
+          
+          replyActions.appendChild(replyLikeAction);
+          
+          replyElement.appendChild(replyHeader);
+          replyElement.appendChild(replyContent);
+          replyElement.appendChild(replyActions);
+          
+          repliesSection.appendChild(replyElement);
+        });
+        
+        tweetElement.appendChild(repliesSection);
+      }
+      
+      return tweetElement;
+    }
+
+    // Add socket.io event listeners for community notes
+    socket.on('new community note', function(note) {
+      loadTweets(); // Refresh the timeline to show the new note
+    });
+
+    socket.on('community note deleted', function(noteId) {
+      loadTweets(); // Refresh the timeline
+    });
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
