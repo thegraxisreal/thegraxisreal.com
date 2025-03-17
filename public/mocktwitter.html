@@ -468,17 +468,14 @@ TWITTER
             <img src="twitter-logo.png" alt="Twitter Logo">
           </div>
           <div class="nav-links">
-            <a href="#" class="active"><i class="fas fa-home"></i> Home</a>
-            <a href="#"><i class="fas fa-search"></i> Explore</a>
-            <a href="#"><i class="fas fa-bell"></i> Notifications</a>
-            <a href="#"><i class="fas fa-envelope"></i> Messages</a>
-            <a href="#"><i class="fas fa-bookmark"></i> Bookmarks</a>
-            <a href="#"><i class="fas fa-list-alt"></i> Lists</a>
+            <a href="#" id="home-link" class="active"><i class="fas fa-home"></i> Home</a>
+            <a href="#" id="explore-link"><i class="fas fa-search"></i> Explore</a>
+            <a href="#" id="bookmarks-link"><i class="fas fa-bookmark"></i> Bookmarks</a>
             <a href="#" id="profile-link"><i class="fas fa-user"></i> Profile</a>
             <a href="#" id="community-notes-link"><i class="fas fa-users"></i> Community Notes</a>
-            <a href="#" id="more-link"><i class="fas fa-ellipsis-h"></i> More</a>
+            <a href="#" id="admin-link"><i class="fas fa-shield-alt"></i> Admin Panel</a>
           </div>
-          <button class="tweet-btn">Tweet</button>
+          <button class="tweet-btn" id="sidebar-tweet-btn">Tweet</button>
         </div>
       </div>
       <!-- Main Content -->
@@ -1293,9 +1290,19 @@ TWITTER
     }
 
     function backToMainFeed() {
+      resetNavigationState();
+      document.getElementById('home-link').classList.add('active');
+      
+      document.getElementById("tweetSection").style.display = "block";
+      document.getElementById("profileSection").style.display = "block";
       document.getElementById("userProfileSection").style.display = "none";
       document.getElementById("adminSection").style.display = "none";
-      document.getElementById("tweetSection").style.display = "block";
+      if (document.getElementById("premiumSection")) {
+        document.getElementById("premiumSection").style.display = "none";
+      }
+      
+      // Reset to chronological order
+      isRandomOrder = false;
       fetchAndRenderTweets();
     }
 
@@ -1907,6 +1914,89 @@ TWITTER
     socket.on('community note deleted', function(noteId) {
       loadTweets(); // Refresh the timeline
     });
+
+    // Sidebar navigation event listeners
+    document.getElementById('home-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      backToMainFeed();
+    });
+
+    document.getElementById('explore-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      // Toggle random order for explore functionality
+      isRandomOrder = true;
+      fetchAndRenderTweets();
+      backToMainFeed();
+    });
+
+    document.getElementById('bookmarks-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      if (!currentUser) {
+        alert('Please log in to view bookmarks');
+        return;
+      }
+      fetch(`/api/bookmarks?handle=${currentUser}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            document.getElementById("tweetSection").style.display = "none";
+            document.getElementById("profileSection").style.display = "none";
+            document.getElementById("premiumSection").style.display = "none";
+            document.getElementById("userProfileSection").style.display = "none";
+            document.getElementById("adminSection").style.display = "none";
+            
+            // Clear and repopulate the feed with bookmarked tweets
+            const tweetFeed = document.querySelector('.tweet-feed');
+            tweetFeed.innerHTML = '<h3>Your Bookmarks</h3>';
+            
+            if (data.bookmarks.length === 0) {
+              tweetFeed.innerHTML += '<p>You have no bookmarked tweets</p>';
+            } else {
+              data.bookmarks.forEach(tweet => {
+                tweetFeed.appendChild(createTweetElement(tweet));
+              });
+            }
+            
+            document.getElementById("tweetSection").style.display = "block";
+          }
+        });
+    });
+
+    // Update the existing profile-link event listener
+    document.getElementById('profile-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      if (currentUser) {
+        loadUserProfile(currentUser);
+      } else {
+        alert('Please log in to view your profile');
+      }
+    });
+
+    // Add event listener for admin panel
+    document.getElementById('admin-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      showAdminSection();
+    });
+
+    // Make the sidebar tweet button work
+    document.getElementById('sidebar-tweet-btn').addEventListener('click', function() {
+      if (!currentUser) {
+        alert('Please log in to tweet');
+        return;
+      }
+      // Focus on the tweet text area
+      document.getElementById('tweetText').focus();
+      // Make sure we're on the main feed
+      backToMainFeed();
+    });
+
+    // Helper function to reset all navigation states
+    function resetNavigationState() {
+      // Remove 'active' class from all navigation links
+      document.querySelectorAll('.nav-links a').forEach(link => {
+        link.classList.remove('active');
+      });
+    }
   </script>
   <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
