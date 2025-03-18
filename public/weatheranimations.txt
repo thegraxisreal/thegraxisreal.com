@@ -1,0 +1,15 @@
+sunny - Bright sun with some small clouds
+cloudy - Multiple clouds floating in the sky
+rainy - Clouds with falling raindrops
+stormy - Dark clouds with rain and lightning flashes
+snowy - Clouds with falling snowflakes
+foggy - Layers of fog floating across the screen
+nightClear - Moon and stars in a dark sky
+nightCloudy - Moon partially visible with clouds and stars
+sam - "Sam's Room" with trash pile and floating debris
+tornado - Dark stormy sky with a spinning funnel and flying debris
+volcano - Volcano with lava and rising embers/ash
+aurora - Northern lights (aurora borealis) with stars
+hurricane - Spinning hurricane spiral with cloud bands
+dustStorm - Swirling dust clouds and particles
+hail - Storm clouds with bouncing hailstones
