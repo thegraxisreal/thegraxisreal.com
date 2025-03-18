@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Elias Glenn | Personal Website</title>
+    <style>
+        :root {
+            --primary: #3498db;
+            --secondary: #2c3e50;
+            --light: #ecf0f1;
+            --dark: #34495e;
+            --accent: #e74c3c;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 4rem 0 2rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header-content {
+            z-index: 2;
+            position: relative;
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .tagline {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        nav {
+            background-color: var(--secondary);
+            padding: 1rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        nav ul {
+            display: flex;
+            justify-content: center;
+            list-style-type: none;
+            gap: 2rem;
+        }
+        
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+        }
+        
+        nav a:hover {
+            color: var(--primary);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        section {
+            margin-bottom: 3rem;
+        }
+        
+        h2 {
+            font-size: 2rem;
+            margin-bottom: 1.5rem;
+            color: var(--secondary);
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid var(--primary);
+        }
+        
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 2rem;
+            align-items: center;
+        }
+        
+        .profile-container {
+            text-align: center;
+        }
+        
+        .avatar-circle {
+            width: 250px;
+            height: 250px;
+            background-color: var(--primary);
+            border-radius: 50%;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            color: white;
+            font-size: 6rem;
+            font-weight: bold;
+        }
+        
+        .portfolio {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+        
+        .project {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .project:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+        }
+        
+        .project-icon {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--light);
+        }
+        
+        .project-content {
+            padding: 1.5rem;
+        }
+        
+        .project h3 {
+            margin-bottom: 0.5rem;
+            color: var(--secondary);
+        }
+        
+        .skills {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+        
+        .skill {
+            background-color: white;
+            padding: 0.8rem 1.5rem;
+            border-radius: 50px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s, box-shadow 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .skill:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+        }
+        
+        .skill-icon {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .contact-form {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        
+        input, textarea {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            font-size: 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin: 0 auto;
+        }
+        
+        button:hover {
+            background-color: var(--secondary);
+        }
+        
+        footer {
+            background-color: var(--secondary);
+            color: white;
+            text-align: center;
+            padding: 2rem;
+            margin-top: 3rem;
+        }
+        
+        .social-links {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin: 1.5rem 0;
+        }
+        
+        .social-links a {
+            color: white;
+            font-size: 1.5rem;
+            transition: color 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .social-links a:hover {
+            color: var(--primary);
+        }
+        
+        .icon {
+            display: inline-block;
+        }
+        
+        @media (max-width: 768px) {
+            .about-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem;
+            }
+            
+            .avatar-circle {
+                width: 200px;
+                height: 200px;
+                font-size: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Elias Glenn</h1>
+            <p class="tagline">Web Developer & Designer</p>
+        </div>
+    </header>
+    
+    <nav>
+        <ul>
+            <li><a href="#about">About</a></li>
+            <li><a href="#portfolio">Portfolio</a></li>
+            <li><a href="#skills">Skills</a></li>
+            <li><a href="#contact">Contact</a></li>
+        </ul>
+    </nav>
+    
+    <main>
+        <section id="about">
+            <h2>About Me</h2>
+            <div class="about-grid">
+                <div class="profile-container">
+                    <div class="avatar-circle">
+                        EG
+                    </div>
+                </div>
+                <div>
+                    <p>Hello! I'm Elias Glenn, a passionate web developer and designer based in New York. I specialize in creating beautiful, functional websites and applications that deliver exceptional user experiences.</p>
+                    <p>With over 7 years of experience in the industry, I've worked with clients ranging from small startups to large enterprises. My approach combines technical expertise with creative problem-solving to build digital solutions that meet and exceed expectations.</p>
+                    <p>When I'm not coding or designing, you can find me hiking, playing chess, or exploring new technologies to enhance my skill set.</p>
+                </div>
+            </div>
+        </section>
+        
+        <section id="portfolio">
+            <h2>My Work</h2>
+            <div class="portfolio">
+                <div class="project">
+                    <div class="project-icon">
+                        <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="80" height="60" x="10" y="20" rx="5" fill="#3498db" />
+                            <rect width="70" height="50" x="15" y="25" rx="3" fill="white" />
+                            <rect width="50" height="5" x="25" y="35" rx="2" fill="#e74c3c" />
+                            <rect width="40" height="3" x="30" y="45" rx="1" fill="#2c3e50" />
+                            <rect width="40" height="3" x="30" y="52" rx="1" fill="#2c3e50" />
+                            <rect width="40" height="3" x="30" y="59" rx="1" fill="#2c3e50" />
+                        </svg>
+                    </div>
+                    <div class="project-content">
+                        <h3>Responsive Web App</h3>
+                        <p>A modern web application with responsive design, built using React and Node.js. Features user authentication, data visualization, and real-time updates.</p>
+                    </div>
+                </div>
+                
+                <div class="project">
+                    <div class="project-icon">
+                        <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="50" cy="50" r="35" fill="#e74c3c" />
+                            <circle cx="50" cy="50" r="25" fill="white" />
+                            <rect width="30" height="5" x="35" y="40" rx="2" fill="#2c3e50" />
+                            <rect width="20" height="3" x="40" y="50" rx="1" fill="#2c3e50" />
+                            <rect width="25" height="3" x="38" y="57" rx="1" fill="#3498db" />
+                        </svg>
+                    </div>
+                    <div class="project-content">
+                        <h3>Brand Identity Design</h3>
+                        <p>Created a comprehensive brand identity for a tech startup, including logo design, color palette, typography, and brand guidelines documentation.</p>
+                    </div>
+                </div>
+                
+                <div class="project">
+                    <div class="project-icon">
+                        <svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <rect width="25" height="50" x="20" y="25" rx="3" fill="#3498db" />
+                            <rect width="25" height="50" x="55" y="25" rx="3" fill="#2c3e50" />
+                            <rect width="15" height="3" x="25" y="35" rx="1" fill="white" />
+                            <rect width="15" height="3" x="25" y="42" rx="1" fill="white" />
+                            <rect width="15" height="3" x="60" y="35" rx="1" fill="white" />
+                            <rect width="15" height="3" x="60" y="42" rx="1" fill="white" />
+                            <rect width="15" height="3" x="60" y="49" rx="1" fill="white" />
+                        </svg>
+                    </div>
+                    <div class="project-content">
+                        <h3>E-Commerce Platform</h3>
+                        <p>Developed a custom e-commerce solution with integrated payment processing, inventory management, and analytics dashboard for a retail client.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <section id="skills">
+            <h2>Skills & Expertise</h2>
+            <p>Here are some of the technologies and tools I work with:</p>
+            <div class="skills">
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.5 3L3 6.5L17.5 21L21 17.5L6.5 3H4.5Z" fill="#E44D26"/>
+                        <path d="M12 12.5L17.5 21L21 17.5L12 8.5V12.5Z" fill="#F16529"/>
+                        <path d="M12 18.5H8L7.5 16H6L7 21H12V18.5Z" fill="#E44D26"/>
+                        <path d="M12 8.5V12.5L16 16L17 15L12 8.5Z" fill="#F16529"/>
+                    </svg>
+                    HTML5
+                </div>
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M4.5 3L3 6.5L17.5 21L21 17.5L6.5 3H4.5Z" fill="#1572B6"/>
+                        <path d="M12 12.5L17.5 21L21 17.5L12 8.5V12.5Z" fill="#33A9DC"/>
+                        <path d="M12 18.5H8L7.5 16H6L7 21H12V18.5Z" fill="#1572B6"/>
+                        <path d="M12 8.5V12.5L16 16L17 15L12 8.5Z" fill="#33A9DC"/>
+                    </svg>
+                    CSS3
+                </div>
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 3H21V21H3V3Z" fill="#F7DF1E"/>
+                        <path d="M12 17.5C13.5 19 15 19 16 18L17.5 15.5C16.5 16.5 15 16.5 14 15.5C13 14.5 13 13 14 12L15.5 10.5C14 9.5 12 10 11 11.5L9.5 13C10 15 11 16.5 12 17.5Z" fill="black"/>
+                    </svg>
+                    JavaScript
+                </div>
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="9" fill="#61DAFB"/>
+                        <circle cx="12" cy="12" r="3" fill="white"/>
+                        <ellipse cx="12" cy="12" rx="9" ry="3.5" fill="transparent" stroke="#61DAFB"/>
+                        <ellipse cx="12" cy="12" rx="9" ry="3.5" fill="transparent" stroke="#61DAFB" transform="rotate(60 12 12)"/>
+                        <ellipse cx="12" cy="12" rx="9" ry="3.5" fill="transparent" stroke="#61DAFB" transform="rotate(120 12 12)"/>
+                    </svg>
+                    React
+                </div>
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 21.5C17.2467 21.5 21.5 17.2467 21.5 12C21.5 6.75329 17.2467 2.5 12 2.5C6.75329 2.5 2.5 6.75329 2.5 12C2.5 17.2467 6.75329 21.5 12 21.5Z" fill="#68A063"/>
+                        <path d="M14.5 7.5L16 9L8.5 16.5L6.5 12.5L8 11.5L9 14L14.5 7.5Z" fill="white"/>
+                    </svg>
+                    Node.js
+                </div>
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="3" y="3" width="18" height="18" rx="2" fill="#FF4088"/>
+                        <circle cx="7.5" cy="7.5" r="1.5" fill="white"/>
+                        <circle cx="12" cy="12" r="5" fill="transparent" stroke="white" stroke-width="1.5"/>
+                    </svg>
+                    UI/UX Design
+                </div>
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M3 3H21V21H3V3Z" fill="#2196F3"/>
+                        <path d="M6 12H18M12 6V18" stroke="white" stroke-width="2"/>
+                    </svg>
+                    Responsive Design
+                </div>
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 14L12 21L3 14V5L12 1L21 5V14Z" fill="#F05032"/>
+                        <path d="M12 11L15 9V13L12 15L9 13V9L12 11Z" fill="white"/>
+                    </svg>
+                    Git
+                </div>
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="5" width="20" height="14" rx="2" fill="#A259FF"/>
+                        <rect x="5" y="8" width="14" height="8" rx="1" fill="white"/>
+                        <circle cx="17" cy="7" r="1" fill="white"/>
+                    </svg>
+                    Figma
+                </div>
+                <div class="skill">
+                    <svg class="skill-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M21 7L12 3L3 7V17L12 21L21 17V7Z" fill="#21759B"/>
+                        <path d="M12 12L12 8L16 8L16 12L12 12Z" fill="white"/>
+                        <path d="M8 12L8 16L12 16L12 12L8 12Z" fill="white"/>
+                        <path d="M12 8L12 12L8 12L8 8L12 8Z" fill="white"/>
+                        <path d="M16 12L16 16L12 16L12 12L16 12Z" fill="white"/>
+                    </svg>
+                    WordPress
+                </div>
+            </div>
+        </section>
+        
+        <section id="contact">
+            <h2>Get In Touch</h2>
+            <div class="contact-form">
+                <form>
+                    <div class="form-group">
+                        <label for="name">Name</label>
+                        <input type="text" id="name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="message">Message</label>
+                        <textarea id="message" rows="5" required></textarea>
+                    </div>
+                    
+                    <button type="submit">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path d="M2 12L20 4L10 12L20 20L2 12Z" fill="white"/>
+                        </svg>
+                        Send Message
+                    </button>
+                </form>
+            </div>
+        </section>
+    </main>
+    
+    <footer>
+        <div class="social-links">
+            <a href="#">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M12 2C6.477 2 2 6.477 2 12C2 16.418 4.865 20.166 8.839 21.489C9.339 21.581 9.5 21.278 9.5 21.012C9.5 20.774 9.492 20.037 9.489 19.226C6.727 19.818 6.139 17.888 6.139 17.888C5.685 16.791 5.029 16.488 5.029 16.488C4.132 15.886 5.098 15.899 5.098 15.899C6.101 15.97 6.629 16.913 6.629 16.913C7.521 18.388 8.97 17.935 9.52 17.679C9.61 17.028 9.866 16.574 10.145 16.319C7.99 16.06 5.731 15.234 5.731 11.462C5.731 10.371 6.118 9.481 6.649 8.787C6.546 8.534 6.203 7.544 6.747 6.159C6.747 6.159 7.587 5.889 9.477 7.185C10.292 6.961 11.15 6.849 12.003 6.845C12.854 6.85 13.711 6.961 14.529 7.185C16.417 5.889 17.255 6.159 17.255 6.159C17.801 7.544 17.458 8.534 17.355 8.787C17.888 9.481 18.271 10.371 18.271 11.462C18.271 15.246 16.007 16.057 13.845 16.31C14.196 16.627 14.51 17.253 14.51 18.2C14.51 19.54 14.499 20.679 14.499 21.011C14.499 21.28 14.657 21.586 15.167 21.487C19.138 20.161 22 16.416 22 12C22 6.477 17.523 2 12 2Z" fill="currentColor"/>
+                </svg>
+                GitHub
+            </a>
+            <a href="#">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="20" height="20" rx="2" fill="currentColor"/>
+                    <rect x="8" y="8" width="8" height="8" fill="white"/>
+                    <circle cx="16" cy="8" r="2" fill="white"/>
+                </svg>
+                LinkedIn
+            </a>
+            <a href="#">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22 5.79997C21.2483 6.12606 20.4534 6.34163 19.64 6.43997C20.4982 5.92729 21.1413 5.12075 21.45 4.16997C20.6436 4.65003 19.7608 4.98826 18.84 5.16997C18.2245 4.50254 17.405 4.05826 16.5098 3.90682C15.6147 3.75537 14.6945 3.90434 13.8938 4.33232C13.093 4.7603 12.4569 5.44359 12.0852 6.27635C11.7135 7.10912 11.6273 8.0386 11.84 8.91997C10.2094 8.84067 8.61444 8.43736 7.15264 7.73465C5.69084 7.03194 4.39519 6.04791 3.34 4.83997C2.99 5.41997 2.8 6.09997 2.8 6.82997C2.7999 7.48659 2.97575 8.13149 3.30754 8.70133C3.63934 9.27117 4.11046 9.74436 4.68 10.08C4.01654 10.0607 3.36784 9.87712 2.78 9.54997V9.59997C2.78004 10.5539 3.1036 11.4797 3.70318 12.2299C4.30276 12.9801 5.14596 13.5091 6.08 13.73C5.4881 13.9027 4.86973 13.9264 4.27 13.8C4.5245 14.6198 5.01978 15.3398 5.69694 15.8743C6.37411 16.4088 7.20212 16.738 8.06 16.82C7.2128 17.4788 6.24722 17.9843 5.21156 18.3161C4.17591 18.6479 3.08909 18.8002 2 18.77C3.81164 19.9246 5.91471 20.5358 8.06 20.53C15.14 20.53 18.99 14.95 18.99 10.11C18.99 9.93997 18.99 9.75997 18.98 9.57997C19.8062 8.99975 20.5225 8.28212 21.1 7.45997L22 5.79997Z" fill="currentColor"/>
+                </svg>
+                Twitter
+            </a>
+            <a href="#">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="2" y="2" width="20" height="20" rx="5" fill="currentColor"/>
+                    <circle cx="12" cy="12" r="5" fill="white"/>
+                    <circle cx="18" cy="6" r="1.5" fill="white"/>
+                </svg>
+                Instagram
+            </a>
+        </div>
+        <p>&copy; 2025 Elias Glenn. All rights reserved.</p>
+    </footer>
+</body>
+</html>
