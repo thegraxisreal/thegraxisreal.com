@@ -337,6 +337,28 @@
       75% { transform: translateY(0); }
       100% { transform: translateY(0); }
     }
+    
+    @keyframes stick-figure-fall {
+      0% { 
+        transform: translateY(-100px) rotate(0deg); 
+        opacity: 0;
+      }
+      10% { opacity: 1; }
+      50% { transform: translateY(150px) rotate(180deg); }
+      90% { opacity: 1; }
+      100% { 
+        transform: translateY(400px) rotate(360deg); 
+        opacity: 0;
+      }
+    }
+    
+    @keyframes stick-figure-panic {
+      0% { transform: rotate(0deg) scaleX(1); }
+      25% { transform: rotate(-20deg) scaleX(1.1); }
+      50% { transform: rotate(0deg) scaleX(1); }
+      75% { transform: rotate(20deg) scaleX(0.9); }
+      100% { transform: rotate(0deg) scaleX(1); }
+    }
   </style>
 </head>
 <body>
@@ -381,15 +403,15 @@
   <script>
     // Weather data (edit these values to change the weather)
     const weatherData = {
-      location: "Glens Falls High School",
-      temperature: 61,
-      type: "sunny", // Change to any of: tornado, volcano, aurora, hurricane, dustStorm, hail
+      location: "New York City",
+      temperature: 72,
+      type: "rainingPeople", // Change to any of: sunny, cloudy, rainy, stormy, snowy, foggy, nightClear, nightCloudy, sam, tornado, volcano, aurora, hurricane, dustStorm, hail, rainingPeople
       humidity: 9,
       windSpeed: 8,
       precipitation: 0,
       warning: {
         show: false,
-        text: "SEVERE WEATHER ALERT: Tornado warning in effect until 5PM"
+        text: "BIZARRE WEATHER ALERT: It's raining people! Stay indoors and avoid looking up!"
       }
     };
     
@@ -836,6 +858,28 @@
           }
           break;
           
+        case 'rainingPeople':
+          container.style.backgroundColor = '#A5D6A7'; // Light green - it's an unusual day!
+          
+          // Create clouds
+          for (let i = 0; i < 3; i++) {
+            const cloud = document.createElement('div');
+            cloud.className = 'cloud';
+            cloud.style.width = `${Math.random() * 80 + 120}px`;
+            cloud.style.height = `${Math.random() * 30 + 40}px`;
+            cloud.style.position = 'absolute';
+            cloud.style.top = `${Math.random() * 25}%`;
+            cloud.style.left = `${Math.random() * 70 + 10}%`;
+            cloud.style.opacity = '0.9';
+            container.appendChild(cloud);
+          }
+          
+          // Create falling stick figures
+          for (let i = 0; i < 15; i++) {
+            createStickFigure(container);
+          }
+          break;
+          
         default:
           container.style.backgroundColor = '#87CEEB'; // Default to sky blue
           const defaultSun = document.createElement('div');
@@ -929,6 +973,107 @@
       container.appendChild(dust);
     }
     
+    // Helper function to create a stick figure
+    function createStickFigure(container) {
+      const figure = document.createElement('div');
+      figure.style.position = 'absolute';
+      figure.style.width = '15px';
+      figure.style.height = '30px';
+      figure.style.left = `${Math.random() * 90 + 5}%`;
+      
+      // Draw the stick figure using SVG
+      const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+      svg.setAttribute('width', '100%');
+      svg.setAttribute('height', '100%');
+      svg.setAttribute('viewBox', '0 0 15 30');
+      
+      // Head
+      const head = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      head.setAttribute('cx', '7.5');
+      head.setAttribute('cy', '5');
+      head.setAttribute('r', '5');
+      head.setAttribute('fill', 'black');
+      
+      // Body
+      const body = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      body.setAttribute('x1', '7.5');
+      body.setAttribute('y1', '10');
+      body.setAttribute('x2', '7.5');
+      body.setAttribute('y2', '20');
+      body.setAttribute('stroke', 'black');
+      body.setAttribute('stroke-width', '2');
+      
+      // Arms
+      const arms = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      arms.setAttribute('x1', '2');
+      arms.setAttribute('y1', '15');
+      arms.setAttribute('x2', '13');
+      arms.setAttribute('y2', '15');
+      arms.setAttribute('stroke', 'black');
+      arms.setAttribute('stroke-width', '2');
+      
+      // Left leg
+      const leftLeg = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      leftLeg.setAttribute('x1', '7.5');
+      leftLeg.setAttribute('y1', '20');
+      leftLeg.setAttribute('x2', '3');
+      leftLeg.setAttribute('y2', '30');
+      leftLeg.setAttribute('stroke', 'black');
+      leftLeg.setAttribute('stroke-width', '2');
+      
+      // Right leg
+      const rightLeg = document.createElementNS("http://www.w3.org/2000/svg", "line");
+      rightLeg.setAttribute('x1', '7.5');
+      rightLeg.setAttribute('y1', '20');
+      rightLeg.setAttribute('x2', '12');
+      rightLeg.setAttribute('y2', '30');
+      rightLeg.setAttribute('stroke', 'black');
+      rightLeg.setAttribute('stroke-width', '2');
+      
+      // Add all parts to the SVG
+      svg.appendChild(head);
+      svg.appendChild(body);
+      svg.appendChild(arms);
+      svg.appendChild(leftLeg);
+      svg.appendChild(rightLeg);
+      
+      figure.appendChild(svg);
+      
+      // Add speech bubble for some figures
+      if (Math.random() > 0.7) {
+        const speech = document.createElement('div');
+        speech.style.position = 'absolute';
+        speech.style.backgroundColor = 'white';
+        speech.style.borderRadius = '50%';
+        speech.style.padding = '3px';
+        speech.style.fontSize = '8px';
+        speech.style.width = '25px';
+        speech.style.height = '25px';
+        speech.style.textAlign = 'center';
+        speech.style.display = 'flex';
+        speech.style.alignItems = 'center';
+        speech.style.justifyContent = 'center';
+        speech.style.left = '-15px';
+        speech.style.top = '-15px';
+        speech.style.fontWeight = 'bold';
+        
+        // Random exclamations
+        const exclamations = ['AAAA!', 'HELP!', 'OH NO!', 'WHEE!', 'AGAIN?'];
+        speech.textContent = exclamations[Math.floor(Math.random() * exclamations.length)];
+        
+        figure.appendChild(speech);
+      }
+      
+      // Animation for falling
+      figure.style.animation = `stick-figure-fall ${Math.random() * 5 + 5}s infinite linear`;
+      figure.style.animationDelay = `${Math.random() * 10}s`;
+      
+      // Add panic animation to the SVG
+      svg.style.animation = `stick-figure-panic 0.5s infinite linear`;
+      
+      container.appendChild(figure);
+    }
+    
     // Function to update the bar graphs
     function updateBarGraphs() {
       // Humidity is already in percentage (0-100)
@@ -967,6 +1112,7 @@
         case 'hurricane': weatherTypeDisplay = 'Hurricane'; break;
         case 'dustStorm': weatherTypeDisplay = 'Dust Storm'; break;
         case 'hail': weatherTypeDisplay = 'Hail Storm'; break;
+        case 'rainingPeople': weatherTypeDisplay = 'Raining People'; break;
         default: weatherTypeDisplay = 'Unknown';
       }
       
