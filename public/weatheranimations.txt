@@ -13,3 +13,4 @@ aurora - Northern lights (aurora borealis) with stars
 hurricane - Spinning hurricane spiral with cloud bands
 dustStorm - Swirling dust clouds and particles
 hail - Storm clouds with bouncing hailstones
+rainingpeople
