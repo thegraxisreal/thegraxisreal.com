@@ -379,6 +379,48 @@
                 width: 100%;
             }
         }
+        
+        .range-selection {
+            margin: 1.5rem 0;
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 1rem;
+        }
+        
+        .range-selection h3 {
+            font-size: 1.25rem;
+            color: var(--primary);
+            margin-bottom: 1rem;
+        }
+        
+        .range-options {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .range-btn {
+            padding: 10px 20px;
+            border-radius: 50px;
+            border: 2px solid var(--primary);
+            background: transparent;
+            color: var(--primary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            min-width: 100px;
+        }
+        
+        .range-btn:hover {
+            background-color: rgba(94, 96, 206, 0.1);
+        }
+        
+        .range-btn.active {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 5px 15px rgba(94, 96, 206, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -409,13 +451,21 @@
         <div class="game-container">
             <div class="game-header">
                 <h1>Number Guessing Game</h1>
-                <p>Think of a number between 1 and 100, and I'll try to guess it!</p>
+                <p>Think of a number, and I'll try to guess it!</p>
             </div>
             
             <!-- Game Setup Section -->
             <div id="setupSection">
                 <div class="game-status">
-                    <p>Ready to play? Think of a number between 1 and 100, and I'll try to guess it!</p>
+                    <p>Select a range and think of a number. I'll try to guess it!</p>
+                </div>
+                <div class="range-selection">
+                    <h3>Select Range</h3>
+                    <div class="range-options">
+                        <button class="range-btn active" data-range="100">1-100</button>
+                        <button class="range-btn" data-range="1000">1-1000</button>
+                        <button class="range-btn" data-range="5000">1-5000</button>
+                    </div>
                 </div>
                 <div class="game-actions">
                     <button id="startGameBtn" class="btn btn-primary">
@@ -499,6 +549,7 @@
         let currentGuess;
         let guessCount = 0;
         let guessHistory = [];
+        let selectedRange = 100; // Default range
         
         // DOM Elements
         const setupSection = document.getElementById('setupSection');
@@ -516,6 +567,21 @@
         const finalNumberSpan = document.getElementById('finalNumber');
         const guessCountSpan = document.getElementById('guessCount');
         const gameOverMessage = document.getElementById('gameOverMessage');
+        const rangeBtns = document.querySelectorAll('.range-btn');
+        
+        // Range selection buttons
+        rangeBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Remove active class from all buttons
+                rangeBtns.forEach(b => b.classList.remove('active'));
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Set selected range
+                selectedRange = parseInt(this.getAttribute('data-range'));
+            });
+        });
         
         // Generate a guess based on current range
         function makeGuess() {
@@ -575,7 +641,7 @@
         // Start a new game
         function startGame() {
             minRange = 1;
-            maxRange = 100;
+            maxRange = selectedRange;
             guessCount = 0;
             guessHistory = [];
             
@@ -652,7 +718,11 @@
             makeGuess();
         });
         
-        playAgainBtn.addEventListener('click', startGame);
+        playAgainBtn.addEventListener('click', function() {
+            // Return to setup screen instead of immediately starting a new game
+            setupSection.classList.remove('hidden');
+            gameOverSection.classList.add('hidden');
+        });
         
         // Add mobile menu script
         const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
