@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Memory Game - TheGraxIsReal</title>
+    
+    <!-- Google Fonts for modern typography -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Animate.css for animations -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    
+    <style>
+        :root {
+            --primary: #5e60ce;
+            --primary-light: #6930c3;
+            --secondary: #48bfe3;
+            --dark: #1e1e2c;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #2ecc71;
+            --danger: #e74c3c;
+            --warning: #f39c12;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --transition: all 0.3s ease;
+        }
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--light);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            color: var(--dark);
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Navbar styling */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+        
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+            transition: var(--transition);
+        }
+        
+        .logo {
+            font-weight: 800;
+            font-size: 24px;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-icon {
+            font-size: 28px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 40px;
+        }
+        
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            position: relative;
+            transition: var(--transition);
+        }
+        
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+        
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+        
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+        
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--dark);
+        }
+        
+        /* Game Container */
+        .game-container {
+            max-width: 800px;
+            margin: 120px auto 2rem;
+            padding: 2rem;
+            background: #fff;
+            border-radius: 1rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .game-header {
+            background: var(--gradient);
+            color: #fff;
+            padding: 2rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            animation: fadeInDown 1s;
+            box-shadow: 0 10px 20px rgba(94, 96, 206, 0.3);
+        }
+        
+        .game-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .game-header p {
+            font-size: 1.125rem;
+            opacity: 0.9;
+        }
+        
+        .game-status {
+            background-color: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 1rem;
+            margin-bottom: 2rem;
+            font-size: 1.25rem;
+            font-weight: 500;
+        }
+        
+        .game-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .game-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-gap: 15px;
+            margin: 30px auto;
+            max-width: 600px;
+        }
+
+        .card {
+            height: 120px;
+            background: var(--light);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: var(--transition);
+            transform-style: preserve-3d;
+            position: relative;
+            perspective: 1000px;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+        }
+
+        .card.flip {
+            transform: rotateY(180deg);
+        }
+
+        .card.matched {
+            background: rgba(46, 204, 113, 0.1);
+            border: 2px solid var(--success);
+            cursor: default;
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+        }
+
+        .card-front {
+            background: var(--gradient);
+            color: white;
+            font-size: 2rem;
+        }
+
+        .card-back {
+            background: white;
+            color: var(--primary);
+            transform: rotateY(180deg);
+            font-size: 2.5rem;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 15px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            color: var(--gray);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .game-over {
+            background: rgba(46, 204, 113, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            margin: 30px 0;
+            color: var(--success);
+            font-weight: 600;
+            animation: fadeInUp 0.5s;
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 1rem;
+            gap: 10px;
+            cursor: pointer;
+            border: none;
+        }
+        
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 10px 20px rgba(94, 96, 206, 0.3);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(94, 96, 206, 0.4);
+        }
+        
+        .btn-outline-secondary {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+        
+        .btn-outline-secondary:hover {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+            margin-top: 2rem;
+        }
+        
+        /* Animations */
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .pulse {
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes flip {
+            0% { transform: rotateY(0); }
+            100% { transform: rotateY(180deg); }
+        }
+
+        .flip-animation {
+            animation: flip 0.5s;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .game-container {
+                margin: 100px 20px 2rem;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: block;
+            }
+            
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                width: 100%;
+                background: white;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px 0;
+                gap: 20px;
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+                transform: translateY(-10px);
+                opacity: 0;
+                visibility: hidden;
+                transition: var(--transition);
+            }
+            
+            .nav-links.active {
+                transform: translateY(0);
+                opacity: 1;
+                visibility: visible;
+            }
+            
+            .game-container {
+                margin: 80px 15px 1rem;
+                padding: 1.5rem;
+            }
+            
+            .game-header h1 {
+                font-size: 2rem;
+            }
+            
+            .game-header p {
+                font-size: 1rem;
+            }
+
+            .game-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+
+            .card {
+                height: 100px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .btn {
+                width: 100%;
+            }
+            
+            .game-actions {
+                width: 100%;
+            }
+
+            .game-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .card {
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <header>
+        <div class="container">
+            <nav>
+                <a href="index.html" class="logo">
+                    <span class="logo-icon"><i class="fas fa-code"></i></span>
+                    TheGraxIsReal
+                </a>
+                <button class="mobile-menu-btn">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="nav-links">
+                    <a href="index.html">Home</a>
+                    <a href="index.html#projects">Projects</a>
+                    <a href="index.html#blog">Blog</a>
+                    <a href="index.html#skills">Skills</a>
+                    <a href="index.html#contact">Contact</a>
+                    <a href="games.html">Games</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+    
+    <div class="container">
+        <div class="game-container">
+            <div class="game-header">
+                <h1>Memory Game</h1>
+                <p>Test your memory! Match all pairs of cards to win.</p>
+            </div>
+            
+            <div class="game-status">
+                <p>Find all matching pairs as quickly as possible!</p>
+            </div>
+            
+            <div class="stats">
+                <div class="stat">
+                    <div class="stat-value" id="movesCount">0</div>
+                    <div class="stat-label">Moves</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="timeElapsed">0</div>
+                    <div class="stat-label">Seconds</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-value" id="pairsFound">0 / 8</div>
+                    <div class="stat-label">Pairs</div>
+                </div>
+            </div>
+            
+            <div id="game-grid" class="game-grid">
+                <!-- Cards will be added here by JavaScript -->
+            </div>
+            
+            <div id="gameOver" class="game-over hidden">
+                <p>Congratulations! You've found all pairs!</p>
+                <p>Score: <span id="finalScore">0</span></p>
+            </div>
+            
+            <div class="game-actions">
+                <button id="resetBtn" class="btn btn-primary">
+                    <i class="fas fa-redo"></i> Reset Game
+                </button>
+                <a href="games.html" class="btn btn-outline-secondary">
+                    <i class="fas fa-gamepad"></i> Back to Games
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-bottom">
+                <p>&copy; 2023 TheGraxIsReal. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        // Game variables
+        let cards = [];
+        let flippedCards = [];
+        let matchedPairs = 0;
+        let isFlipping = false;
+        let moveCount = 0;
+        let timerInterval;
+        let seconds = 0;
+        let gameStarted = false;
+        
+        // Icons for card pairs
+        const cardIcons = [
+            'fa-heart', 'fa-star', 'fa-bolt', 'fa-bell',
+            'fa-moon', 'fa-sun', 'fa-gem', 'fa-fire'
+        ];
+        
+        // DOM Elements
+        const gameGrid = document.getElementById('game-grid');
+        const movesCountDisplay = document.getElementById('movesCount');
+        const timeElapsedDisplay = document.getElementById('timeElapsed');
+        const pairsFoundDisplay = document.getElementById('pairsFound');
+        const gameOverDisplay = document.getElementById('gameOver');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const resetButton = document.getElementById('resetBtn');
+        const gameStatus = document.querySelector('.game-status p');
+        
+        // Initialize game
+        function initGame() {
+            resetGame();
+            createCards();
+            shuffleCards();
+            renderCards();
+        }
+        
+        // Create card elements
+        function createCards() {
+            // Create pairs of cards with icons
+            let iconPairs = [...cardIcons, ...cardIcons];
+            
+            cards = iconPairs.map((icon, index) => ({
+                id: index,
+                icon: icon,
+                isFlipped: false,
+                isMatched: false
+            }));
+        }
+        
+        // Shuffle cards using Fisher-Yates algorithm
+        function shuffleCards() {
+            for (let i = cards.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [cards[i], cards[j]] = [cards[j], cards[i]];
+            }
+        }
+        
+        // Render cards to the grid
+        function renderCards() {
+            gameGrid.innerHTML = '';
+            
+            cards.forEach(card => {
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card');
+                cardElement.dataset.id = card.id;
+                
+                // Create card front (back facing)
+                const cardFront = document.createElement('div');
+                cardFront.classList.add('card-front');
+                cardFront.innerHTML = '<i class="fas fa-question"></i>';
+                
+                // Create card back (face with icon)
+                const cardBack = document.createElement('div');
+                cardBack.classList.add('card-back');
+                cardBack.innerHTML = `<i class="fas ${card.icon}"></i>`;
+                
+                // Apply matched or flipped state if needed
+                if (card.isMatched) {
+                    cardElement.classList.add('matched');
+                    cardElement.classList.add('flip');
+                } else if (card.isFlipped) {
+                    cardElement.classList.add('flip');
+                }
+                
+                cardElement.appendChild(cardFront);
+                cardElement.appendChild(cardBack);
+                
+                // Add click handler
+                cardElement.addEventListener('click', () => flipCard(card.id));
+                
+                gameGrid.appendChild(cardElement);
+            });
+        }
+        
+        // Card flip logic
+        function flipCard(cardId) {
+            // Don't allow flipping if already flipping or card is matched/flipped
+            if (isFlipping) return;
+            
+            const card = cards.find(c => c.id === cardId);
+            
+            // Can't flip an already flipped or matched card
+            if (card.isFlipped || card.isMatched) return;
+            
+            // Start timer on first move
+            if (!gameStarted) {
+                startTimer();
+                gameStarted = true;
+            }
+            
+            // Flip the card
+            card.isFlipped = true;
+            flippedCards.push(card);
+            
+            // Update UI
+            renderCards();
+            
+            // Check for matches if we have 2 flipped cards
+            if (flippedCards.length === 2) {
+                moveCount++;
+                movesCountDisplay.textContent = moveCount;
+                
+                isFlipping = true;
+                setTimeout(checkForMatch, 1000);
+            }
+        }
+        
+        // Check if the two flipped cards match
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+            
+            if (card1.icon === card2.icon) {
+                // Match found
+                card1.isMatched = true;
+                card2.isMatched = true;
+                matchedPairs++;
+                
+                pairsFoundDisplay.textContent = `${matchedPairs} / 8`;
+                
+                // Check for game completion
+                if (matchedPairs === 8) {
+                    endGame();
+                }
+            } else {
+                // No match, flip cards back
+                card1.isFlipped = false;
+                card2.isFlipped = false;
+            }
+            
+            // Reset flipped cards array
+            flippedCards = [];
+            isFlipping = false;
+            
+            // Update UI
+            renderCards();
+        }
+        
+        // Timer function
+        function startTimer() {
+            timerInterval = setInterval(() => {
+                seconds++;
+                timeElapsedDisplay.textContent = seconds;
+            }, 1000);
+        }
+        
+        // End game logic
+        function endGame() {
+            clearInterval(timerInterval);
+            
+            // Calculate score (fewer moves and less time is better)
+            const score = Math.round(10000 / (moveCount + seconds/2));
+            
+            finalScoreDisplay.textContent = score;
+            gameOverDisplay.classList.remove('hidden');
+            
+            gameStatus.textContent = "Congratulations! You've completed the game!";
+            gameStatus.style.color = 'var(--success)';
+        }
+        
+        // Reset game
+        function resetGame() {
+            cards = [];
+            flippedCards = [];
+            matchedPairs = 0;
+            isFlipping = false;
+            moveCount = 0;
+            seconds = 0;
+            gameStarted = false;
+            
+            // Reset displays
+            movesCountDisplay.textContent = '0';
+            timeElapsedDisplay.textContent = '0';
+            pairsFoundDisplay.textContent = '0 / 8';
+            gameStatus.textContent = 'Find all matching pairs as quickly as possible!';
+            gameStatus.style.color = '';
+            
+            // Hide game over message
+            gameOverDisplay.classList.add('hidden');
+            
+            // Clear timer
+            clearInterval(timerInterval);
+        }
+        
+        // Event Listeners
+        resetButton.addEventListener('click', initGame);
+        
+        // Initialize the game when page loads
+        initGame();
+        
+        // Mobile menu script
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        
+        mobileMenuBtn.addEventListener('click', () => {
+            navLinks.classList.toggle('active');
+        });
+        
+        // Close mobile menu when clicking on a link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                navLinks.classList.remove('active');
+            });
+        });
+        
+        // Sticky Header
+        const header = document.querySelector('header');
+        
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                header.style.padding = '0';
+                header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
+            } else {
+                header.style.padding = '10px 0';
+                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+            }
+        });
+    </script>
+</body>
+</html>
