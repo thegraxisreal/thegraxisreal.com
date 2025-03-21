@@ -124,8 +124,8 @@
         
         /* Game Styles */
         .game-section {
-            padding-top: 120px;
-            padding-bottom: 80px;
+            padding-top: 150px;
+            padding-bottom: 100px;
             min-height: 100vh;
         }
         
@@ -133,7 +133,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
         
         .game-title {
@@ -163,26 +163,18 @@
             font-size: 1.8rem;
         }
         
-        /* New layout adjustments */
-        .game-layout {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 20px;
+        .game-container {
+            display: flex;
+            gap: 30px;
             margin-bottom: 40px;
         }
         
-        .game-main {
-            display: grid;
-            grid-template-rows: auto 1fr auto;
-            gap: 20px;
-        }
-        
         .powerups {
+            width: 250px;
             background: white;
             border-radius: 15px;
             padding: 25px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
-            align-self: start;
         }
         
         .powerups h3 {
@@ -225,10 +217,17 @@
             color: var(--gray);
         }
         
+        .main-game {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
         .current-number {
             background: white;
             border-radius: 15px;
-            padding: 25px;
+            padding: 30px;
+            margin-bottom: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             text-align: center;
         }
@@ -240,7 +239,7 @@
         }
         
         .number-display {
-            font-size: 3.5rem;
+            font-size: 4rem;
             font-weight: 800;
             color: var(--primary);
             background: var(--gradient);
@@ -255,8 +254,9 @@
             gap: 15px;
             background: white;
             border-radius: 15px;
-            padding: 25px;
+            padding: 30px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            margin-bottom: 30px;
         }
         
         .box {
@@ -353,7 +353,7 @@
             background: white;
             border-radius: 15px;
             padding: 30px;
-            margin-top: 30px;
+            margin-top: 40px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
         }
         
@@ -458,24 +458,19 @@
         
         /* Responsive Design */
         @media (max-width: 1024px) {
-            .game-layout {
-                grid-template-columns: 1fr;
+            .game-container {
+                flex-direction: column;
             }
             
             .powerups {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 15px;
-            }
-            
-            .powerups h3 {
-                grid-column: 1 / -1;
+                width: 100%;
+                margin-bottom: 30px;
             }
         }
         
         @media (max-width: 768px) {
             .game-section {
-                padding-top: 100px;
+                padding-top: 120px;
             }
             
             .mobile-menu-btn {
@@ -507,10 +502,6 @@
             
             .box-container {
                 grid-template-columns: repeat(4, 1fr);
-            }
-            
-            .powerups {
-                grid-template-columns: 1fr;
             }
         }
         
@@ -580,20 +571,20 @@
                 </div>
             </div>
 
-            <div class="game-layout">
+            <div class="game-container">
                 <div class="powerups">
                     <h3>Power-ups</h3>
                     <div class="powerup disabled" id="eraser-powerup" onclick="usePowerup('eraser')">
                         <h4><i class="fas fa-eraser"></i> Eraser</h4>
-                        <p>Clear one box (150 coins)</p>
+                        <p>Clear one box (20 coins)</p>
                     </div>
                     <div class="powerup disabled" id="custom-powerup" onclick="usePowerup('custom')">
                         <h4><i class="fas fa-bullseye"></i> Custom Number</h4>
-                        <p>Place any number (150 coins)</p>
+                        <p>Place any number (30 coins)</p>
                     </div>
                 </div>
 
-                <div class="game-main">
+                <div class="main-game">
                     <div class="current-number">
                         <h3>Current Number</h3>
                         <div id="current-number" class="number-display">Ready to start!</div>
@@ -618,7 +609,7 @@
                 <h3>How to Play</h3>
                 <p>The goal is to sort numbers in ascending order from box 1 to box 20:</p>
                 <ul>
-                    <li>You'll be given random numbers between 1 and 999.</li>
+                    <li>You'll be given random numbers between 1 and 100.</li>
                     <li>Place each number in one of the 20 boxes, maintaining ascending order.</li>
                     <li>Box 1 is for the lowest numbers, box 20 is for the highest numbers.</li>
                     <li>If you place a number out of order, the game ends.</li>
@@ -822,7 +813,7 @@
         function usePowerup(type) {
             if (!gameActive) return;
             
-            if (type === 'eraser' && coins >= 150) {
+            if (type === 'eraser' && coins >= 20) {
                 // Check if there are any filled boxes
                 if (filledBoxes === 0) {
                     alert("There are no boxes to erase!");
@@ -830,11 +821,11 @@
                 }
                 
                 activePowerup = 'eraser';
-                updateCoins(coins - 150);
+                updateCoins(coins - 20);
                 openModal('eraser-modal');
-            } else if (type === 'custom' && coins >= 150) {
+            } else if (type === 'custom' && coins >= 30) {
                 activePowerup = 'custom';
-                updateCoins(coins - 150);
+                updateCoins(coins - 30);
                 openModal('custom-modal');
             } else {
                 alert("Not enough coins!");
@@ -860,10 +851,10 @@
         // Cancel powerup
         function cancelPowerup() {
             if (activePowerup === 'eraser') {
-                updateCoins(coins + 150); // Refund coins
+                updateCoins(coins + 20); // Refund coins
                 closeModal('eraser-modal');
             } else if (activePowerup === 'custom') {
-                updateCoins(coins + 150); // Refund coins
+                updateCoins(coins + 30); // Refund coins
                 closeModal('custom-modal');
             }
             
@@ -882,8 +873,8 @@
             const eraserPowerup = document.getElementById('eraser-powerup');
             const customPowerup = document.getElementById('custom-powerup');
             
-            eraserPowerup.className = coins >= 150 ? 'powerup' : 'powerup disabled';
-            customPowerup.className = coins >= 150 ? 'powerup' : 'powerup disabled';
+            eraserPowerup.className = coins >= 20 ? 'powerup' : 'powerup disabled';
+            customPowerup.className = coins >= 30 ? 'powerup' : 'powerup disabled';
         }
 
         // Modal functions
