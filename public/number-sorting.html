@@ -128,13 +128,14 @@
         
         /* Game Container */
         .game-container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 120px auto 2rem;
             padding: 2rem;
             background: #fff;
             border-radius: 1rem;
             box-shadow: 0 5px 15px rgba(0,0,0,0.05);
             text-align: center;
+            position: relative;
         }
         
         .game-header {
@@ -358,6 +359,144 @@
             margin-top: 2rem;
         }
         
+        /* Coin and shop styles */
+        .coin-display {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--gradient);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            box-shadow: 0 5px 15px rgba(94, 96, 206, 0.3);
+            z-index: 100;
+        }
+        
+        .coin-icon {
+            color: #FFD700;
+        }
+        
+        .shop-container {
+            position: absolute;
+            top: 200px;
+            left: 20px;
+            width: 180px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            padding: 15px;
+            z-index: 50;
+        }
+        
+        .shop-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+            text-align: center;
+        }
+        
+        .powerup-item {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+        
+        .powerup-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 5px 10px rgba(0,0,0,0.1);
+        }
+        
+        .powerup-item.disabled {
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+        
+        .powerup-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .powerup-cost {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+            color: var(--gray);
+        }
+        
+        .powerup-count {
+            position: absolute;
+            top: 5px;
+            right: 10px;
+            background: var(--primary);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .powerup-description {
+            font-size: 0.8rem;
+            color: var(--gray);
+            margin-top: 5px;
+        }
+        
+        .custom-number-dialog {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        
+        .dialog-content {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            width: 300px;
+            text-align: center;
+        }
+        
+        .dialog-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary);
+        }
+        
+        .dialog-input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .dialog-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        
         /* Animations */
         @keyframes fadeInDown {
             from { opacity: 0; transform: translateY(-20px); }
@@ -381,10 +520,24 @@
             20%, 40%, 60%, 80% { transform: translateX(10px); }
         }
         
+        @keyframes coinEarned {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); color: #FFD700; }
+            100% { transform: scale(1); }
+        }
+        
         /* Responsive Design */
         @media (max-width: 1024px) {
             .game-container {
                 margin: 100px 20px 2rem;
+            }
+            
+            .shop-container {
+                position: relative;
+                top: 0;
+                left: 0;
+                width: 100%;
+                margin-bottom: 20px;
             }
         }
         
@@ -432,6 +585,25 @@
             .sorting-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
+            
+            .coin-display {
+                position: relative;
+                top: 0;
+                right: 0;
+                margin: 0 auto 20px;
+                width: fit-content;
+            }
+            
+            .shop-container {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                justify-content: center;
+            }
+            
+            .powerup-item {
+                width: 45%;
+            }
         }
         
         @media (max-width: 576px) {
@@ -455,6 +627,10 @@
 
             .current-number {
                 font-size: 2.5rem;
+            }
+            
+            .powerup-item {
+                width: 100%;
             }
         }
     </style>
@@ -485,6 +661,31 @@
     
     <div class="container">
         <div class="game-container">
+            <!-- Coin Display -->
+            <div class="coin-display">
+                <i class="fas fa-coins coin-icon"></i>
+                <span id="coinCount">0</span>
+            </div>
+            
+            <!-- Shop -->
+            <div class="shop-container">
+                <div class="shop-title">Powerups</div>
+                
+                <div class="powerup-item" id="eraser">
+                    <div class="powerup-name"><i class="fas fa-eraser"></i> Eraser</div>
+                    <div class="powerup-description">Remove a placed number</div>
+                    <div class="powerup-cost"><i class="fas fa-coins" style="color: #FFD700;"></i> 20</div>
+                    <div class="powerup-count">0</div>
+                </div>
+                
+                <div class="powerup-item" id="customNumber">
+                    <div class="powerup-name"><i class="fas fa-keyboard"></i> Custom Number</div>
+                    <div class="powerup-description">Choose your own number</div>
+                    <div class="powerup-cost"><i class="fas fa-coins" style="color: #FFD700;"></i> 30</div>
+                    <div class="powerup-count">0</div>
+                </div>
+            </div>
+            
             <div class="game-header">
                 <h1>Number Sorting Challenge</h1>
                 <p>Put the numbers in ascending order without knowing what comes next!</p>
@@ -501,9 +702,10 @@
                     <li>Your task is to place these numbers in ascending order (lowest to highest) on a list of 20 slots.</li>
                     <li>The challenge: You don't know what number will come next!</li>
                     <li>Click on a slot to place the current number there.</li>
-                    <li>Once a number is placed, you cannot move it.</li>
+                    <li>Once a number is placed, you cannot move it (unless you use an Eraser powerup).</li>
                     <li>If at any point your list isn't in ascending order, you lose.</li>
                     <li>Try to fit all 20 numbers in ascending order to win!</li>
+                    <li>Earn 10 coins every time you place 12 or more numbers successfully!</li>
                 </ul>
             </div>
             
@@ -550,6 +752,18 @@
                     </a>
                 </div>
             </div>
+            
+            <!-- Custom Number Dialog (with style="display: none" to ensure it's hidden initially) -->
+            <div id="customNumberDialog" class="custom-number-dialog hidden" style="display: none;">
+                <div class="dialog-content">
+                    <div class="dialog-title">Enter Custom Number</div>
+                    <input type="number" id="customNumberInput" class="dialog-input" min="1" max="999" placeholder="1-999">
+                    <div class="dialog-buttons">
+                        <button id="cancelCustomNumber" class="btn btn-outline-secondary">Cancel</button>
+                        <button id="confirmCustomNumber" class="btn btn-primary">Confirm</button>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -569,29 +783,122 @@
         let numbersPlaced = 0;
         let gameActive = false;
         let highScore = localStorage.getItem('sortingGameHighScore') || 0;
+        let coins = localStorage.getItem('sortingGameCoins') || 0;
+        let eraserCount = localStorage.getItem('eraserCount') || 0;
+        let customNumberCount = localStorage.getItem('customNumberCount') || 0;
+        let isEraserActive = false;
+        let isErasing = false;
         
         // DOM Elements
-        const setupSection = document.getElementById('setupSection');
-        const gameplaySection = document.getElementById('gameplaySection');
-        const gameOverSection = document.getElementById('gameOverSection');
-        const startGameBtn = document.getElementById('startGameBtn');
-        const playAgainBtn = document.getElementById('playAgainBtn');
-        const currentNumberDisplay = document.getElementById('currentNumber');
-        const sortingGrid = document.getElementById('sortingGrid');
-        const numbersPlacedDisplay = document.getElementById('numbersPlaced');
-        const highScoreDisplay = document.getElementById('highScore');
-        const finalScoreDisplay = document.getElementById('finalScore');
-        const gameOverMessage = document.getElementById('gameOverMessage');
         const statusText = document.getElementById('statusText');
-        const gameInstructions = document.getElementById('gameInstructions');
+        const coinCountDisplay = document.getElementById('coinCount');
+        const eraserItem = document.getElementById('eraser');
+        const customNumberItem = document.getElementById('customNumber');
+        const eraserCountDisplay = document.getElementById('eraser').querySelector('.powerup-count');
+        const customNumberCountDisplay = document.getElementById('customNumber').querySelector('.powerup-count');
+        const customNumberDialog = document.getElementById('customNumberDialog');
+        const customNumberInput = document.getElementById('customNumberInput');
+        const cancelCustomNumberBtn = document.getElementById('cancelCustomNumber');
+        const confirmCustomNumberBtn = document.getElementById('confirmCustomNumber');
         
-        // Initialize high score from localStorage
-        highScoreDisplay.textContent = highScore;
+        // Initialize stored values
+        document.getElementById('highScore').textContent = highScore;
+        coinCountDisplay.textContent = coins;
+        eraserCountDisplay.textContent = eraserCount;
+        customNumberCountDisplay.textContent = customNumberCount;
+        
+        // Update shop state
+        function updateShop() {
+            if (parseInt(coins) < 20) {
+                eraserItem.classList.add('disabled');
+            } else {
+                eraserItem.classList.remove('disabled');
+            }
+            
+            if (parseInt(coins) < 30) {
+                customNumberItem.classList.add('disabled');
+            } else {
+                customNumberItem.classList.remove('disabled');
+            }
+        }
+        
+        // Initialize shop
+        updateShop();
+        
+        // Start game
+        function startGame() {
+            // Reset game state
+            numbersPlaced = 0;
+            gameActive = true;
+            isErasing = false;
+            
+            // Hide setup and show gameplay
+            document.getElementById('setupSection').classList.add('hidden');
+            document.getElementById('gameInstructions').classList.add('hidden');
+            document.getElementById('gameplaySection').classList.remove('hidden');
+            document.getElementById('gameOverSection').classList.add('hidden');
+            
+            // Initialize game
+            initGame();
+            
+            // Update status
+            statusText.textContent = "Place your first number!";
+        }
+        
+        // Game Over
+        function gameOver(isSuccess) {
+            gameActive = false;
+            
+            // Update high score if needed
+            if (numbersPlaced > highScore) {
+                highScore = numbersPlaced;
+                localStorage.setItem('sortingGameHighScore', highScore);
+                document.getElementById('highScore').textContent = highScore;
+            }
+            
+            // Update final score
+            document.getElementById('finalScore').textContent = numbersPlaced;
+            
+            // Display success or failure message
+            const gameOverMessage = document.getElementById('gameOverMessage');
+            if (isSuccess) {
+                gameOverMessage.classList.remove('failure');
+                gameOverMessage.innerHTML = `
+                    <p>Congratulations! You won!</p>
+                    <p>You successfully sorted all 20 numbers.</p>
+                `;
+                // Award bonus coins for winning
+                earnCoins(50);
+            } else {
+                gameOverMessage.classList.add('failure');
+                gameOverMessage.innerHTML = `
+                    <p>Game Over!</p>
+                    <p>You successfully placed ${numbersPlaced} numbers.</p>
+                `;
+            }
+            
+            // Hide gameplay and show game over
+            document.getElementById('gameplaySection').classList.add('hidden');
+            document.getElementById('gameOverSection').classList.remove('hidden');
+        }
+        
+        // Direct button click handlers
+        document.getElementById('startGameBtn').addEventListener('click', startGame);
+        
+        document.getElementById('playAgainBtn').addEventListener('click', function() {
+            // Hide game over and show setup
+            document.getElementById('gameOverSection').classList.add('hidden');
+            document.getElementById('setupSection').classList.remove('hidden');
+            document.getElementById('gameInstructions').classList.remove('hidden');
+            
+            // Reset status
+            statusText.textContent = "Click Start Game to begin!";
+        });
         
         // Initialize game
         function initGame() {
             // Create 20 slots
-            sortingGrid.innerHTML = '';
+            document.getElementById('sortingGrid').innerHTML = '';
             slotsArray = [];
             
             for (let i = 1; i <= 20; i++) {
@@ -604,9 +911,15 @@
                 
                 slot.appendChild(slotNumber);
                 slot.dataset.index = i - 1;
-                slot.addEventListener('click', () => placeNumber(i - 1));
+                slot.addEventListener('click', function() {
+                    if (isErasing) {
+                        eraseNumber(i - 1);
+                    } else {
+                        placeNumber(i - 1);
+                    }
+                });
                 
-                sortingGrid.appendChild(slot);
+                document.getElementById('sortingGrid').appendChild(slot);
                 slotsArray.push({
                     element: slot,
                     value: null,
@@ -619,17 +932,18 @@
             
             // Update display
             updateGameDisplay();
+            updateShop();
         }
         
         // Generate a random number between 1 and 999
         function generateRandomNumber() {
             currentNumber = Math.floor(Math.random() * 999) + 1;
-            currentNumberDisplay.textContent = currentNumber;
+            document.getElementById('currentNumber').textContent = currentNumber;
         }
         
         // Place number in a slot
         function placeNumber(index) {
-            if (!gameActive) return;
+            if (!gameActive || isErasing) return;
             
             const slot = slotsArray[index];
             
@@ -658,6 +972,11 @@
             // Increment counter
             numbersPlaced++;
             
+            // Check for rewards
+            if (numbersPlaced >= 12) {
+                earnCoins(10);
+            }
+            
             // Check for win condition
             if (numbersPlaced === 20) {
                 gameOver(true);
@@ -671,135 +990,146 @@
             updateGameDisplay();
         }
         
+        // Erase a number
+        function eraseNumber(index) {
+            if (!gameActive || !isErasing) return;
+            
+            const slot = slotsArray[index];
+            
+            // Can only erase filled slots
+            if (!slot.filled) return;
+            
+            // Erase the number
+            slot.value = null;
+            slot.filled = false;
+            slot.element.textContent = '';
+            slot.element.classList.remove('filled');
+            
+            // Decrement counter
+            numbersPlaced--;
+            
+            // Exit eraser mode
+            isErasing = false;
+            eraserCount--;
+            eraserCountDisplay.textContent = eraserCount;
+            localStorage.setItem('eraserCount', eraserCount);
+            
+            // Reset UI
+            document.querySelectorAll('.sorting-slot').forEach(slot => {
+                slot.style.cursor = 'pointer';
+            });
+            
+            statusText.textContent = "Number erased! Continue placing numbers.";
+            
+            // Update display
+            updateGameDisplay();
+        }
+        
         // Update game display
         function updateGameDisplay() {
-            numbersPlacedDisplay.textContent = `${numbersPlaced} / 20`;
-            
-            if (numbersPlaced === 0) {
-                statusText.textContent = "Place your first number!";
-            } else if (numbersPlaced < 5) {
-                statusText.textContent = "Good start! Keep going.";
-            } else if (numbersPlaced < 10) {
-                statusText.textContent = "You're doing well!";
-            } else if (numbersPlaced < 15) {
-                statusText.textContent = "Amazing progress!";
-            } else {
-                statusText.textContent = "Almost there!";
-            }
+            // Update numbers placed display
+            document.getElementById('numbersPlaced').textContent = `${numbersPlaced} / 20`;
         }
         
-        // Game over function
-        function gameOver(success) {
-            gameActive = false;
+        // Earn coins
+        function earnCoins(amount) {
+            coins = parseInt(coins) + amount;
+            localStorage.setItem('sortingGameCoins', coins);
+            coinCountDisplay.textContent = coins;
             
-            // Highlight the error if it was a failure
-            if (!success) {
-                const errorSlots = document.querySelectorAll('.sorting-slot.filled');
-                errorSlots.forEach(slot => {
-                    const slotIndex = parseInt(slot.dataset.index);
-                    const slotValue = slotsArray[slotIndex].value;
-                    
-                    const prevSlot = slotIndex > 0 ? slotsArray[slotIndex - 1] : null;
-                    const nextSlot = slotIndex < 19 ? slotsArray[slotIndex + 1] : null;
-                    
-                    if (
-                        (prevSlot && prevSlot.filled && prevSlot.value >= slotValue) ||
-                        (nextSlot && nextSlot.filled && nextSlot.value <= slotValue)
-                    ) {
-                        slot.classList.add('error');
+            // Show coin earned animation
+            coinCountDisplay.style.animation = 'coinEarned 0.5s';
+            setTimeout(() => {
+                coinCountDisplay.style.animation = '';
+            }, 500);
+            
+            // Update shop state
+            updateShop();
+        }
+        
+        // Power-up: Eraser
+        eraserItem.addEventListener('click', function() {
+            if (gameActive && !isErasing && eraserCount > 0 && slotsArray.some(slot => slot.filled)) {
+                isErasing = true;
+                statusText.textContent = "Click on a number to erase it.";
+                
+                // Change cursor for filled slots
+                slotsArray.forEach(slot => {
+                    if (slot.filled) {
+                        slot.element.style.cursor = 'pointer';
+                    } else {
+                        slot.element.style.cursor = 'not-allowed';
                     }
                 });
+            } else if (parseInt(coins) >= 20 && !isErasing) {
+                // Purchase eraser if not already in eraser mode
+                coins -= 20;
+                localStorage.setItem('sortingGameCoins', coins);
+                coinCountDisplay.textContent = coins;
+                
+                eraserCount++;
+                localStorage.setItem('eraserCount', eraserCount);
+                eraserCountDisplay.textContent = eraserCount;
+                
+                updateShop();
             }
-            
-            // Update high score if needed
-            if (numbersPlaced > highScore) {
-                highScore = numbersPlaced;
-                localStorage.setItem('sortingGameHighScore', highScore);
-                highScoreDisplay.textContent = highScore;
-            }
-            
-            // Set final score
-            finalScoreDisplay.textContent = numbersPlaced;
-            
-            // Update game over message
-            if (success) {
-                gameOverMessage.classList.remove('failure');
-                gameOverMessage.innerHTML = `
-                    <p><i class="fas fa-trophy"></i> Congratulations!</p>
-                    <p>You successfully placed all 20 numbers in ascending order!</p>
-                `;
-            } else {
-                gameOverMessage.classList.add('failure');
-                gameOverMessage.innerHTML = `
-                    <p><i class="fas fa-times-circle"></i> Game Over!</p>
-                    <p>You successfully placed ${numbersPlaced} numbers before making a mistake.</p>
-                `;
-            }
-            
-            // Show game over section
-            gameplaySection.classList.add('hidden');
-            gameOverSection.classList.remove('hidden');
-        }
-        
-        // Start game
-        function startGame() {
-            // Reset game state
-            numbersPlaced = 0;
-            gameActive = true;
-            
-            // Hide setup and show gameplay
-            setupSection.classList.add('hidden');
-            gameInstructions.classList.add('hidden');
-            gameplaySection.classList.remove('hidden');
-            gameOverSection.classList.add('hidden');
-            
-            // Initialize game
-            initGame();
-            
-            // Update status
-            statusText.textContent = "Place your first number!";
-        }
-        
-        // Event Listeners
-        startGameBtn.addEventListener('click', startGame);
-        
-        playAgainBtn.addEventListener('click', () => {
-            // Hide game over and show setup
-            gameOverSection.classList.add('hidden');
-            setupSection.classList.remove('hidden');
-            gameInstructions.classList.remove('hidden');
-            
-            // Reset status
-            statusText.textContent = "Click Start Game to begin!";
         });
         
-        // Mobile menu script
+        // Power-up: Custom Number
+        customNumberItem.addEventListener('click', function() {
+            if (gameActive && customNumberCount > 0) {
+                // Use a custom number
+                customNumberDialog.classList.remove('hidden');
+                customNumberDialog.style.display = 'flex';
+            } else if (parseInt(coins) >= 30) {
+                // Purchase custom number
+                coins -= 30;
+                localStorage.setItem('sortingGameCoins', coins);
+                coinCountDisplay.textContent = coins;
+                
+                customNumberCount++;
+                localStorage.setItem('customNumberCount', customNumberCount);
+                customNumberCountDisplay.textContent = customNumberCount;
+                
+                updateShop();
+            }
+        });
+        
+        // Custom Number Dialog
+        cancelCustomNumberBtn.addEventListener('click', function() {
+            customNumberDialog.classList.add('hidden');
+            setTimeout(() => {
+                customNumberDialog.style.display = 'none';
+            }, 300);
+        });
+        
+        confirmCustomNumberBtn.addEventListener('click', function() {
+            const customNum = parseInt(customNumberInput.value);
+            if (customNum && customNum >= 1 && customNum <= 999) {
+                currentNumber = customNum;
+                document.getElementById('currentNumber').textContent = currentNumber;
+                
+                customNumberCount--;
+                localStorage.setItem('customNumberCount', customNumberCount);
+                customNumberCountDisplay.textContent = customNumberCount;
+                
+                customNumberDialog.classList.add('hidden');
+                setTimeout(() => {
+                    customNumberDialog.style.display = 'none';
+                }, 300);
+            }
+        });
+        
+        // Mobile menu toggle
         const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
         const navLinks = document.querySelector('.nav-links');
         
-        mobileMenuBtn.addEventListener('click', () => {
+        mobileMenuBtn.addEventListener('click', function() {
             navLinks.classList.toggle('active');
         });
         
-        // Close mobile menu when clicking on a link
-        document.querySelectorAll('.nav-links a').forEach(link => {
-            link.addEventListener('click', () => {
-                navLinks.classList.remove('active');
-            });
-        });
-        
-        // Sticky Header
-        const header = document.querySelector('header');
-        
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 100) {
-                header.style.padding = '0';
-                header.style.boxShadow = '0 2px 20px rgba(0, 0, 0, 0.1)';
-            } else {
-                header.style.padding = '10px 0';
-                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
-            }
-        });
+        // Initialize the game
+        updateShop();
     </script>
 </body>
-</html> 
+</html>
