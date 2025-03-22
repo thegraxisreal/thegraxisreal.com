@@ -250,20 +250,18 @@
         
         .box-container {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(5, 1fr);
-            gap: 5px;
+            grid-template-columns: repeat(5, 1fr);
+            grid-template-rows: repeat(4, auto);
+            gap: 4px;
             background: white;
             border-radius: 12px;
             padding: 10px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
             margin-bottom: 15px;
             height: auto;
-            max-height: 60vh;
         }
         
         .box {
-            aspect-ratio: 1;
             background: rgba(94, 96, 206, 0.05);
             border: 1px solid rgba(94, 96, 206, 0.1);
             border-radius: 6px;
@@ -273,21 +271,21 @@
             justify-content: center;
             cursor: pointer;
             transition: var(--transition);
-            padding: 2px;
-            min-height: auto;
-            height: auto;
+            padding: 6px 4px;
+            height: 30px;
+            width: 100%;
         }
         
         .box:hover:not(.filled):not(.wrong) {
-            transform: translateY(-3px);
-            box-shadow: 0 5px 10px rgba(94, 96, 206, 0.1);
+            transform: translateY(-2px);
+            box-shadow: 0 3px 5px rgba(94, 96, 206, 0.1);
             border-color: var(--primary);
         }
         
         .box.filled {
             background: rgba(94, 96, 206, 0.1);
             border-color: var(--primary);
-            box-shadow: 0 5px 15px rgba(94, 96, 206, 0.2);
+            box-shadow: 0 3px 8px rgba(94, 96, 206, 0.2);
         }
         
         .box.wrong {
@@ -296,9 +294,10 @@
         }
         
         .box-number {
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             font-weight: 700;
             color: var(--primary);
+            line-height: 1;
         }
         
         .box.wrong .box-number {
@@ -306,9 +305,10 @@
         }
         
         .box-label {
-            font-size: 0.6rem;
+            font-size: 0.5rem;
             color: var(--gray);
             font-weight: 500;
+            line-height: 1;
         }
         
         .game-controls {
@@ -473,7 +473,13 @@
             }
             
             .box-container {
-                max-height: 50vh;
+                grid-template-columns: repeat(5, 1fr);
+                grid-template-rows: repeat(4, auto);
+            }
+            
+            .box {
+                height: 28px;
+                padding: 4px 2px;
             }
         }
         
@@ -511,21 +517,23 @@
             }
             
             .box-container {
-                gap: 4px;
-                padding: 8px;
-                max-height: 45vh;
+                gap: 3px;
+                padding: 6px;
+                grid-template-columns: repeat(4, 1fr);
+                grid-template-rows: repeat(5, auto);
             }
             
             .box {
-                min-height: auto;
+                height: 26px;
+                padding: 3px 2px;
             }
             
             .box-number {
-                font-size: 0.8rem;
+                font-size: 0.7rem;
             }
             
             .box-label {
-                font-size: 0.55rem;
+                font-size: 0.45rem;
             }
             
             .current-number {
@@ -558,21 +566,21 @@
             }
             
             .box-container {
-                gap: 3px;
-                padding: 6px;
-                max-height: 40vh;
+                gap: 2px;
+                padding: 5px;
             }
             
             .box {
-                min-height: auto;
+                height: 24px;
+                padding: 2px 1px;
             }
             
             .box-number {
-                font-size: 0.7rem;
+                font-size: 0.65rem;
             }
             
             .box-label {
-                font-size: 0.45rem;
+                font-size: 0.4rem;
             }
             
             .game-controls {
@@ -614,15 +622,15 @@
         
         @media (max-width: 400px) {
             .box {
-                min-height: auto;
+                height: 22px;
             }
             
             .box-number {
-                font-size: 0.65rem;
+                font-size: 0.6rem;
             }
             
             .box-label {
-                font-size: 0.4rem;
+                font-size: 0.35rem;
             }
             
             .game-section {
@@ -802,7 +810,7 @@
                 
                 const boxLabel = document.createElement('div');
                 boxLabel.className = 'box-label';
-                boxLabel.textContent = `Box ${i + 1}`;
+                boxLabel.textContent = `${i + 1}`;
                 
                 box.appendChild(boxNumber);
                 box.appendChild(boxLabel);
