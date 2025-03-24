@@ -2309,8 +2309,8 @@
             dealButton.addEventListener('click', dealBlackjack);
             hitButton.addEventListener('click', hitBlackjack);
             standButton.addEventListener('click', standBlackjack);
-            decreaseBlackjackBetButton.addEventListener('click', () => adjustBet('blackjack', -5));
-            increaseBlackjackBetButton.addEventListener('click', () => adjustBet('blackjack', 5));
+            decreaseBlackjackBetButton.addEventListener('click', () => adjustBet('blackjack', -50));
+            increaseBlackjackBetButton.addEventListener('click', () => adjustBet('blackjack', 100));
             
             // Bar Events
             drinks.forEach(drink => {
@@ -2341,8 +2341,8 @@
                 option.addEventListener('click', () => selectHorse(option));
             });
             startRaceButton.addEventListener('click', startRace);
-            decreaseRaceBetButton.addEventListener('click', () => adjustBet('race', -10));
-            increaseRaceBetButton.addEventListener('click', () => adjustBet('race', 10));
+            decreaseRaceBetButton.addEventListener('click', () => adjustBet('race', -100));
+            increaseRaceBetButton.addEventListener('click', () => adjustBet('race', 100));
             
             // Wheel of Fortune Events
             spinFortuneWheelButton.addEventListener('click', spinFortuneWheel);
