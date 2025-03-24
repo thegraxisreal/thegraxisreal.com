@@ -2385,19 +2385,19 @@
         function adjustBet(game, amount) {
             switch(game) {
                 case 'slot':
-                    gameState.slotBet = Math.max(5, Math.min(100, gameState.slotBet + amount));
+                    gameState.slotBet = Math.max(5, Math.min(10000, gameState.slotBet + amount));
                     betAmountDisplay.textContent = gameState.slotBet;
                     break;
                 case 'roulette':
-                    gameState.rouletteBet = Math.max(10, Math.min(200, gameState.rouletteBet + amount));
+                    gameState.rouletteBet = Math.max(10, Math.min(10000, gameState.rouletteBet + amount));
                     rouletteBetAmountDisplay.textContent = gameState.rouletteBet;
                     break;
                 case 'blackjack':
-                    gameState.blackjackBet = Math.max(5, Math.min(100, gameState.blackjackBet + amount));
+                    gameState.blackjackBet = Math.max(5, Math.min(10000, gameState.blackjackBet + amount));
                     blackjackBetAmountDisplay.textContent = gameState.blackjackBet;
                     break;
                 case 'race':
-                    gameState.raceBet = Math.max(10, Math.min(200, gameState.raceBet + amount));
+                    gameState.raceBet = Math.max(10, Math.min(10000, gameState.raceBet + amount));
                     raceBetAmountDisplay.textContent = gameState.raceBet;
                     break;
                 case 'wheel':
