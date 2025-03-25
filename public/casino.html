@@ -847,19 +847,305 @@
         }
 
         .panel {
-            padding: 0 18px;
-            background-color: rgba(0, 0, 0, 0.2);
-            max-height: 0;
-            overflow: hidden;
-            transition: max-height 0.3s ease-out;
-            border-radius: 0 0 10px 10px;
-            margin-top: -10px;
-            margin-bottom: 10px;
+            display: none;
+            padding: 20px;
+            background-color: rgba(0, 0, 0, 0.3);
+            border-radius: 15px;
+            margin-top: 20px;
         }
 
-        .panel p {
-            padding: 20px 0;
-            line-height: 1.6;
+        /* GIFT SHOP STYLES */
+        .gift-shop-intro {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 18px;
+        }
+
+        .gift-items {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .gift-item {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 25px;
+            width: 250px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            text-align: center;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .gift-item:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.5);
+            border-color: var(--accent-color);
+        }
+
+        .gift-icon {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
+        .gift-name {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: var(--accent-color);
+        }
+
+        .gift-price {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: white;
+        }
+
+        .gift-description {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 20px;
+            min-height: 60px;
+        }
+
+        .buy-button {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .buy-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .time-display {
+            font-size: 24px;
+            text-align: center;
+            margin: 30px 0;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.4);
+            display: none;
+        }
+        
+        .purchased-items {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 40px;
+        }
+        
+        .purchased-items h3 {
+            text-align: center;
+            margin-bottom: 15px;
+            color: var(--accent-color);
+        }
+        
+        .items-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .purchased-item {
+            display: flex;
+            align-items: center;
+            background-color: rgba(90, 30, 130, 0.3);
+            padding: 10px 15px;
+            border-radius: 10px;
+        }
+        
+        .purchased-item-icon {
+            font-size: 24px;
+            margin-right: 10px;
+        }
+        
+        /* PREMIUM SCRATCHERS STYLES */
+        .scratchers-title {
+            text-align: center;
+            margin: 40px 0 20px;
+        }
+        
+        .scratchers-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .scratcher-types {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .scratcher-type {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 15px;
+            padding: 20px;
+            width: 300px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            text-align: center;
+        }
+        
+        .scratcher-icon {
+            font-size: 36px;
+            margin-bottom: 10px;
+        }
+        
+        .scratcher-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+        
+        .scratcher-price {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .scratcher-description {
+            font-size: 14px;
+            color: #ccc;
+            margin-bottom: 20px;
+        }
+        
+        .scratcher-description p {
+            margin-bottom: 8px;
+        }
+        
+        .scratcher-button {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 12px 25px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .scratcher-button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        .scratcher-game {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            max-width: 600px;
+        }
+        
+        .scratcher-card {
+            position: relative;
+            width: 100%;
+            padding-bottom: 100%;
+            margin-bottom: 20px;
+            background-color: #000;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .scratcher-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.6);
+        }
+        
+        .scratcher-grid {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            gap: 2px;
+            padding: 10px;
+            pointer-events: none;
+        }
+        
+        .grid-cell {
+            background-color: #333;
+            border-radius: 3px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .scratcher-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--secondary-color);
+            z-index: 5;
+            cursor: pointer;
+        }
+        
+        .scratcher-result {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            padding: 15px;
+            border-radius: 10px;
+            background-color: rgba(0, 0, 0, 0.4);
+            margin-top: 20px;
+            min-height: 60px;
+        }
+        
+        .scratcher-instructions {
+            text-align: center;
+            color: var(--accent-color);
+            font-size: 18px;
+            margin-top: 15px;
+            font-weight: bold;
+            animation: pulse 1.5s infinite;
+        }
+        
+        /* Animation for highlighting the scratch card when purchased */
+        @keyframes highlight-pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 159, 0, 0.7); }
+            70% { box-shadow: 0 0 0 20px rgba(255, 159, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 159, 0, 0); }
+        }
+        
+        .highlight-pulse {
+            animation: highlight-pulse 1.5s ease-out;
+            border: 2px solid var(--accent-color);
+        }
+
+        /* Button flash animation */
+        @keyframes button-flash {
+            0% { background-color: var(--accent-color); }
+            50% { background-color: white; }
+            100% { background-color: var(--accent-color); }
+        }
+        
+        .button-flash {
+            animation: button-flash 0.5s ease;
         }
 
         /* ANIMATION EFFECTS */
@@ -1574,6 +1860,35 @@
                 font-size: 14px;
             }
         }
+
+        /* Admin button styles */
+        .admin-button-container {
+            text-align: right;
+            margin-top: 30px;
+            opacity: 0.5;
+            transition: opacity 0.3s ease;
+        }
+
+        .admin-button-container:hover {
+            opacity: 1;
+        }
+
+        #admin-button {
+            background-color: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--accent-color);
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 10px 12px;
+            transition: all 0.3s ease;
+            color: var(--accent-color);
+        }
+
+        #admin-button:hover {
+            transform: scale(1.2);
+            box-shadow: 0 0 10px var(--accent-color);
+            background-color: rgba(0, 0, 0, 0.6);
+        }
     </style>
 </head>
 <body>
@@ -1589,6 +1904,7 @@
             <button class="nav-button" data-section="race-section">Horse Race</button>
             <button class="nav-button" data-section="blackjack-section">Blackjack</button>
             <button class="nav-button" data-section="bar-section">Bar</button>
+            <button class="nav-button" data-section="gift-shop-section">Gift Shop</button>
             <button class="nav-button" data-section="instructions-section">Help</button>
         </nav>
 
@@ -1928,6 +2244,11 @@
                         - The "Martingale" system involves doubling your bet after each loss, but be careful not to run out of money!
                     </p>
                 </div>
+                
+                <!-- Hidden Admin Button - Small and Subtle -->
+                <div class="admin-button-container">
+                    <button id="admin-button" title="Admin Access" onclick="adminLogin()">🔒 Admin</button>
+                </div>
             </div>
         </section>
 
@@ -1982,23 +2303,23 @@
                     <div class="horse-options">
                         <div class="horse-option" data-horse="1">
                             <div class="horse-option-name">Thunder</div>
-                            <div class="horse-option-odds">3:1</div>
+                            <div class="horse-option-odds">30:1</div>
                         </div>
                         <div class="horse-option" data-horse="2">
                             <div class="horse-option-name">Lightning</div>
-                            <div class="horse-option-odds">5:1</div>
+                            <div class="horse-option-odds">25:1</div>
                         </div>
                         <div class="horse-option" data-horse="3">
                             <div class="horse-option-name">Blaze</div>
-                            <div class="horse-option-odds">2:1</div>
+                            <div class="horse-option-odds">15:1</div>
                         </div>
                         <div class="horse-option" data-horse="4">
                             <div class="horse-option-name">Shadow</div>
-                            <div class="horse-option-odds">6:1</div>
+                            <div class="horse-option-odds">50:1</div>
                         </div>
                         <div class="horse-option" data-horse="5">
                             <div class="horse-option-name">Comet</div>
-                            <div class="horse-option-odds">4:1</div>
+                            <div class="horse-option-odds">20:1</div>
                         </div>
                     </div>
                     
@@ -2054,6 +2375,141 @@
             </div>
         </section>
 
+        <div class="leaderboard">
+            <h3>Top Players</h3>
+            <div class="leaderboard-entries">
+                <div class="leaderboard-entry">
+                    <div class="rank">1</div>
+                    <div class="player-name">CasinoKing88</div>
+                    <div class="player-money">$25,750</div>
+                </div>
+                <div class="leaderboard-entry">
+                    <div class="rank">2</div>
+                    <div class="player-name">LuckyCharm7</div>
+                    <div class="player-money">$18,320</div>
+                </div>
+                <div class="leaderboard-entry">
+                    <div class="rank">3</div>
+                    <div class="player-name">JackpotHunter</div>
+                    <div class="player-money">$15,890</div>
+                </div>
+                <div class="leaderboard-entry">
+                    <div class="rank">4</div>
+                    <div class="player-name">RoyalFlush</div>
+                    <div class="player-money">$12,430</div>
+                </div>
+                <div class="leaderboard-entry you">
+                    <div class="rank">?</div>
+                    <div class="player-name">You</div>
+                    <div class="player-money" id="leaderboard-you-money">$1,000</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="theme-selector">
+            <button class="theme-button" data-theme="classic">Classic</button>
+            <button class="theme-button" data-theme="neon">Neon</button>
+            <button class="theme-button" data-theme="royal">Royal</button>
+            <button class="theme-button" data-theme="dark">Dark</button>
+        </div>
+
+        <!-- GIFT SHOP SECTION -->
+        <section id="gift-shop-section">
+            <h2>Luxury Gift Shop</h2>
+            
+            <div class="gift-shop-intro">
+                <p>Welcome to our exclusive Gift Shop! Spend your winnings on these luxury items.</p>
+            </div>
+            
+            <div class="gift-items">
+                <div class="gift-item">
+                    <div class="gift-icon">⌚</div>
+                    <div class="gift-name">Platinum Casino Watch</div>
+                    <div class="gift-price">$100,000</div>
+                    <div class="gift-description">A luxury timepiece that displays the current time.</div>
+                    <button class="buy-button" data-item="watch" data-price="100000">BUY NOW</button>
+                </div>
+                
+                <div class="gift-item">
+                    <div class="gift-icon">💎</div>
+                    <div class="gift-name">Diamond Chip</div>
+                    <div class="gift-price">$250,000</div>
+                    <div class="gift-description">A sparkling diamond chip that adds a permanent shine to your profile.</div>
+                    <button class="buy-button" data-item="diamond" data-price="250000">BUY NOW</button>
+                </div>
+                
+                <div class="gift-item">
+                    <div class="gift-icon">🏆</div>
+                    <div class="gift-name">VIP Membership</div>
+                    <div class="gift-price">$500,000</div>
+                    <div class="gift-description">Exclusive VIP status with a golden profile border.</div>
+                    <button class="buy-button" data-item="vip" data-price="500000">BUY NOW</button>
+                </div>
+                
+                <div class="gift-item">
+                    <div class="gift-icon">🚗</div>
+                    <div class="gift-name">Luxury Sports Car</div>
+                    <div class="gift-price">$750,000</div>
+                    <div class="gift-description">A virtual sports car that appears next to your name.</div>
+                    <button class="buy-button" data-item="car" data-price="750000">BUY NOW</button>
+                </div>
+                
+                <div class="gift-item">
+                    <div class="gift-icon">🏝️</div>
+                    <div class="gift-name">Private Island</div>
+                    <div class="gift-price">$1,000,000</div>
+                    <div class="gift-description">A virtual private island that comes with exclusive background themes.</div>
+                    <button class="buy-button" data-item="island" data-price="1000000">BUY NOW</button>
+                </div>
+            </div>
+            
+            <div class="time-display" id="watch-display"></div>
+            
+            <div class="purchased-items" id="purchased-items">
+                <h3>Your Purchased Items</h3>
+                <div class="items-list" id="items-list">
+                    <p>You haven't purchased any items yet.</p>
+                </div>
+            </div>
+            
+            <h2 class="scratchers-title">Premium Scratchers</h2>
+            
+            <div class="scratchers-section">
+                <div class="scratcher-types">
+                    <div class="scratcher-type">
+                        <div class="scratcher-icon">🎫</div>
+                        <div class="scratcher-name">Standard Scratcher</div>
+                        <div class="scratcher-price">$5</div>
+                        <div class="scratcher-description">
+                            <p>9x9 grid with symbols. Match 3 in a row to win!</p>
+                            <p>Possible prizes: $10, $20, $50, $100, $500</p>
+                        </div>
+                        <button class="scratcher-button" data-type="standard" data-price="5">BUY SCRATCHER</button>
+                    </div>
+                    
+                    <div class="scratcher-type">
+                        <div class="scratcher-icon">💰</div>
+                        <div class="scratcher-name">VIP Scratcher</div>
+                        <div class="scratcher-price">$10,000</div>
+                        <div class="scratcher-description">
+                            <p>Premium 9x9 grid with higher rewards. Match 3 in a row to win big!</p>
+                            <p>Possible prizes: $20,000, $50,000, $100,000, $500,000</p>
+                        </div>
+                        <button class="scratcher-button" data-type="vip" data-price="10000">BUY VIP SCRATCHER</button>
+                    </div>
+                </div>
+                
+                <div class="scratcher-game">
+                    <div class="scratcher-card" id="premium-scratcher-card">
+                        <div class="scratcher-grid" id="scratcher-grid"></div>
+                        <div class="scratcher-overlay" id="premium-scratcher-overlay"></div>
+                    </div>
+                    <div class="scratcher-result" id="scratcher-result"></div>
+                    <div class="scratcher-instructions">Click and drag to scratch the card!</div>
+                </div>
+            </div>
+        </section>
+        
         <div class="leaderboard">
             <h3>Top Players</h3>
             <div class="leaderboard-entries">
@@ -2154,6 +2610,20 @@
     </section>
 
     <script>
+        // Admin login function (for the admin button)
+        function adminLogin() {
+            console.log("Admin button clicked");
+            const password = prompt('Enter admin password:');
+            if (password === '5656') {
+                updateMoney(1000000, true);
+                showNotification('Admin mode: Added $1,000,000 for testing', 'win');
+                createCoins(20); // Create coins animation for fun
+                playSound('jackpot');
+            } else if (password !== null) {
+                showNotification('Incorrect password', 'error');
+            }
+        }
+        
         // Game state
         const gameState = {
             money: 1000,
@@ -3175,7 +3645,7 @@
             
             switch (sound) {
                 case 'win':
-                    audio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAAFowDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAABaNzHEqOAAAAAAD/+xBkAA8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xBkFo8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xBkE48AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xBkE48AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
+                    audio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAAFowDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAABaNzHEqOAAAAAAD/+xBkAA8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xBkFo8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xBkE48AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
                     break;
                 case 'lose':
                     audio.src = 'data:audio/mp3;base64,SUQzBAAAAAAAI1RTU0UAAAAPAAADTGF2ZjU4Ljc2LjEwMAAAAAAAAAAAAAAA//tQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAAFowDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ0NDQ//////////////////////////////////////////////////////////////////8AAAAATGF2YzU4LjEzAAAAAAAAAAAAAAAAJAAAAAAAAAAABaNXzBaPAAAAAAD/+xBkAA8AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAETEFNRTMuMTAwVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVX/+xBkE48AAAaQAAAAgAAA0gAAABAAABpAAAACAAADSAAAAEVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV';
@@ -4010,6 +4480,489 @@
                     break;
             }
         }
+
+        // Initialize the game on page load
+        initGame();
+        
+        // Gift Shop Functionality
+        const buyButtons = document.querySelectorAll('.buy-button');
+        const watchDisplay = document.getElementById('watch-display');
+        const itemsList = document.getElementById('items-list');
+        const scratcherButtons = document.querySelectorAll('.scratcher-button');
+        const scratcherGrid = document.getElementById('scratcher-grid');
+        const premiumScratcherOverlay = document.getElementById('premium-scratcher-overlay');
+        const scratcherResult = document.getElementById('scratcher-result');
+        
+        // Make sure scratcher elements are properly initialized
+        function initScratchers() {
+            // If premium-scratcher-overlay doesn't exist, create it
+            if (!premiumScratcherOverlay) {
+                console.error('Premium scratcher overlay not found, creating one');
+                const scratcherCard = document.getElementById('premium-scratcher-card');
+                if (scratcherCard) {
+                    const newOverlay = document.createElement('div');
+                    newOverlay.id = 'premium-scratcher-overlay';
+                    newOverlay.className = 'scratcher-overlay';
+                    scratcherCard.appendChild(newOverlay);
+                }
+            }
+        }
+        
+        // Initialize scratchers
+        initScratchers();
+        
+        // Store purchased items
+        gameState.purchasedItems = [];
+        
+        // Add event listeners to buy buttons
+        buyButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const itemName = button.getAttribute('data-item');
+                const price = parseInt(button.getAttribute('data-price'));
+                
+                if (gameState.money >= price) {
+                    // Deduct money
+                    updateMoney(-price);
+                    
+                    // Add to purchased items
+                    if (!gameState.purchasedItems.includes(itemName)) {
+                        gameState.purchasedItems.push(itemName);
+                    }
+                    
+                    // Display notification
+                    showNotification(`You bought the ${button.parentElement.querySelector('.gift-name').textContent}!`, 'win');
+                    
+                    // Handle special item functionality
+                    if (itemName === 'watch') {
+                        activateWatch();
+                    }
+                    
+                    // Update purchased items display
+                    updatePurchasedItems();
+                    
+                } else {
+                    showNotification('Not enough money to buy this item!', 'error');
+                }
+            });
+        });
+        
+        // Function to activate the watch
+        function activateWatch() {
+            watchDisplay.style.display = 'block';
+            
+            // Update the time every second
+            function updateTime() {
+                const now = new Date();
+                watchDisplay.textContent = now.toLocaleTimeString();
+            }
+            
+            updateTime(); // Initial update
+            setInterval(updateTime, 1000);
+        }
+        
+        // Function to update the purchased items display
+        function updatePurchasedItems() {
+            if (gameState.purchasedItems.length === 0) {
+                itemsList.innerHTML = '<p>You haven\'t purchased any items yet.</p>';
+                return;
+            }
+            
+            itemsList.innerHTML = '';
+            
+            gameState.purchasedItems.forEach(item => {
+                const itemElement = document.createElement('div');
+                itemElement.className = 'purchased-item';
+                
+                let icon = '';
+                let name = '';
+                
+                switch (item) {
+                    case 'watch':
+                        icon = '⌚';
+                        name = 'Platinum Casino Watch';
+                        break;
+                    case 'diamond':
+                        icon = '💎';
+                        name = 'Diamond Chip';
+                        break;
+                    case 'vip':
+                        icon = '🏆';
+                        name = 'VIP Membership';
+                        break;
+                    case 'car':
+                        icon = '🚗';
+                        name = 'Luxury Sports Car';
+                        break;
+                    case 'island':
+                        icon = '🏝️';
+                        name = 'Private Island';
+                        break;
+                }
+                
+                itemElement.innerHTML = `
+                    <div class="purchased-item-icon">${icon}</div>
+                    <div class="purchased-item-name">${name}</div>
+                `;
+                
+                itemsList.appendChild(itemElement);
+            });
+        }
+        
+        // Premium Scratchers Functionality
+        scratcherButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const scratcherType = button.getAttribute('data-type');
+                const price = parseInt(button.getAttribute('data-price'));
+                
+                if (gameState.money >= price) {
+                    // Deduct money
+                    updateMoney(-price);
+                    
+                    // Show a notification
+                    const scratcherName = button.closest('.scratcher-type').querySelector('.scratcher-name').textContent;
+                    showNotification(`You bought a ${scratcherName}! Scratch to reveal prizes!`, 'win');
+                    
+                    // Create a new scratcher
+                    createScratcher(scratcherType);
+                    
+                    // Add visual feedback
+                    button.classList.add('button-flash');
+                    setTimeout(() => {
+                        button.classList.remove('button-flash');
+                    }, 500);
+                    
+                } else {
+                    showNotification('Not enough money to buy this scratcher!', 'error');
+                }
+            });
+        });
+        
+        // Function to create a new scratcher
+        function createScratcher(type) {
+            // Clear previous scratcher
+            scratcherGrid.innerHTML = '';
+            scratcherResult.textContent = '';
+            
+            // Make sure the scratcher card and overlay are visible
+            const scratcherCard = document.getElementById('premium-scratcher-card');
+            scratcherCard.style.display = 'block';
+            
+            // Reset overlay
+            if (premiumScratcherOverlay) {
+                premiumScratcherOverlay.style.opacity = '1';
+                premiumScratcherOverlay.style.pointerEvents = 'auto';
+                premiumScratcherOverlay.classList.remove('revealed');
+            }
+            
+            // Scroll to scratcher and highlight it
+            scratcherCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            scratcherCard.classList.add('highlight-pulse');
+            setTimeout(() => {
+                scratcherCard.classList.remove('highlight-pulse');
+            }, 1500);
+            
+            // Show instruction
+            showNotification('Click and drag to scratch the card!', 'info');
+            
+            // Define symbols and their probabilities based on type
+            const symbols = type === 'standard' 
+                ? ['💰', '💎', '🍀', '🎁', '⭐', '🎯', '🎨', '🎭', '🎪']
+                : ['💰', '💎', '👑', '🏆', '💵', '💍', '🏅', '🥇', '🌟'];
+                
+            const symbolWeights = type === 'standard'
+                ? [10, 2, 8, 7, 6, 5, 4, 3, 2]  // Standard weights (sum = 47)
+                : [12, 3, 10, 8, 7, 6, 5, 4, 3]; // VIP weights (sum = 58)
+            
+            // Create the grid with random symbols
+            const gridSize = 9;
+            const grid = [];
+            
+            for (let i = 0; i < gridSize; i++) {
+                grid[i] = [];
+                for (let j = 0; j < gridSize; j++) {
+                    // Randomly select a symbol based on weights
+                    const symbolIndex = weightedRandom(symbolWeights);
+                    grid[i][j] = symbols[symbolIndex];
+                    
+                    // Create cell element
+                    const cell = document.createElement('div');
+                    cell.className = 'grid-cell';
+                    cell.textContent = grid[i][j];
+                    cell.style.fontSize = type === 'standard' ? '16px' : '18px';
+                    
+                    scratcherGrid.appendChild(cell);
+                }
+            }
+            
+            // Check for winning combinations (3 in a row horizontally, vertically, or diagonally)
+            let winnings = 0;
+            let winType = '';
+            
+            // Check rows
+            for (let i = 0; i < gridSize; i++) {
+                for (let j = 0; j <= gridSize - 3; j++) {
+                    if (grid[i][j] === grid[i][j+1] && grid[i][j] === grid[i][j+2]) {
+                        winnings += getWinAmount(grid[i][j], type);
+                        winType = grid[i][j];
+                    }
+                }
+            }
+            
+            // Check columns
+            for (let j = 0; j < gridSize; j++) {
+                for (let i = 0; i <= gridSize - 3; i++) {
+                    if (grid[i][j] === grid[i+1][j] && grid[i][j] === grid[i+2][j]) {
+                        winnings += getWinAmount(grid[i][j], type);
+                        winType = grid[i][j];
+                    }
+                }
+            }
+            
+            // Check diagonals (top-left to bottom-right)
+            for (let i = 0; i <= gridSize - 3; i++) {
+                for (let j = 0; j <= gridSize - 3; j++) {
+                    if (grid[i][j] === grid[i+1][j+1] && grid[i][j] === grid[i+2][j+2]) {
+                        winnings += getWinAmount(grid[i][j], type);
+                        winType = grid[i][j];
+                    }
+                }
+            }
+            
+            // Check diagonals (top-right to bottom-left)
+            for (let i = 0; i <= gridSize - 3; i++) {
+                for (let j = gridSize - 1; j >= 2; j--) {
+                    if (grid[i][j] === grid[i+1][j-1] && grid[i][j] === grid[i+2][j-2]) {
+                        winnings += getWinAmount(grid[i][j], type);
+                        winType = grid[i][j];
+                    }
+                }
+            }
+            
+            // Setup scratch effect
+            setupPremiumScratchEffect(winnings, winType, type);
+        }
+        
+        // Function to get win amount based on symbol and scratcher type
+        function getWinAmount(symbol, type) {
+            const baseMultipliers = {
+                '💰': 2,  // Money bag
+                '💎': 10, // Diamond
+                '🍀': 1,  // Clover
+                '🎁': 1,  // Gift
+                '⭐': 2,  // Star
+                '🎯': 3,  // Target
+                '🎨': 2,  // Paint
+                '🎭': 3,  // Masks
+                '🎪': 4,  // Circus
+                '👑': 15, // Crown
+                '🏆': 8,  // Trophy
+                '💵': 5,  // Cash
+                '💍': 20, // Ring
+                '🏅': 10, // Medal
+                '🥇': 12, // Gold Medal
+                '🌟': 15  // Star2
+            };
+            
+            // Base amount is $5 for standard and $10,000 for VIP
+            const baseAmount = type === 'standard' ? 5 : 10000;
+            
+            return baseAmount * baseMultipliers[symbol];
+        }
+        
+        // Function to set up the premium scratcher effect
+        function setupPremiumScratchEffect(winnings, winType, type) {
+            let isScratching = false;
+            let revealedPercentage = 0;
+            const overlay = premiumScratcherOverlay;
+            const totalPixels = overlay.offsetWidth * overlay.offsetHeight;
+            const revealedPixels = new Set();
+            
+            // Clear previous event listeners
+            const newOverlay = overlay.cloneNode(true);
+            overlay.parentNode.replaceChild(newOverlay, overlay);
+            
+            function scratch(e) {
+                // Get coordinates based on event type
+                let clientX, clientY;
+                if (e.type.includes('touch')) {
+                    clientX = e.touches[0].clientX;
+                    clientY = e.touches[0].clientY;
+                } else {
+                    clientX = e.clientX;
+                    clientY = e.clientY;
+                }
+                
+                const radius = 30;
+                const rect = newOverlay.getBoundingClientRect();
+                const x = clientX - rect.left;
+                const y = clientY - rect.top;
+                
+                // Create scratcher effect
+                const ctx = document.createElement('canvas').getContext('2d');
+                ctx.canvas.width = newOverlay.offsetWidth;
+                ctx.canvas.height = newOverlay.offsetHeight;
+                
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(x, y, radius, 0, Math.PI * 2);
+                ctx.fill();
+                
+                const maskUrl = ctx.canvas.toDataURL();
+                const currentMask = newOverlay.style.webkitMaskImage || '';
+                
+                if (currentMask) {
+                    const img = new Image();
+                    img.onload = function() {
+                        ctx.drawImage(img, 0, 0);
+                        ctx.globalCompositeOperation = 'destination-out';
+                        ctx.beginPath();
+                        ctx.arc(x, y, radius, 0, Math.PI * 2);
+                        ctx.fill();
+                        newOverlay.style.webkitMaskImage = `url(${ctx.canvas.toDataURL()})`;
+                        newOverlay.style.maskImage = `url(${ctx.canvas.toDataURL()})`;
+                    };
+                    img.src = currentMask.replace(/url\((['"])?(.*?)\1\)/gi, '$2');
+                } else {
+                    newOverlay.style.webkitMaskImage = `url(${maskUrl})`;
+                    newOverlay.style.maskImage = `url(${maskUrl})`;
+                }
+                
+                // Track percentage revealed
+                for (let dy = -radius; dy <= radius; dy++) {
+                    for (let dx = -radius; dx <= radius; dx++) {
+                        if (dx*dx + dy*dy <= radius*radius) {
+                            const px = Math.floor(x + dx);
+                            const py = Math.floor(y + dy);
+                            if (px >= 0 && px < rect.width && py >= 0 && py < rect.height) {
+                                revealedPixels.add(`${px},${py}`);
+                            }
+                        }
+                    }
+                }
+                
+                revealedPercentage = (revealedPixels.size / totalPixels) * 100;
+                
+                // If 50% revealed, reveal all and show result
+                if (revealedPercentage > 50 && !newOverlay.classList.contains('revealed')) {
+                    newOverlay.style.opacity = '0';
+                    newOverlay.classList.add('revealed');
+                    
+                    // Show result
+                    if (winnings > 0) {
+                        scratcherResult.textContent = `You won $${winnings}!`;
+                        scratcherResult.style.color = 'var(--accent-color)';
+                        
+                        // Add winnings
+                        setTimeout(() => {
+                            updateMoney(winnings, true);
+                            playSound('win');
+                            
+                            // Extra effects for big wins
+                            if (type === 'vip' || winnings >= 100) {
+                                createCoins(15);
+                            }
+                        }, 1000);
+                        
+                    } else {
+                        scratcherResult.textContent = 'Better luck next time!';
+                        scratcherResult.style.color = '#ccc';
+                        playSound('lose');
+                    }
+                    
+                    // Track for achievements
+                    gameState.scratchCardsRevealed++;
+                    checkAchievements();
+                }
+            }
+            
+            // Mouse events
+            newOverlay.addEventListener('mousedown', (e) => {
+                isScratching = true;
+                scratch(e);
+            });
+            
+            newOverlay.addEventListener('mousemove', (e) => {
+                if (isScratching) {
+                    scratch(e);
+                }
+            });
+            
+            document.addEventListener('mouseup', () => {
+                isScratching = false;
+            });
+            
+            // Touch events
+            newOverlay.addEventListener('touchstart', (e) => {
+                isScratching = true;
+                scratch(e);
+                e.preventDefault();
+            });
+            
+            newOverlay.addEventListener('touchmove', (e) => {
+                if (isScratching) {
+                    scratch(e);
+                }
+                e.preventDefault();
+            });
+            
+            newOverlay.addEventListener('touchend', () => {
+                isScratching = false;
+            });
+        }
+        
+        // Utility function for weighted random selection
+        function weightedRandom(weights) {
+            let sum = weights.reduce((a, b) => a + b, 0);
+            let random = Math.random() * sum;
+            
+            for (let i = 0; i < weights.length; i++) {
+                if (random < weights[i]) {
+                    return i;
+                }
+                random -= weights[i];
+            }
+            
+            return 0; // Fallback
+        }
+        
+        // Admin Button Functionality
+        const adminButton = document.getElementById('admin-button');
+        if (adminButton) {
+            adminButton.addEventListener('click', function() {
+                const password = prompt('Enter admin password:');
+                if (password === '5656') {
+                    updateMoney(1000000, true);
+                    showNotification('Admin mode: Added $1,000,000 for testing', 'win');
+                    createCoins(20); // Create coins animation for fun
+                    playSound('jackpot');
+                } else if (password !== null) {
+                    showNotification('Incorrect password', 'error');
+                }
+            });
+        }
+
+        // Wait for the DOM to be fully loaded before adding event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize admin button functionality
+            const adminButton = document.getElementById('admin-button');
+            if (adminButton) {
+                adminButton.addEventListener('click', function() {
+                    const password = prompt('Enter admin password:');
+                    if (password === '5656') {
+                        updateMoney(1000000, true);
+                        showNotification('Admin mode: Added $1,000,000 for testing', 'win');
+                        createCoins(20); // Create coins animation for fun
+                        playSound('jackpot');
+                    } else if (password !== null) {
+                        showNotification('Incorrect password', 'error');
+                    }
+                });
+                console.log('Admin button initialized');
+            } else {
+                console.error('Admin button not found');
+            }
+        });
     </script>
 </body>
 </html>
