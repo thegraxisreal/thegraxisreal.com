@@ -1526,6 +1526,54 @@
             50% { filter: blur(2px); }
             100% { filter: blur(0px); }
         }
+
+        /* Add this to the CSS section */
+        .bet-input {
+            background-color: rgba(0, 0, 0, 0.3);
+            color: var(--text-color);
+            border: 2px solid var(--secondary-color);
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 16px;
+            width: 100px;
+            text-align: center;
+            margin: 0 10px;
+            transition: all 0.3s;
+        }
+
+        .bet-input:focus {
+            border-color: var(--accent-color);
+            outline: none;
+            box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.5);
+        }
+
+        .bet-label {
+            font-size: 16px;
+            margin-right: 5px;
+        }
+
+        .bet-controls {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Update the slot controls for better spacing */
+        .slot-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        /* For mobile responsiveness */
+        @media (max-width: 480px) {
+            .bet-input {
+                width: 80px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -1632,9 +1680,8 @@
                 
                 <div class="slot-controls">
                     <div class="bet-controls">
-                        <button class="bet-button" id="decrease-bet">-</button>
-                        <div class="bet-display">Bet: $<span id="bet-amount">10</span></div>
-                        <button class="bet-button" id="increase-bet">+</button>
+                        <span class="bet-label">Bet:</span>
+                        <input type="text" class="bet-input" id="slot-bet-input" value="10">
                     </div>
                     <button class="spin-button" id="spin-button">SPIN</button>
                 </div>
@@ -1677,9 +1724,8 @@
                 
                 <div class="roulette-controls">
                     <div class="bet-controls">
-                        <button class="bet-button" id="decrease-roulette-bet">-</button>
-                        <div class="bet-display">Bet: $<span id="roulette-bet-amount">20</span></div>
-                        <button class="bet-button" id="increase-roulette-bet">+</button>
+                        <span class="bet-label">Bet:</span>
+                        <input type="text" class="bet-input" id="roulette-bet-input" value="20">
                     </div>
                     <button class="roulette-button" id="spin-wheel">SPIN</button>
                 </div>
@@ -1707,9 +1753,8 @@
                 
                 <div class="blackjack-controls">
                     <div class="bet-controls">
-                        <button class="bet-button" id="decrease-blackjack-bet">-</button>
-                        <div class="bet-display">Bet: $<span id="blackjack-bet-amount">25</span></div>
-                        <button class="bet-button" id="increase-blackjack-bet">+</button>
+                        <span class="bet-label">Bet:</span>
+                        <input type="text" class="bet-input" id="blackjack-bet-input" value="25">
                     </div>
                     <button class="blackjack-button deal-button" id="deal-button">DEAL</button>
                     <button class="blackjack-button hit-button" id="hit-button" disabled>HIT</button>
@@ -1959,9 +2004,8 @@
                     
                     <div class="race-controls">
                         <div class="bet-controls">
-                            <button class="bet-button" id="decrease-race-bet">-</button>
-                            <div class="bet-display">Bet: $<span id="race-bet-amount">20</span></div>
-                            <button class="bet-button" id="increase-race-bet">+</button>
+                            <span class="bet-label">Bet:</span>
+                            <input type="text" class="bet-input" id="race-bet-input" value="20">
                         </div>
                         <button class="race-button" id="start-race">START RACE</button>
                     </div>
@@ -1981,11 +2025,10 @@
                 
                 <div class="scratch-controls">
                     <div class="bet-controls">
-                        <button class="bet-button" id="decrease-scratch-bet">-</button>
-                        <div class="bet-display">Card Cost: $<span id="scratch-bet-amount">5</span></div>
-                        <button class="bet-button" id="increase-scratch-bet">+</button>
+                        <span class="bet-label">Card Cost:</span>
+                        <input type="text" class="bet-input" id="scratch-bet-input" value="5">
                     </div>
-                    <button class="race-button" id="buy-scratch">BUY CARD</button>
+                    <button class="start-button" id="buy-scratch">BUY CARD</button>
                 </div>
             </div>
         </section>
@@ -2003,9 +2046,8 @@
                 
                 <div class="wheel-controls">
                     <div class="bet-controls">
-                        <button class="bet-button" id="decrease-wheel-bet">-</button>
-                        <div class="bet-display">Bet: $<span id="wheel-bet-amount">10</span></div>
-                        <button class="bet-button" id="increase-wheel-bet">+</button>
+                        <span class="bet-label">Bet:</span>
+                        <input type="text" class="bet-input" id="wheel-bet-input" value="10">
                     </div>
                     <button class="start-button" id="spin-fortune-wheel">SPIN WHEEL</button>
                 </div>
@@ -2075,9 +2117,8 @@
             
             <div class="scratch-controls">
                 <div class="bet-controls">
-                    <button class="bet-button" id="decrease-scratch-bet">-</button>
-                    <div class="bet-display">Card Cost: $<span id="scratch-bet-amount">5</span></div>
-                    <button class="bet-button" id="increase-scratch-bet">+</button>
+                    <span class="bet-label">Card Cost:</span>
+                    <input type="text" class="bet-input" id="scratch-bet-input" value="5">
                 </div>
                 <button class="start-button" id="buy-scratch">BUY CARD</button>
             </div>
@@ -2270,11 +2311,14 @@
             winsDisplay.textContent = gameState.wins;
             lossesDisplay.textContent = gameState.losses;
             streakDisplay.textContent = gameState.streak;
-            betAmountDisplay.textContent = gameState.slotBet;
-            rouletteBetAmountDisplay.textContent = gameState.rouletteBet;
-            blackjackBetAmountDisplay.textContent = gameState.blackjackBet;
-            raceBetAmountDisplay.textContent = gameState.raceBet;
-            wheelBetAmountDisplay.textContent = gameState.wheelBet;
+            
+            // Update all bet inputs to match game state
+            document.getElementById('slot-bet-input').value = gameState.slotBet;
+            document.getElementById('roulette-bet-input').value = gameState.rouletteBet;
+            document.getElementById('blackjack-bet-input').value = gameState.blackjackBet;
+            document.getElementById('race-bet-input').value = gameState.raceBet;
+            document.getElementById('wheel-bet-input').value = gameState.wheelBet;
+            document.getElementById('scratch-bet-input').value = gameState.scratchBet;
         }
         
         // Setup event listeners
@@ -2294,23 +2338,17 @@
             
             // Slot Machine Events
             spinButton.addEventListener('click', spinSlots);
-            decreaseBetButton.addEventListener('click', () => adjustBet('slot', -50));
-            increaseBetButton.addEventListener('click', () => adjustBet('slot', 100));
             
             // Roulette Events
             betOptions.forEach(option => {
                 option.addEventListener('click', () => selectRouletteBet(option));
             });
             spinWheelButton.addEventListener('click', spinRouletteWheel);
-            decreaseRouletteBetButton.addEventListener('click', () => adjustBet('roulette', -10));
-            increaseRouletteBetButton.addEventListener('click', () => adjustBet('roulette', 10));
             
             // Blackjack Events
             dealButton.addEventListener('click', dealBlackjack);
             hitButton.addEventListener('click', hitBlackjack);
             standButton.addEventListener('click', standBlackjack);
-            decreaseBlackjackBetButton.addEventListener('click', () => adjustBet('blackjack', -50));
-            increaseBlackjackBetButton.addEventListener('click', () => adjustBet('blackjack', 100));
             
             // Bar Events
             drinks.forEach(drink => {
@@ -2341,23 +2379,17 @@
                 option.addEventListener('click', () => selectHorse(option));
             });
             startRaceButton.addEventListener('click', startRace);
-            decreaseRaceBetButton.addEventListener('click', () => adjustBet('race', -100));
-            increaseRaceBetButton.addEventListener('click', () => adjustBet('race', 100));
             
             // Wheel of Fortune Events
             spinFortuneWheelButton.addEventListener('click', spinFortuneWheel);
-            decreaseWheelBetButton.addEventListener('click', () => {
-                if (gameState.wheelBet > 10) {
-                    gameState.wheelBet -= 10;
-                    wheelBetAmountDisplay.textContent = gameState.wheelBet;
-                }
-            });
-            increaseWheelBetButton.addEventListener('click', () => {
-                if (gameState.wheelBet < 100) {
-                    gameState.wheelBet += 10;
-                    wheelBetAmountDisplay.textContent = gameState.wheelBet;
-                }
-            });
+            
+            // Add new input handlers for bet amounts
+            document.getElementById('slot-bet-input').addEventListener('input', (e) => validateBetInput(e, 'slot'));
+            document.getElementById('roulette-bet-input').addEventListener('input', (e) => validateBetInput(e, 'roulette'));
+            document.getElementById('blackjack-bet-input').addEventListener('input', (e) => validateBetInput(e, 'blackjack'));
+            document.getElementById('race-bet-input').addEventListener('input', (e) => validateBetInput(e, 'race'));
+            document.getElementById('wheel-bet-input').addEventListener('input', (e) => validateBetInput(e, 'wheel'));
+            document.getElementById('scratch-bet-input').addEventListener('input', (e) => validateBetInput(e, 'scratch'));
         }
         
         // Switch between sections
@@ -2550,7 +2582,12 @@
         
         // Spin the slot machine
         function spinSlots() {
-            if (gameState.isSpinning || gameState.money < gameState.slotBet) return;
+            if (gameState.isSpinning || gameState.money < gameState.slotBet) {
+                if (gameState.money < gameState.slotBet) {
+                    showNotification('Not enough money for this bet!', 'important');
+                }
+                return;
+            }
             
             gameState.isSpinning = true;
             updateMoney(-gameState.slotBet, false);
@@ -3911,6 +3948,68 @@
         document.getElementById('scratch-ticket-btn').addEventListener('click', function() {
             showSection('scratch-section');
         });
+
+        // Add a new function to validate and update bet inputs
+        function validateBetInput(event, gameType) {
+            const input = event.target;
+            let value = input.value.trim();
+            
+            // Remove non-numeric characters
+            value = value.replace(/[^0-9]/g, '');
+            
+            // Convert to number
+            let betAmount = parseInt(value, 10);
+            
+            // Handle empty or NaN values
+            if (isNaN(betAmount) || value === '') {
+                betAmount = 0;
+            }
+            
+            // Set minimum bet amounts based on game type
+            const minBets = {
+                'slot': 5,
+                'roulette': 10,
+                'blackjack': 5,
+                'race': 10,
+                'wheel': 10,
+                'scratch': 5
+            };
+            
+            // Ensure bet is at least the minimum
+            if (betAmount < minBets[gameType]) {
+                betAmount = minBets[gameType];
+            }
+            
+            // Ensure bet is not more than player's money
+            if (betAmount > gameState.money) {
+                betAmount = gameState.money;
+            }
+            
+            // Update the input value
+            input.value = betAmount;
+            
+            // Update the game state
+            switch(gameType) {
+                case 'slot':
+                    gameState.slotBet = betAmount;
+                    break;
+                case 'roulette':
+                    gameState.rouletteBet = betAmount;
+                    break;
+                case 'blackjack':
+                    gameState.blackjackBet = betAmount;
+                    break;
+                case 'race':
+                    gameState.raceBet = betAmount;
+                    break;
+                case 'wheel':
+                    gameState.wheelBet = betAmount;
+                    break;
+                case 'scratch':
+                    gameState.scratchBet = betAmount;
+                    break;
+            }
+        }
     </script>
 </body>
 </html>
