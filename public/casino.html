@@ -1404,6 +1404,37 @@
             background-color: #c0392b;
             transform: scale(1.05);
         }
+
+        /* Add styles for the reset button and button container */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .reset-button {
+            padding: 15px 30px;
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s;
+        }
+        
+        .reset-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        .reset-button:active {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.4);
+        }
     </style>
 </head>
 <body>
@@ -1448,7 +1479,7 @@
             <h2>Welcome to the Casino</h2>
             <div class="intro-text">
                 <p>Step into our exclusive virtual casino, where thrill meets fortune! Whether you're a seasoned gambler or just looking for some entertainment, we've got everything you need for an unforgettable gaming experience.</p>
-                <p>Start with 1000 chips and try your luck at our premium selection of games. Will you play it safe or risk it all for the jackpot?</p>
+                <p>Start with 1000 chips and try your luck at our premium selection of games. Your money and stats will be saved automatically, so you can continue your winning streak anytime you return!</p>
             </div>
             
             <div class="feature-cards">
@@ -1479,7 +1510,10 @@
                 </div>
             </div>
             
-            <button class="start-button" id="start-playing">START PLAYING</button>
+            <div class="button-container">
+                <button class="start-button" id="start-playing">START PLAYING</button>
+                <button class="reset-button" id="reset-game">RESET GAME</button>
+            </div>
         </section>
 
         <!-- SLOT MACHINE SECTION -->
@@ -1521,7 +1555,7 @@
                 <p><strong>Winning Combinations:</strong></p>
                 <p>🍒🍒🍒 = 5x your bet | 🍋🍋🍋 = 10x your bet | 🍇🍇🍇 = 15x your bet</p>
                 <p>7️⃣7️⃣7️⃣ = 50x your bet | 💎💎💎 = JACKPOT (100x your bet)</p>
-                <p>Any two matching = 2x your bet</p>
+                <p>Any two matching = 1.5x your bet</p>
             </div>
         </section>
         
@@ -1813,7 +1847,7 @@
                         - Three grapes (🍇🍇🍇): 15x your bet<br>
                         - Three sevens (7️⃣7️⃣7️⃣): 50x your bet<br>
                         - Three diamonds (💎💎💎): JACKPOT - 100x your bet<br>
-                        - Any two matching symbols: 2x your bet<br><br>
+                        - Any two matching symbols: 1.5x your bet<br><br>
                         
                         <strong>Note:</strong> Our slot machine has Vegas-level odds - winning combinations are rare, especially jackpots! But the payouts are worth it when you hit big.
                     </p>
@@ -1906,7 +1940,7 @@
                         - Each game requires you to place a bet before playing.<br>
                         - Winning games will add money to your account based on the payout rates.<br>
                         - Losing games will deduct your bet from your account.<br>
-                        - If you run out of money, refresh the page to start over.<br>
+                        - If you run out of money, use the Admin button and type "reset" or go to the Home page and click the Reset Game button.<br>
                         - Try to build your fortune through strategic betting and a bit of luck!
                     </p>
                 </div>
@@ -1972,7 +2006,7 @@
             isSpinning: false,
             blackjackInProgress: false,
             symbols: ['🍒', '🍋', '🍇', '7️⃣', '💎'],
-            symbolProbabilities: [0.4, 0.3, 0.2, 0.07, 0.03],
+            symbolProbabilities: [0.5, 0.3, 0.15, 0.04, 0.01],
             symbolMultipliers: {
                 '🍒': 5,
                 '🍋': 10,
@@ -1993,6 +2027,9 @@
 
         // Initialize the game
         function initGame() {
+            // Load saved money from localStorage if available
+            loadGameState();
+            
             // Setup all event listeners
             setupEventListeners();
             
@@ -2004,6 +2041,38 @@
             
             // Show the intro section by default
             document.getElementById('intro-section').classList.add('active');
+        }
+
+        // Load game state from localStorage
+        function loadGameState() {
+            const savedMoney = localStorage.getItem('casinoMoney');
+            const savedWins = localStorage.getItem('casinoWins');
+            const savedLosses = localStorage.getItem('casinoLosses');
+            const savedStreak = localStorage.getItem('casinoStreak');
+            
+            if (savedMoney !== null) {
+                gameState.money = parseInt(savedMoney);
+            }
+            
+            if (savedWins !== null) {
+                gameState.wins = parseInt(savedWins);
+            }
+            
+            if (savedLosses !== null) {
+                gameState.losses = parseInt(savedLosses);
+            }
+            
+            if (savedStreak !== null) {
+                gameState.streak = parseInt(savedStreak);
+            }
+        }
+
+        // Save game state to localStorage
+        function saveGameState() {
+            localStorage.setItem('casinoMoney', gameState.money);
+            localStorage.setItem('casinoWins', gameState.wins);
+            localStorage.setItem('casinoLosses', gameState.losses);
+            localStorage.setItem('casinoStreak', gameState.streak);
         }
 
         // Update display with current game state
@@ -2035,6 +2104,9 @@
             document.getElementById('start-playing').addEventListener('click', () => {
                 switchSection('slot-section');
             });
+            
+            // Reset game button
+            document.getElementById('reset-game').addEventListener('click', resetGame);
             
             // Slot Machine Events
             document.getElementById('spin-button').addEventListener('click', spinSlots);
@@ -2218,6 +2290,9 @@
                 showNotification(`You lost $${Math.abs(amount)}.`, 'loss');
             }
             
+            // Save game state to localStorage
+            saveGameState();
+            
             // Update display
             updateDisplay();
             
@@ -2228,7 +2303,7 @@
         // Check if player is out of money
         function checkMoney() {
             if (gameState.money <= 0) {
-                showNotification('You\'re out of money! Refresh the page to start over.', 'important');
+                showNotification('You\'re out of money! Go to the Home page and click the Reset Game button, or use the Admin button and type "reset".', 'important');
                 disableGameButtons();
             } else {
                 // Make sure buttons are enabled if we have money
@@ -2286,10 +2361,18 @@
 
         // Admin login
         function adminLogin() {
-            const password = prompt('Enter admin password:');
+            const password = prompt('Enter admin password (or type "reset" to reset money):');
             if (password === '1234') {
                 updateMoney(1000000, false);
                 showNotification('Admin mode: Added $1,000,000 for testing', 'win');
+            } else if (password === 'reset') {
+                gameState.money = 1000;
+                gameState.wins = 0;
+                gameState.losses = 0;
+                gameState.streak = 0;
+                saveGameState();
+                updateDisplay();
+                showNotification('Money reset to $1,000', 'info');
             } else if (password !== null) {
                 showNotification('Incorrect password', 'error');
             }
@@ -2349,8 +2432,8 @@
                 
                 // Generate second symbol with bias against matching the first
                 let secondRand = Math.random();
-                // 25% chance to re-roll if it would match the first symbol
-                if (determineSymbol(secondRand) === firstSymbol && Math.random() < 0.25) {
+                // 65% chance to re-roll if it would match the first symbol (increased from 25%)
+                if (determineSymbol(secondRand) === firstSymbol && Math.random() < 0.65) {
                     secondRand = Math.random();
                 }
                 let secondSymbol = generateSymbol(secondRand);
@@ -2358,12 +2441,12 @@
                 
                 // Generate third symbol with bias against matching either previous symbol
                 let thirdRand = Math.random();
-                // 50% chance to re-roll if it would match both previous symbols
-                if (determineSymbol(thirdRand) === firstSymbol && determineSymbol(thirdRand) === secondSymbol && Math.random() < 0.5) {
+                // 80% chance to re-roll if it would match both previous symbols (increased from 50%)
+                if (determineSymbol(thirdRand) === firstSymbol && determineSymbol(thirdRand) === secondSymbol && Math.random() < 0.8) {
                     thirdRand = Math.random();
                 }
-                // 25% chance to re-roll if it would match just one previous symbol
-                else if ((determineSymbol(thirdRand) === firstSymbol || determineSymbol(thirdRand) === secondSymbol) && Math.random() < 0.25) {
+                // 65% chance to re-roll if it would match just one previous symbol (increased from 25%)
+                else if ((determineSymbol(thirdRand) === firstSymbol || determineSymbol(thirdRand) === secondSymbol) && Math.random() < 0.65) {
                     thirdRand = Math.random();
                 }
                 let thirdSymbol = generateSymbol(thirdRand);
@@ -2435,9 +2518,9 @@
                 return bet * gameState.symbolMultipliers[results[0]];
             }
             
-            // Check for two of a kind
+            // Check for two of a kind (reduced multiplier from 2x to 1.5x)
             if (results[0] === results[1] || results[1] === results[2] || results[0] === results[2]) {
-                return bet * 2;
+                return Math.floor(bet * 1.5);
             }
             
             return 0;
@@ -3094,6 +3177,20 @@
                 }
             }
         });
+
+        // Reset game to initial state
+        function resetGame() {
+            if (confirm('Are you sure you want to reset your game? This will set your money back to $1000 and reset all your stats.')) {
+                gameState.money = 1000;
+                gameState.wins = 0;
+                gameState.losses = 0;
+                gameState.streak = 0;
+                saveGameState();
+                updateDisplay();
+                showNotification('Game reset! Money set to $1,000', 'info');
+                enableGameButtons();
+            }
+        }
     </script>
 </body>
 </html>
