@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sam Jumper</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #333;
+            font-family: Arial, sans-serif;
+        }
+        #gameContainer {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            margin: 0 auto;
+            background-color: #87CEEB;
+            overflow: hidden;
+        }
+        #homeScreen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: #4169E1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        #homeScreen h1 {
+            color: #FFD700;
+            font-size: 48px;
+            text-shadow: 3px 3px 0 #000;
+            margin-bottom: 20px;
+        }
+        #characterSelector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        .character {
+            width: 120px;
+            height: 180px;
+            margin: 0 15px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .character.selected {
+            box-shadow: 0 0 15px 5px #FFD700;
+            transform: scale(1.05);
+        }
+        .character:hover:not(.locked) {
+            transform: scale(1.05);
+        }
+        .character.locked {
+            filter: grayscale(100%);
+            cursor: not-allowed;
+        }
+        .character-icon {
+            width: 80px;
+            height: 80px;
+            margin-top: 15px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 40px;
+            color: white;
+        }
+        .sam-icon {
+            background-color: #FF6347;
+        }
+        .piper-icon {
+            background-color: #333;
+        }
+        .link-icon {
+            background-color: #32CD32;
+        }
+        .character-name {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .character-ability {
+            font-size: 12px;
+            color: #555;
+            text-align: center;
+            padding: 0 5px;
+            margin-top: 5px;
+        }
+        .locked-message {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 12px;
+            padding: 5px 0;
+            text-align: center;
+        }
+        #startButton {
+            background-color: #32CD32;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #228B22;
+            transition: transform 0.1s, box-shadow 0.1s;
+        }
+        #startButton:hover {
+            transform: translateY(2px);
+            box-shadow: 0 3px 0 #228B22;
+        }
+        #startButton:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+        #gameOverScreen {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 10;
+        }
+        #gameOverScreen h2 {
+            color: #FF4500;
+            font-size: 48px;
+            margin-bottom: 20px;
+        }
+        #finalScore {
+            color: white;
+            font-size: 32px;
+            margin-bottom: 30px;
+        }
+        #newHighScore {
+            color: #FFD700;
+            font-size: 24px;
+            margin-bottom: 10px;
+            display: none;
+        }
+        #unlockMessage {
+            color: #32CD32;
+            font-size: 20px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        #restartButton {
+            background-color: #4169E1;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 24px;
+            border-radius: 10px;
+            cursor: pointer;
+        }
+        #player {
+            position: absolute;
+            width: 40px;
+            height: 60px;
+            background-color: #FF6347;
+            border-radius: 5px;
+            border-bottom: 3px solid #B22222;
+            transition: transform 0.1s;
+        }
+        .platform {
+            position: absolute;
+            background-color: #8B4513;
+            border-top: 5px solid #A0522D;
+        }
+        #score {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        #highScore {
+            position: absolute;
+            top: 60px;
+            right: 20px;
+            font-size: 18px;
+            color: #FFD700;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 16px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+        #currentCharacter {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            font-size: 18px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="homeScreen">
+            <h1>SAM JUMPER</h1>
+            <div id="characterSelector">
+                <div class="character selected" data-character="sam">
+                    <div class="character-icon sam-icon">S</div>
+                    <div class="character-name">Sam</div>
+                    <div class="character-ability">Balanced jumper</div>
+                </div>
+                <div class="character locked" data-character="piper">
+                    <div class="character-icon piper-icon">P</div>
+                    <div class="character-name">Piper</div>
+                    <div class="character-ability">Double jump</div>
+                    <div class="locked-message">Unlocks at 100 points</div>
+                </div>
+                <div class="character locked" data-character="link">
+                    <div class="character-icon link-icon">L</div>
+                    <div class="character-name">Ling Link</div>
+                    <div class="character-ability">Super speed</div>
+                    <div class="locked-message">Unlocks at 100 points</div>
+                </div>
+            </div>
+            <button id="startButton">START GAME</button>
+        </div>
+        <div id="gameOverScreen">
+            <h2>GAME OVER</h2>
+            <div id="finalScore">Score: 0</div>
+            <div id="newHighScore">NEW HIGH SCORE!</div>
+            <div id="unlockMessage">New character unlocked!</div>
+            <button id="restartButton">PLAY AGAIN</button>
+        </div>
+        <div id="player"></div>
+        <div id="score">Score: 0</div>
+        <div id="highScore">High Score: 0</div>
+        <div id="currentCharacter">Character: Sam</div>
+        <div id="controls">Controls: Arrow Keys to move, Space or Up Arrow to jump</div>
+    </div>
+
+    <script>
+        // Game variables
+        const player = document.getElementById('player');
+        const gameContainer = document.getElementById('gameContainer');
+        const scoreDisplay = document.getElementById('score');
+        const highScoreDisplay = document.getElementById('highScore');
+        const currentCharacterDisplay = document.getElementById('currentCharacter');
+        const homeScreen = document.getElementById('homeScreen');
+        const startButton = document.getElementById('startButton');
+        const gameOverScreen = document.getElementById('gameOverScreen');
+        const finalScoreDisplay = document.getElementById('finalScore');
+        const newHighScoreDisplay = document.getElementById('newHighScore');
+        const unlockMessageDisplay = document.getElementById('unlockMessage');
+        const restartButton = document.getElementById('restartButton');
+        const characterElements = document.querySelectorAll('.character');
+        
+        const containerWidth = gameContainer.offsetWidth;
+        const containerHeight = gameContainer.offsetHeight;
+        
+        let platforms = [];
+        let score = 0;
+        let highScore = 0;
+        let gameRunning = false;
+        let playerX = 50;
+        let playerY = 0;
+        let playerVelX = 0;
+        let playerVelY = 0;
+        let playerSpeed = 5;
+        let jumpForce = 15;
+        let gravity = 0.6;
+        let isJumping = false;
+        let canDoubleJump = false;
+        let hasDoubleJumped = false;
+        let isGrounded = false;
+        let keys = {};
+        let cameraOffset = 0;
+        let platformsGenerated = 0;
+        
+        // Character configuration
+        const characters = {
+            sam: {
+                color: '#FF6347',
+                borderColor: '#B22222',
+                speed: 5,
+                jumpForce: 15,
+                doubleJump: false,
+                unlocked: true
+            },
+            piper: {
+                color: '#333',
+                borderColor: '#000',
+                speed: 5,
+                jumpForce: 13,
+                doubleJump: true,
+                unlocked: false
+            },
+            link: {
+                color: '#32CD32',
+                borderColor: '#228B22',
+                speed: 8,
+                jumpForce: 15,
+                doubleJump: false,
+                unlocked: false
+            }
+        };
+        
+        let currentCharacter = 'sam';
+        
+        // Initialize player
+        function initPlayer() {
+            playerX = 50;
+            playerY = 340; // Position player directly above the starting platform
+            playerVelX = 0;
+            playerVelY = 0;
+            isJumping = false;
+            hasDoubleJumped = false;
+            isGrounded = true; // Start as grounded
+            
+            // Apply character properties
+            playerSpeed = characters[currentCharacter].speed;
+            jumpForce = characters[currentCharacter].jumpForce;
+            canDoubleJump = characters[currentCharacter].doubleJump;
+            
+            // Update player appearance
+            player.style.backgroundColor = characters[currentCharacter].color;
+            player.style.borderBottom = `3px solid ${characters[currentCharacter].borderColor}`;
+            
+            // Update character display
+            currentCharacterDisplay.textContent = `Character: ${currentCharacter.charAt(0).toUpperCase() + currentCharacter.slice(1)}`;
+            
+            updatePlayerPosition();
+        }
+        
+        // Update player position
+        function updatePlayerPosition() {
+            player.style.left = (playerX - cameraOffset) + 'px';
+            player.style.top = playerY + 'px';
+            
+            // Add a little tilt based on velocity
+            if (playerVelX > 0) {
+                player.style.transform = 'rotate(5deg)';
+            } else if (playerVelX < 0) {
+                player.style.transform = 'rotate(-5deg)';
+            } else {
+                player.style.transform = 'rotate(0)';
+            }
+        }
+        
+        // Create platform
+        function createPlatform(x, y, width) {
+            const platform = document.createElement('div');
+            platform.className = 'platform';
+            platform.style.left = (x - cameraOffset) + 'px';
+            platform.style.top = y + 'px';
+            platform.style.width = width + 'px';
+            platform.style.height = '15px';
+            
+            // Store the original x position for camera adjustment
+            platform.dataset.origX = x;
+            
+            gameContainer.appendChild(platform);
+            platforms.push(platform);
+            platformsGenerated++;
+            
+            return platform;
+        }
+        
+        // Generate initial platforms
+        function generateInitialPlatforms() {
+            // Clear existing platforms
+            platforms.forEach(platform => {
+                gameContainer.removeChild(platform);
+            });
+            platforms = [];
+            
+            // Starting platform - make it wider and ensure it's properly positioned
+            createPlatform(0, 400, 300);
+            
+            // Generate some random platforms with better spacing
+            let lastX = 250; // Start after the first platform
+            for (let i = 0; i < 20; i++) {
+                const x = lastX + 50 + Math.random() * 150; // Ensure platforms aren't too far apart
+                const y = 300 + Math.random() * 150; // Keep platforms at reasonable heights
+                const width = 70 + Math.random() * 130;
+                createPlatform(x, y, width);
+                lastX = x + width;
+            }
+        }
+        
+        // Generate more platforms as player progresses
+        function generateMorePlatforms() {
+            const lastPlatform = platforms[platforms.length - 1];
+            const lastX = parseFloat(lastPlatform.dataset.origX) + parseFloat(lastPlatform.style.width);
+            
+            if (playerX > lastX - 800) {
+                for (let i = 0; i < 5; i++) {
+                    const x = lastX + i * 200 + Math.random() * 100;
+                    const y = 250 + Math.random() * 200;
+                    const width = 70 + Math.random() * 130;
+                    createPlatform(x, y, width);
+                }
+            }
+        }
+        
+        // Check collision with platforms
+        function checkPlatformCollisions() {
+            isGrounded = false;
+            
+            for (let i = 0; i < platforms.length; i++) {
+                const platform = platforms[i];
+                const platformX = parseFloat(platform.dataset.origX);
+                const platformY = parseFloat(platform.style.top);
+                const platformWidth = parseFloat(platform.style.width);
+                
+                // Improved collision detection for platforms
+                if (playerVelY >= 0 && 
+                    playerY + player.offsetHeight >= platformY - 5 && 
+                    playerY + player.offsetHeight <= platformY + 20 &&
+                    playerX + player.offsetWidth > platformX && 
+                    playerX < platformX + platformWidth) {
+                    
+                    playerY = platformY - player.offsetHeight;
+                    playerVelY = 0;
+                    isGrounded = true;
+                    isJumping = false;
+                    break;
+                }
+            }
+        }
+        
+        // Update camera position
+        function updateCamera() {
+            if (playerX > containerWidth / 2) {
+                cameraOffset = playerX - containerWidth / 2;
+                
+                // Update platform positions
+                platforms.forEach(platform => {
+                    const origX = parseFloat(platform.dataset.origX);
+                    platform.style.left = (origX - cameraOffset) + 'px';
+                });
+            }
+        }
+        
+        // Remove platforms that are far behind
+        function removeFarPlatforms() {
+            const toRemove = [];
+            
+            platforms.forEach((platform, index) => {
+                const platformX = parseFloat(platform.dataset.origX);
+                if (platformX < cameraOffset - 200) {
+                    toRemove.push(index);
+                    gameContainer.removeChild(platform);
+                }
+            });
+            
+            // Remove from array (from back to front to avoid index issues)
+            for (let i = toRemove.length - 1; i >= 0; i--) {
+                platforms.splice(toRemove[i], 1);
+            }
+        }
+        
+        // Update score based on distance
+        function updateScore() {
+            score = Math.floor(playerX / 100);
+            scoreDisplay.textContent = 'Score: ' + score;
+            highScoreDisplay.textContent = 'High Score: ' + highScore;
+        }
+        
+        // Game over
+        function gameOver() {
+            gameRunning = false;
+            
+            // Check for high score
+            let isNewHighScore = false;
+            if (score > highScore) {
+                highScore = score;
+                isNewHighScore = true;
+                newHighScoreDisplay.style.display = 'block';
+            } else {
+                newHighScoreDisplay.style.display = 'none';
+            }
+            
+            // Check for character unlocks
+            let newUnlock = false;
+            if (highScore >= 100) {
+                if (!characters.piper.unlocked) {
+                    characters.piper.unlocked = true;
+                    newUnlock = true;
+                    unlockMessageDisplay.textContent = "Piper unlocked!";
+                    document.querySelector('[data-character="piper"]').classList.remove('locked');
+                }
+                
+                if (!characters.link.unlocked) {
+                    characters.link.unlocked = true;
+                    newUnlock = true;
+                    unlockMessageDisplay.textContent = "Ling Link unlocked!";
+                    document.querySelector('[data-character="link"]').classList.remove('locked');
+                }
+            }
+            
+            if (newUnlock) {
+                unlockMessageDisplay.style.display = 'block';
+            } else {
+                unlockMessageDisplay.style.display = 'none';
+            }
+            
+            // Update displays
+            gameOverScreen.style.display = 'flex';
+            finalScoreDisplay.textContent = 'Score: ' + score;
+            highScoreDisplay.textContent = 'High Score: ' + highScore;
+        }
+        
+        // Game loop
+        function gameLoop() {
+            if (!gameRunning) return;
+            
+            // Apply gravity
+            playerVelY += gravity;
+            
+            // Apply horizontal movement based on key input
+            if (keys.ArrowLeft) {
+                playerVelX = -playerSpeed;
+            } else if (keys.ArrowRight) {
+                playerVelX = playerSpeed;
+            } else {
+                // Add some friction
+                playerVelX *= 0.9;
+            }
+            
+            // Jump if space is pressed and player is on ground
+            if ((keys[' '] || keys.ArrowUp) && isGrounded && !isJumping) {
+                playerVelY = -jumpForce;
+                isJumping = true;
+                isGrounded = false;
+                hasDoubleJumped = false;
+            }
+            // Double jump functionality for Piper
+            else if ((keys[' '] || keys.ArrowUp) && !isGrounded && isJumping && canDoubleJump && !hasDoubleJumped) {
+                playerVelY = -jumpForce * 0.8; // Slightly weaker double jump
+                hasDoubleJumped = true;
+            }
+            
+            // Apply velocities
+            playerX += playerVelX;
+            playerY += playerVelY;
+            
+            // Limit player from going too far left
+            if (playerX < 0) {
+                playerX = 0;
+                playerVelX = 0;
+            }
+            
+            // Check for bottom of screen (game over)
+            if (playerY > containerHeight) {
+                gameOver();
+                return;
+            }
+            
+            // Check platform collisions before updating position
+            checkPlatformCollisions();
+            
+            // Update camera position
+            updateCamera();
+            
+            // Generate more platforms
+            generateMorePlatforms();
+            
+            // Remove far behind platforms
+            removeFarPlatforms();
+            
+            // Update score
+            updateScore();
+            
+            // Update player position
+            updatePlayerPosition();
+            
+            // Continue the game loop
+            requestAnimationFrame(gameLoop);
+        }
+        
+        // Character selection
+        function selectCharacter(character) {
+            if (characters[character].unlocked) {
+                currentCharacter = character;
+                
+                // Update selection UI
+                characterElements.forEach(el => {
+                    if (el.dataset.character === character) {
+                        el.classList.add('selected');
+                    } else {
+                        el.classList.remove('selected');
+                    }
+                });
+            }
+        }
+        
+        // Event listeners
+        document.addEventListener('keydown', function(e) {
+            keys[e.key] = true;
+        });
+        
+        document.addEventListener('keyup', function(e) {
+            keys[e.key] = false;
+        });
+        
+        // Character selection event listeners
+        characterElements.forEach(el => {
+            el.addEventListener('click', function() {
+                const character = this.dataset.character;
+                if (characters[character].unlocked) {
+                    selectCharacter(character);
+                }
+            });
+        });
+        
+        startButton.addEventListener('click', function() {
+            homeScreen.style.display = 'none';
+            score = 0;
+            cameraOffset = 0;
+            platformsGenerated = 0;
+            updateScore();
+            initPlayer();
+            generateInitialPlatforms();
+            gameRunning = true;
+            requestAnimationFrame(gameLoop);
+        });
+        
+        restartButton.addEventListener('click', function() {
+            gameOverScreen.style.display = 'none';
+            homeScreen.style.display = 'flex';
+        });
+        
+        // Initialize the game
+        initPlayer();
+        
+        // Update high score display initially
+        highScoreDisplay.textContent = 'High Score: ' + highScore;
+    </script>
+</body>
+</html>
