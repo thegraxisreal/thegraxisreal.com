@@ -20,6 +20,54 @@
             background-color: #87CEEB;
             overflow: hidden;
         }
+        /* Parallax background layers */
+        .parallax-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-repeat: repeat-x;
+            background-size: auto 100%;
+        }
+        #backgroundFar {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%23729FCF"/></svg>');
+            z-index: 1;
+        }
+        #backgroundMid {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%235C95CF"/></svg>');
+            z-index: 2;
+        }
+        #backgroundClose {
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%23356AA0"/></svg>');
+            z-index: 3;
+        }
+        /* Weather effects container */
+        #weatherEffects {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 4;
+            overflow: hidden;
+        }
+        .raindrop {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.7);
+            width: 2px;
+            height: 15px;
+            transform: rotate(10deg);
+        }
+        .snowflake {
+            position: absolute;
+            background-color: white;
+            border-radius: 50%;
+            width: 5px;
+            height: 5px;
+            opacity: 0.8;
+        }
         #homeScreen {
             position: absolute;
             width: 100%;
@@ -173,6 +221,7 @@
             border-radius: 10px;
             cursor: pointer;
         }
+        /* Player (original style) */
         #player {
             position: absolute;
             width: 40px;
@@ -181,11 +230,37 @@
             border-radius: 5px;
             border-bottom: 3px solid #B22222;
             transition: transform 0.1s;
+            z-index: 5;
         }
+        /* Platform varieties */
         .platform {
             position: absolute;
-            background-color: #8B4513;
             border-top: 5px solid #A0522D;
+            z-index: 4;
+        }
+        .platform-normal {
+            background-color: #8B4513;
+        }
+        .platform-grass {
+            background-color: #228B22;
+            border-top-color: #32CD32;
+        }
+        .platform-stone {
+            background-color: #808080;
+            border-top-color: #A9A9A9;
+        }
+        .platform-ice {
+            background-color: #B0E0E6;
+            border-top-color: #F0FFFF;
+        }
+        .spike {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-bottom: 16px solid #FF0000;
+            z-index: 5;
         }
         #score {
             position: absolute;
@@ -196,6 +271,7 @@
             background-color: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
             border-radius: 5px;
+            z-index: 6;
         }
         #highScore {
             position: absolute;
@@ -206,6 +282,7 @@
             background-color: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
             border-radius: 5px;
+            z-index: 6;
         }
         #controls {
             position: absolute;
@@ -216,6 +293,7 @@
             background-color: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
             border-radius: 5px;
+            z-index: 6;
         }
         #currentCharacter {
             position: absolute;
@@ -226,14 +304,36 @@
             background-color: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
             border-radius: 5px;
+            z-index: 6;
+        }
+        /* Weather toggle */
+        #weatherToggle {
+            position: absolute;
+            top: 60px;
+            left: 20px;
+            font-size: 16px;
+            color: white;
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 5px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 6;
         }
     </style>
 </head>
 <body>
     <div id="gameContainer">
+        <!-- Parallax Backgrounds -->
+        <div id="backgroundFar" class="parallax-layer"></div>
+        <div id="backgroundMid" class="parallax-layer"></div>
+        <div id="backgroundClose" class="parallax-layer"></div>
+        
+        <!-- Weather Effects Container -->
+        <div id="weatherEffects"></div>
+        
         <div id="homeScreen">
             <h1>SAM JUMPER</h1>
-            <div style="color: white; font-size: 18px; margin-bottom: 20px;">Beta 0.1</div>
+            <div style="color: white; font-size: 18px; margin-bottom: 20px;">Public Beta 1.0</div>
             <div id="characterSelector">
                 <div class="character selected" data-character="sam">
                     <div class="character-icon sam-icon">S</div>
@@ -262,11 +362,15 @@
             <div id="unlockMessage">New character unlocked!</div>
             <button id="restartButton">PLAY AGAIN</button>
         </div>
+        
+        <!-- Original player (no animation elements) -->
         <div id="player"></div>
+        
         <div id="score">Score: 0</div>
         <div id="highScore">High Score: 0</div>
         <div id="currentCharacter">Character: Sam</div>
         <div id="controls">Controls: Arrow Keys to move, Space or Up Arrow to jump (Press twice for double jump with Piper)</div>
+        <div id="weatherToggle">Toggle Weather: Off</div>
     </div>
 
     <script>
@@ -284,11 +388,19 @@
         const unlockMessageDisplay = document.getElementById('unlockMessage');
         const restartButton = document.getElementById('restartButton');
         const characterElements = document.querySelectorAll('.character');
+        const weatherToggle = document.getElementById('weatherToggle');
+        const weatherEffects = document.getElementById('weatherEffects');
+        
+        // Parallax background elements
+        const backgroundFar = document.getElementById('backgroundFar');
+        const backgroundMid = document.getElementById('backgroundMid');
+        const backgroundClose = document.getElementById('backgroundClose');
         
         // Game state
         let containerWidth = window.innerWidth;
         let containerHeight = window.innerHeight;
         let platforms = [];
+        let spikes = [];
         let score = 0;
         let highScore = 0;
         let gameRunning = false;
@@ -309,7 +421,14 @@
         let cameraOffset = 0;
         let platformsGenerated = 0;
         
-        // Character configuration
+        // Weather animation variables (no character animations)
+        let weatherUpdateTimer = 0;
+        
+        // Weather variables
+        let weatherMode = 'none'; // 'none', 'rain', 'snow'
+        let weatherParticles = [];
+        
+        // Character configuration (original without animation properties)
         const characters = {
             sam: {
                 color: '#FF6347',
@@ -339,7 +458,31 @@
         
         let currentCharacter = 'sam';
         
-        // Initialize player
+        // Platform types
+        const platformTypes = [
+            {
+                name: 'normal',
+                className: 'platform-normal',
+                friction: 1.0
+            },
+            {
+                name: 'grass',
+                className: 'platform-grass',
+                friction: 1.0
+            },
+            {
+                name: 'stone',
+                className: 'platform-stone',
+                friction: 1.0
+            },
+            {
+                name: 'ice',
+                className: 'platform-ice',
+                friction: 0.95 // Slippery
+            }
+        ];
+        
+        // Initialize player (original style)
         function initPlayer() {
             playerX = 50;
             playerY = 340; // Position player directly above the starting platform
@@ -369,7 +512,7 @@
             player.style.left = (playerX - cameraOffset) + 'px';
             player.style.top = playerY + 'px';
             
-            // Add a little tilt based on velocity
+            // Add a little tilt based on velocity (from original game)
             if (playerVelX > 0) {
                 player.style.transform = 'rotate(5deg)';
             } else if (playerVelX < 0) {
@@ -383,19 +526,55 @@
         function createPlatform(x, y, width) {
             const platform = document.createElement('div');
             platform.className = 'platform';
+            
+            // Select a random platform type, weighted towards normal platforms
+            const platformTypeIndex = Math.random() < 0.7 ? 0 : Math.floor(Math.random() * platformTypes.length);
+            const platformType = platformTypes[platformTypeIndex];
+            
+            platform.classList.add(platformType.className);
             platform.style.left = (x - cameraOffset) + 'px';
             platform.style.top = y + 'px';
             platform.style.width = width + 'px';
             platform.style.height = '15px';
             
-            // Store the original x position for camera adjustment
+            // Store platform properties
             platform.dataset.origX = x;
+            platform.dataset.type = platformType.name;
+            platform.dataset.friction = platformType.friction;
             
             gameContainer.appendChild(platform);
             platforms.push(platform);
             platformsGenerated++;
             
+            // Randomly add spikes to platforms (but not the first one and after score 20)
+            if (platformsGenerated > 1 && Math.random() < 0.25 && score >= 20) {
+                // Determine number of spikes (1-3)
+                const spikeCount = Math.floor(Math.random() * 3) + 1;
+                
+                for (let i = 0; i < spikeCount; i++) {
+                    // Random position along the platform
+                    const spikeX = x + (width * Math.random() * 0.8) + (width * 0.1);
+                    createSpike(spikeX, y - 16); // Position spike on top of platform
+                }
+            }
+            
             return platform;
+        }
+        
+        // Create spike
+        function createSpike(x, y) {
+            const spike = document.createElement('div');
+            spike.className = 'spike';
+            spike.style.left = (x - cameraOffset) + 'px';
+            spike.style.top = y + 'px';
+            
+            // Store the original x position for camera adjustment
+            spike.dataset.origX = x;
+            
+            gameContainer.appendChild(spike);
+            spikes.push(spike);
+            
+            return spike;
         }
         
         // Generate initial platforms
@@ -405,6 +584,12 @@
                 gameContainer.removeChild(platform);
             });
             platforms = [];
+            
+            // Clear existing spikes
+            spikes.forEach(spike => {
+                gameContainer.removeChild(spike);
+            });
+            spikes = [];
             
             // Starting platform - make it wider and ensure it's properly positioned
             createPlatform(0, 400, 300);
@@ -437,8 +622,9 @@
             }
         }
         
-        // Check collision with platforms
-        function checkPlatformCollisions() {
+        // Check collision with platforms and spikes
+        function checkCollisions() {
+            // Check platform collisions
             isGrounded = false;
             
             for (let i = 0; i < platforms.length; i++) {
@@ -446,6 +632,7 @@
                 const platformX = parseFloat(platform.dataset.origX);
                 const platformY = parseFloat(platform.style.top);
                 const platformWidth = parseFloat(platform.style.width);
+                const platformFriction = parseFloat(platform.dataset.friction);
                 
                 // Improved collision detection for platforms
                 if (playerVelY >= 0 && 
@@ -459,7 +646,29 @@
                     isGrounded = true;
                     isJumping = false;
                     hasDoubleJumped = false; // Reset double jump when landing
+                    
+                    // Apply platform-specific friction
+                    playerVelX *= platformFriction;
+                    
                     break;
+                }
+            }
+            
+            // Check spike collisions
+            for (let i = 0; i < spikes.length; i++) {
+                const spike = spikes[i];
+                const spikeX = parseFloat(spike.dataset.origX);
+                const spikeY = parseFloat(spike.style.top);
+                
+                // Simple spike collision detection (16x16 pixel area)
+                if (playerX + player.offsetWidth > spikeX - 8 && 
+                    playerX < spikeX + 8 &&
+                    playerY + player.offsetHeight > spikeY &&
+                    playerY < spikeY + 16) {
+                    
+                    // Player hit a spike
+                    gameOver();
+                    return;
                 }
             }
         }
@@ -474,24 +683,50 @@
                     const origX = parseFloat(platform.dataset.origX);
                     platform.style.left = (origX - cameraOffset) + 'px';
                 });
+                
+                // Update spike positions
+                spikes.forEach(spike => {
+                    const origX = parseFloat(spike.dataset.origX);
+                    spike.style.left = (origX - cameraOffset) + 'px';
+                });
+                
+                // Update parallax backgrounds
+                backgroundFar.style.backgroundPosition = `${-cameraOffset * 0.2}px 0`;
+                backgroundMid.style.backgroundPosition = `${-cameraOffset * 0.4}px 0`;
+                backgroundClose.style.backgroundPosition = `${-cameraOffset * 0.6}px 0`;
             }
         }
         
-        // Remove platforms that are far behind
+        // Remove platforms and spikes that are far behind
         function removeFarPlatforms() {
-            const toRemove = [];
-            
+            // Remove platforms
+            const platformsToRemove = [];
             platforms.forEach((platform, index) => {
                 const platformX = parseFloat(platform.dataset.origX);
                 if (platformX < cameraOffset - 200) {
-                    toRemove.push(index);
+                    platformsToRemove.push(index);
                     gameContainer.removeChild(platform);
                 }
             });
             
             // Remove from array (from back to front to avoid index issues)
-            for (let i = toRemove.length - 1; i >= 0; i--) {
-                platforms.splice(toRemove[i], 1);
+            for (let i = platformsToRemove.length - 1; i >= 0; i--) {
+                platforms.splice(platformsToRemove[i], 1);
+            }
+            
+            // Remove spikes
+            const spikesToRemove = [];
+            spikes.forEach((spike, index) => {
+                const spikeX = parseFloat(spike.dataset.origX);
+                if (spikeX < cameraOffset - 200) {
+                    spikesToRemove.push(index);
+                    gameContainer.removeChild(spike);
+                }
+            });
+            
+            // Remove from array (from back to front to avoid index issues)
+            for (let i = spikesToRemove.length - 1; i >= 0; i--) {
+                spikes.splice(spikesToRemove[i], 1);
             }
         }
         
@@ -500,6 +735,142 @@
             score = Math.floor(playerX / 100);
             scoreDisplay.textContent = 'Score: ' + score;
             highScoreDisplay.textContent = 'High Score: ' + highScore;
+            
+            // Change background based on score
+            if (score > 100) {
+                // Night mode
+                gameContainer.style.backgroundColor = '#191970'; // Midnight blue
+                
+                // Update parallax background colors for night
+                backgroundFar.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%23729FCF"/></svg>\')';
+                backgroundMid.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%235C95CF"/></svg>\')';
+                backgroundClose.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%23356AA0"/></svg>\')';
+                
+                // Remove stars if they exist
+                const stars = document.getElementById('stars');
+                if (stars) {
+                    gameContainer.removeChild(stars);
+                }
+            }
+        }
+        
+        // Weather system
+        function toggleWeather() {
+            // Cycle through weather types
+            if (weatherMode === 'none') {
+                weatherMode = 'rain';
+                weatherToggle.textContent = 'Toggle Weather: Rain';
+                startWeather();
+            } else if (weatherMode === 'rain') {
+                weatherMode = 'snow';
+                weatherToggle.textContent = 'Toggle Weather: Snow';
+                startWeather();
+            } else {
+                weatherMode = 'none';
+                weatherToggle.textContent = 'Toggle Weather: Off';
+                clearWeather();
+            }
+        }
+        
+        function startWeather() {
+            clearWeather();
+            
+            if (weatherMode === 'rain') {
+                // Create raindrops
+                for (let i = 0; i < 100; i++) {
+                    createRaindrop();
+                }
+            } else if (weatherMode === 'snow') {
+                // Create snowflakes
+                for (let i = 0; i < 50; i++) {
+                    createSnowflake();
+                }
+            }
+        }
+        
+        function createRaindrop() {
+            const raindrop = document.createElement('div');
+            raindrop.className = 'raindrop';
+            raindrop.style.left = Math.random() * containerWidth + 'px';
+            raindrop.style.top = Math.random() * containerHeight + 'px';
+            raindrop.speedY = 15 + Math.random() * 10;
+            
+            weatherEffects.appendChild(raindrop);
+            weatherParticles.push(raindrop);
+        }
+        
+        function createSnowflake() {
+            const snowflake = document.createElement('div');
+            snowflake.className = 'snowflake';
+            snowflake.style.left = Math.random() * containerWidth + 'px';
+            snowflake.style.top = Math.random() * containerHeight + 'px';
+            snowflake.speedY = 1 + Math.random() * 3;
+            snowflake.speedX = Math.random() * 2 - 1;
+            snowflake.style.width = (3 + Math.random() * 4) + 'px';
+            snowflake.style.height = snowflake.style.width;
+            
+            weatherEffects.appendChild(snowflake);
+            weatherParticles.push(snowflake);
+        }
+        
+        function updateWeather(deltaTime) {
+            if (weatherMode === 'none') return;
+            
+            const particlesToRemove = [];
+            
+            weatherParticles.forEach((particle, index) => {
+                if (weatherMode === 'rain') {
+                    // Update raindrop position
+                    const newTop = parseFloat(particle.style.top) + particle.speedY * (deltaTime / 16);
+                    particle.style.top = newTop + 'px';
+                    
+                    // Remove if off screen and create a new one
+                    if (newTop > containerHeight) {
+                        particlesToRemove.push(index);
+                    }
+                } else if (weatherMode === 'snow') {
+                    // Update snowflake position with some wobble
+                    const newTop = parseFloat(particle.style.top) + particle.speedY * (deltaTime / 16);
+                    let newLeft = parseFloat(particle.style.left) + particle.speedX * (deltaTime / 16);
+                    
+                    // Add a little wobble
+                    particle.speedX += (Math.random() - 0.5) * 0.1;
+                    
+                    // Keep within bounds
+                    if (newLeft < 0) newLeft = containerWidth;
+                    if (newLeft > containerWidth) newLeft = 0;
+                    
+                    particle.style.top = newTop + 'px';
+                    particle.style.left = newLeft + 'px';
+                    
+                    // Remove if off screen and create a new one
+                    if (newTop > containerHeight) {
+                        particlesToRemove.push(index);
+                    }
+                }
+            });
+            
+            // Remove particles that are off screen
+            for (let i = particlesToRemove.length - 1; i >= 0; i--) {
+                const index = particlesToRemove[i];
+                weatherEffects.removeChild(weatherParticles[index]);
+                weatherParticles.splice(index, 1);
+                
+                // Create a new particle at the top
+                if (weatherMode === 'rain') {
+                    createRaindrop();
+                } else if (weatherMode === 'snow') {
+                    createSnowflake();
+                }
+            }
+        }
+        
+        function clearWeather() {
+            // Remove all weather particles
+            weatherParticles.forEach(particle => {
+                weatherEffects.removeChild(particle);
+            });
+            weatherParticles = [];
         }
         
         // Game over
@@ -546,11 +917,11 @@
             highScoreDisplay.textContent = 'High Score: ' + highScore;
         }
         
-        // Game loop
+        // Game loop (using original physics)
         function gameLoop() {
             if (!gameRunning) return;
             
-            // Apply gravity
+            // Apply gravity (original fixed value)
             playerVelY += gravity;
             
             // Apply horizontal movement based on key input
@@ -582,7 +953,7 @@
             // Update jump key state
             jumpKeyWasPressed = jumpKeyPressed;
             
-            // Apply velocities
+            // Apply velocities (original fixed values)
             playerX += playerVelX;
             playerY += playerVelY;
             
@@ -598,8 +969,11 @@
                 return;
             }
             
-            // Check platform collisions before updating position
-            checkPlatformCollisions();
+            // Check platform and spike collisions
+            checkCollisions();
+            
+            // If game is no longer running (player hit a spike), exit the loop
+            if (!gameRunning) return;
             
             // Update camera position
             updateCamera();
@@ -607,7 +981,7 @@
             // Generate more platforms
             generateMorePlatforms();
             
-            // Remove far behind platforms
+            // Remove far behind platforms and spikes
             removeFarPlatforms();
             
             // Update score
@@ -615,6 +989,9 @@
             
             // Update player position
             updatePlayerPosition();
+            
+            // Update weather effects
+            updateWeather(16); // Fixed timestep for weather
             
             // Continue the game loop
             requestAnimationFrame(gameLoop);
@@ -655,11 +1032,21 @@
             });
         });
         
+        // Weather toggle event listener
+        weatherToggle.addEventListener('click', toggleWeather);
+        
         startButton.addEventListener('click', function() {
             homeScreen.style.display = 'none';
             score = 0;
             cameraOffset = 0;
             platformsGenerated = 0;
+            
+            // Clear any existing spikes
+            spikes.forEach(spike => {
+                gameContainer.removeChild(spike);
+            });
+            spikes = [];
+            
             updateScore();
             initPlayer();
             generateInitialPlatforms();
@@ -689,4 +1076,27 @@
         });
     </script>
 </body>
-</html>
+</html><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%23000033"/></svg>\')';
+                backgroundMid.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%23000066"/></svg>\')';
+                backgroundClose.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%23000099"/></svg>\')';
+                
+                // Add stars to the background
+                if (!document.getElementById('stars')) {
+                    const stars = document.createElement('div');
+                    stars.id = 'stars';
+                    stars.style.position = 'absolute';
+                    stars.style.top = '0';
+                    stars.style.left = '0';
+                    stars.style.width = '100%';
+                    stars.style.height = '100%';
+                    stars.style.backgroundImage = 'radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 8px)';
+                    stars.style.backgroundSize = '100px 100px';
+                    stars.style.zIndex = '0';
+                    gameContainer.insertBefore(stars, backgroundFar);
+                }
+            } else {
+                // Day mode
+                gameContainer.style.backgroundColor = '#87CEEB'; // Sky blue (day)
+                
+                // Update parallax background colors for day
+                backgroundFar.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600">
