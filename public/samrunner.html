@@ -333,7 +333,7 @@
         
         <div id="homeScreen">
             <h1>SAM JUMPER</h1>
-            <div style="color: white; font-size: 18px; margin-bottom: 20px;">Public Beta 1.0</div>
+            <div style="color: white; font-size: 18px; margin-bottom: 20px;">Enhanced Edition</div>
             <div id="characterSelector">
                 <div class="character selected" data-character="sam">
                     <div class="character-icon sam-icon">S</div>
@@ -660,11 +660,16 @@
                 const spikeX = parseFloat(spike.dataset.origX);
                 const spikeY = parseFloat(spike.style.top);
                 
-                // Simple spike collision detection (16x16 pixel area)
-                if (playerX + player.offsetWidth > spikeX - 8 && 
-                    playerX < spikeX + 8 &&
-                    playerY + player.offsetHeight > spikeY &&
-                    playerY < spikeY + 16) {
+                // Improved spike collision detection with smaller, more accurate hitbox
+                const spikeWidth = 12; // Smaller than the visual width (was 16)
+                const spikeHeight = 12; // Shorter than the visual height (was 16)
+                const spikeOffsetX = 0; // Center offset
+                const spikeOffsetY = 4; // Move hitbox up a bit to match the visual part
+                
+                if (playerX + player.offsetWidth > spikeX - spikeWidth/2 + spikeOffsetX && 
+                    playerX < spikeX + spikeWidth/2 + spikeOffsetX &&
+                    playerY + player.offsetHeight > spikeY + spikeOffsetY &&
+                    playerY < spikeY + spikeHeight + spikeOffsetY) {
                     
                     // Player hit a spike
                     gameOver();
