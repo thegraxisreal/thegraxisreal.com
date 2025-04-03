@@ -14,9 +14,9 @@
         }
         #gameContainer {
             position: relative;
-            width: 800px;
-            height: 600px;
-            margin: 0 auto;
+            width: 100%;
+            height: 100vh;
+            margin: 0;
             background-color: #87CEEB;
             overflow: hidden;
         }
@@ -233,6 +233,7 @@
     <div id="gameContainer">
         <div id="homeScreen">
             <h1>SAM JUMPER</h1>
+            <div style="color: white; font-size: 18px; margin-bottom: 20px;">Beta 0.1</div>
             <div id="characterSelector">
                 <div class="character selected" data-character="sam">
                     <div class="character-icon sam-icon">S</div>
@@ -265,7 +266,7 @@
         <div id="score">Score: 0</div>
         <div id="highScore">High Score: 0</div>
         <div id="currentCharacter">Character: Sam</div>
-        <div id="controls">Controls: Arrow Keys to move, Space or Up Arrow to jump</div>
+        <div id="controls">Controls: Arrow Keys to move, Space or Up Arrow to jump (Press twice for double jump with Piper)</div>
     </div>
 
     <script>
@@ -284,9 +285,9 @@
         const restartButton = document.getElementById('restartButton');
         const characterElements = document.querySelectorAll('.character');
         
-        const containerWidth = gameContainer.offsetWidth;
-        const containerHeight = gameContainer.offsetHeight;
-        
+        // Game state
+        let containerWidth = window.innerWidth;
+        let containerHeight = window.innerHeight;
         let platforms = [];
         let score = 0;
         let highScore = 0;
@@ -303,6 +304,8 @@
         let hasDoubleJumped = false;
         let isGrounded = false;
         let keys = {};
+        let jumpKeyPressed = false;
+        let jumpKeyWasPressed = false;
         let cameraOffset = 0;
         let platformsGenerated = 0;
         
@@ -422,12 +425,14 @@
             const lastPlatform = platforms[platforms.length - 1];
             const lastX = parseFloat(lastPlatform.dataset.origX) + parseFloat(lastPlatform.style.width);
             
-            if (playerX > lastX - 800) {
+            if (playerX > lastX - containerWidth) {
+                let newLastX = lastX;
                 for (let i = 0; i < 5; i++) {
-                    const x = lastX + i * 200 + Math.random() * 100;
-                    const y = 250 + Math.random() * 200;
+                    const x = newLastX + 50 + Math.random() * 150;
+                    const y = 300 + Math.random() * 150;
                     const width = 70 + Math.random() * 130;
                     createPlatform(x, y, width);
+                    newLastX = x + width;
                 }
             }
         }
@@ -453,6 +458,7 @@
                     playerVelY = 0;
                     isGrounded = true;
                     isJumping = false;
+                    hasDoubleJumped = false; // Reset double jump when landing
                     break;
                 }
             }
@@ -557,18 +563,24 @@
                 playerVelX *= 0.9;
             }
             
-            // Jump if space is pressed and player is on ground
-            if ((keys[' '] || keys.ArrowUp) && isGrounded && !isJumping) {
+            // Handle jumping logic
+            jumpKeyPressed = keys[' '] || keys.ArrowUp;
+            
+            // Regular jump
+            if (jumpKeyPressed && !jumpKeyWasPressed && isGrounded) {
                 playerVelY = -jumpForce;
                 isJumping = true;
                 isGrounded = false;
                 hasDoubleJumped = false;
             }
             // Double jump functionality for Piper
-            else if ((keys[' '] || keys.ArrowUp) && !isGrounded && isJumping && canDoubleJump && !hasDoubleJumped) {
+            else if (jumpKeyPressed && !jumpKeyWasPressed && !isGrounded && canDoubleJump && !hasDoubleJumped) {
                 playerVelY = -jumpForce * 0.8; // Slightly weaker double jump
                 hasDoubleJumped = true;
             }
+            
+            // Update jump key state
+            jumpKeyWasPressed = jumpKeyPressed;
             
             // Apply velocities
             playerX += playerVelX;
@@ -660,11 +672,21 @@
             homeScreen.style.display = 'flex';
         });
         
-        // Initialize the game
-        initPlayer();
+        // Handle window resize
+        function handleResize() {
+            containerWidth = window.innerWidth;
+            containerHeight = window.innerHeight;
+        }
         
-        // Update high score display initially
-        highScoreDisplay.textContent = 'High Score: ' + highScore;
+        // Listen for window resize
+        window.addEventListener('resize', handleResize);
+        
+        // Initialize the game
+        window.addEventListener('load', function() {
+            handleResize();
+            initPlayer();
+            highScoreDisplay.textContent = 'High Score: ' + highScore;
+        });
     </script>
 </body>
 </html>
