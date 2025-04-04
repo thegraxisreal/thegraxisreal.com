@@ -15,9 +15,9 @@
         #gameContainer {
             position: relative;
             width: 100%;
-            height: 100vh;
+            height: 650px;
             margin: 0;
-            background-color: #87CEEB;
+            background-color: #A6D785;
             overflow: hidden;
         }
         /* Parallax background layers */
@@ -31,15 +31,15 @@
             background-size: auto 100%;
         }
         #backgroundFar {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%23729FCF"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%2367864E"/></svg>');
             z-index: 1;
         }
         #backgroundMid {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%235C95CF"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%237CCD7C"/></svg>');
             z-index: 2;
         }
         #backgroundClose {
-            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%23356AA0"/></svg>');
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%2390EE90"/></svg>');
             z-index: 3;
         }
         /* Weather effects container */
@@ -81,21 +81,106 @@
         }
         #homeScreen h1 {
             color: #FFD700;
-            font-size: 48px;
+            font-size: 36px;
             text-shadow: 3px 3px 0 #000;
             margin-bottom: 20px;
+        }
+        
+        #secretCheat {
+            cursor: pointer;
+            color: #FFD700;
+            text-shadow: 0 0 5px #FF0000;
+        }
+        
+        #secretCheat:hover {
+            animation: pulse 0.5s infinite alternate;
+        }
+        
+        @keyframes pulse {
+            0% { text-shadow: 0 0 5px #FF0000; }
+            100% { text-shadow: 0 0 15px #FF0000; }
+        }
+        /* Level selector styles */
+        #levelSelector {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+            width: 100%;
+        }
+        .level {
+            width: 120px;
+            height: 120px;
+            margin: 0 15px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .level.selected {
+            box-shadow: 0 0 15px 5px #FFD700;
+            transform: scale(1.05);
+        }
+        .level:hover:not(.locked) {
+            transform: scale(1.05);
+        }
+        .level.locked {
+            filter: grayscale(100%);
+            cursor: not-allowed;
+        }
+        .level-preview {
+            width: 100px;
+            height: 60px;
+            margin-top: 10px;
+            border-radius: 5px;
+            background-size: cover;
+            background-position: center;
+        }
+        .grasslands-preview {
+            background-image: linear-gradient(to bottom, #87CEEB, #32CD32);
+        }
+        .icelands-preview {
+            background-image: linear-gradient(to bottom, #E0FFFF, #B0E0E6);
+        }
+        .level-name {
+            margin-top: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        .level-description {
+            font-size: 10px;
+            color: #555;
+            text-align: center;
+            padding: 0 5px;
+            margin-top: 5px;
+        }
+        .locked-message {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 10px;
+            padding: 5px 0;
+            text-align: center;
         }
         #characterSelector {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             width: 100%;
         }
         .character {
-            width: 120px;
-            height: 180px;
-            margin: 0 15px;
+            width: 100px;
+            height: 140px;
+            margin: 0 8px;
             background-color: rgba(255, 255, 255, 0.7);
             border-radius: 10px;
             display: flex;
@@ -118,14 +203,14 @@
             cursor: not-allowed;
         }
         .character-icon {
-            width: 80px;
-            height: 80px;
-            margin-top: 15px;
+            width: 60px;
+            height: 60px;
+            margin-top: 10px;
             border-radius: 50%;
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 40px;
+            font-size: 30px;
             color: white;
         }
         .sam-icon {
@@ -137,35 +222,27 @@
         .link-icon {
             background-color: #32CD32;
         }
+        .steve-icon {
+            background-color: #4169E1;
+        }
         .character-name {
-            margin-top: 10px;
+            margin-top: 8px;
             font-weight: bold;
             color: #333;
         }
         .character-ability {
-            font-size: 12px;
+            font-size: 10px;
             color: #555;
             text-align: center;
             padding: 0 5px;
             margin-top: 5px;
         }
-        .locked-message {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background-color: rgba(0, 0, 0, 0.7);
-            color: white;
-            font-size: 12px;
-            padding: 5px 0;
-            text-align: center;
-        }
         #startButton {
             background-color: #32CD32;
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 24px;
+            padding: 10px 20px;
+            font-size: 18px;
             border-radius: 10px;
             cursor: pointer;
             box-shadow: 0 5px 0 #228B22;
@@ -192,23 +269,23 @@
         }
         #gameOverScreen h2 {
             color: #FF4500;
-            font-size: 48px;
+            font-size: 36px;
             margin-bottom: 20px;
         }
         #finalScore {
             color: white;
-            font-size: 32px;
-            margin-bottom: 30px;
+            font-size: 24px;
+            margin-bottom: 20px;
         }
         #newHighScore {
             color: #FFD700;
-            font-size: 24px;
+            font-size: 18px;
             margin-bottom: 10px;
             display: none;
         }
         #unlockMessage {
             color: #32CD32;
-            font-size: 20px;
+            font-size: 16px;
             margin-bottom: 20px;
             display: none;
         }
@@ -216,16 +293,16 @@
             background-color: #4169E1;
             color: white;
             border: none;
-            padding: 15px 30px;
-            font-size: 24px;
+            padding: 10px 20px;
+            font-size: 18px;
             border-radius: 10px;
             cursor: pointer;
         }
         /* Player (original style) */
         #player {
             position: absolute;
-            width: 40px;
-            height: 60px;
+            width: 30px;
+            height: 45px;
             background-color: #FF6347;
             border-radius: 5px;
             border-bottom: 3px solid #B22222;
@@ -264,9 +341,9 @@
         }
         #score {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            font-size: 24px;
+            top: 10px;
+            right: 10px;
+            font-size: 18px;
             color: white;
             background-color: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
@@ -275,9 +352,9 @@
         }
         #highScore {
             position: absolute;
-            top: 60px;
-            right: 20px;
-            font-size: 18px;
+            top: 40px;
+            right: 10px;
+            font-size: 14px;
             color: #FFD700;
             background-color: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
@@ -286,9 +363,9 @@
         }
         #controls {
             position: absolute;
-            bottom: 20px;
-            left: 20px;
-            font-size: 16px;
+            bottom: 10px;
+            left: 10px;
+            font-size: 12px;
             color: white;
             background-color: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
@@ -297,9 +374,9 @@
         }
         #currentCharacter {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            font-size: 18px;
+            top: 10px;
+            left: 10px;
+            font-size: 14px;
             color: white;
             background-color: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
@@ -309,9 +386,9 @@
         /* Weather toggle */
         #weatherToggle {
             position: absolute;
-            top: 60px;
-            left: 20px;
-            font-size: 16px;
+            top: 40px;
+            left: 10px;
+            font-size: 12px;
             color: white;
             background-color: rgba(0, 0, 0, 0.5);
             padding: 5px 10px;
@@ -332,29 +409,55 @@
         <div id="weatherEffects"></div>
         
         <div id="homeScreen">
-            <h1>SAM JUMPER</h1>
-            <div style="color: white; font-size: 18px; margin-bottom: 20px;">Enhanced Edition</div>
+            <h1>S<span id="secretCheat">A</span>M JUMPER</h1>
+            <div style="color: white; font-size: 14px; margin-bottom: 10px;">Enhanced Edition</div>
+            
+            <!-- Level Selector -->
+            <div style="color: white; font-size: 16px; margin-bottom: 5px;">Select Level</div>
+            <div id="levelSelector">
+                <div class="level selected" data-level="grasslands">
+                    <div class="level-preview grasslands-preview"></div>
+                    <div class="level-name">Grasslands</div>
+                    <div class="level-description">Balanced difficulty</div>
+                </div>
+                <div class="level locked" data-level="icelands">
+                    <div class="level-preview icelands-preview"></div>
+                    <div class="level-name">Ice Lands</div>
+                    <div class="level-description">Slippery terrain</div>
+                    <div class="locked-message">Unlocks at 250 pts</div>
+                </div>
+            </div>
+            
+            <!-- Character Selector -->
+            <div style="color: white; font-size: 16px; margin-top: 10px; margin-bottom: 5px;">Select Character</div>
             <div id="characterSelector">
                 <div class="character selected" data-character="sam">
                     <div class="character-icon sam-icon">S</div>
                     <div class="character-name">Sam</div>
                     <div class="character-ability">Balanced jumper</div>
                 </div>
+                <div class="character locked" data-character="steve">
+                    <div class="character-icon steve-icon">S+</div>
+                    <div class="character-name">Steve</div>
+                    <div class="character-ability">Respawn 1 time</div>
+                    <div class="locked-message">Unlocks at 100 pts</div>
+                </div>
                 <div class="character locked" data-character="piper">
                     <div class="character-icon piper-icon">P</div>
                     <div class="character-name">Piper</div>
                     <div class="character-ability">Double jump</div>
-                    <div class="locked-message">Unlocks at 100 points</div>
+                    <div class="locked-message">Unlocks at 200 pts</div>
                 </div>
                 <div class="character locked" data-character="link">
                     <div class="character-icon link-icon">L</div>
                     <div class="character-name">Ling Link</div>
                     <div class="character-ability">Super speed</div>
-                    <div class="locked-message">Unlocks at 100 points</div>
+                    <div class="locked-message">Unlocks at 200 pts</div>
                 </div>
             </div>
             <button id="startButton">START GAME</button>
         </div>
+        
         <div id="gameOverScreen">
             <h2>GAME OVER</h2>
             <div id="finalScore">Score: 0</div>
@@ -369,7 +472,7 @@
         <div id="score">Score: 0</div>
         <div id="highScore">High Score: 0</div>
         <div id="currentCharacter">Character: Sam</div>
-        <div id="controls">Controls: Arrow Keys to move, Space or Up Arrow to jump (Press twice for double jump with Piper)</div>
+        <div id="controls">Controls: Arrow Keys to move, Space or Up Arrow to jump</div>
         <div id="weatherToggle">Toggle Weather: Off</div>
     </div>
 
@@ -397,8 +500,8 @@
         const backgroundClose = document.getElementById('backgroundClose');
         
         // Game state
-        let containerWidth = window.innerWidth;
-        let containerHeight = window.innerHeight;
+        let containerWidth = gameContainer.offsetWidth;
+        let containerHeight = gameContainer.offsetHeight;
         let platforms = [];
         let spikes = [];
         let score = 0;
@@ -414,6 +517,8 @@
         let isJumping = false;
         let canDoubleJump = false;
         let hasDoubleJumped = false;
+        let canRespawn = false;
+        let hasRespawned = false;
         let isGrounded = false;
         let keys = {};
         let jumpKeyPressed = false;
@@ -421,14 +526,46 @@
         let cameraOffset = 0;
         let platformsGenerated = 0;
         
-        // Weather animation variables (no character animations)
-        let weatherUpdateTimer = 0;
+        // Current level
+        let currentLevel = 'grasslands';
+        
+        // Level configurations
+        const levels = {
+            grasslands: {
+                backgroundFar: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%2367864E"/></svg>\')',
+                backgroundMid: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%237CCD7C"/></svg>\')',
+                backgroundClose: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%2390EE90"/></svg>\')',
+                backgroundColor: '#A6D785',
+                platformTypes: [
+                    { name: 'normal', className: 'platform-normal', weight: 0.3, friction: 1.0 },
+                    { name: 'grass', className: 'platform-grass', weight: 0.7, friction: 1.0 }
+                ],
+                nightBackgroundFar: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%23355E3B"/></svg>\')',
+                nightBackgroundMid: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%23458B74"/></svg>\')',
+                nightBackgroundClose: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%23548B54"/></svg>\')',
+                nightBackgroundColor: '#2E8B57'
+            },
+            icelands: {
+                backgroundFar: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%23B0E0E6"/></svg>\')',
+                backgroundMid: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%2387CEEB"/></svg>\')',
+                backgroundClose: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%23E0FFFF"/></svg>\')',
+                backgroundColor: '#ADD8E6',
+                platformTypes: [
+                    { name: 'stone', className: 'platform-stone', weight: 0.3, friction: 1.0 },
+                    { name: 'ice', className: 'platform-ice', weight: 0.7, friction: 0.95 }
+                ],
+                nightBackgroundFar: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%236495ED"/></svg>\')',
+                nightBackgroundMid: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%234682B4"/></svg>\')',
+                nightBackgroundClose: 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%233A5FCD"/></svg>\')',
+                nightBackgroundColor: '#00008B'
+            }
+        };
         
         // Weather variables
         let weatherMode = 'none'; // 'none', 'rain', 'snow'
         let weatherParticles = [];
         
-        // Character configuration (original without animation properties)
+        // Character configuration
         const characters = {
             sam: {
                 color: '#FF6347',
@@ -436,7 +573,17 @@
                 speed: 5,
                 jumpForce: 15,
                 doubleJump: false,
+                respawn: false,
                 unlocked: true
+            },
+            steve: {
+                color: '#4169E1',
+                borderColor: '#0000CD',
+                speed: 5,
+                jumpForce: 15,
+                doubleJump: false,
+                respawn: true,
+                unlocked: false
             },
             piper: {
                 color: '#333',
@@ -444,6 +591,7 @@
                 speed: 5,
                 jumpForce: 13,
                 doubleJump: true,
+                respawn: false,
                 unlocked: false
             },
             link: {
@@ -452,50 +600,29 @@
                 speed: 8,
                 jumpForce: 15,
                 doubleJump: false,
+                respawn: false,
                 unlocked: false
             }
         };
         
         let currentCharacter = 'sam';
         
-        // Platform types
-        const platformTypes = [
-            {
-                name: 'normal',
-                className: 'platform-normal',
-                friction: 1.0
-            },
-            {
-                name: 'grass',
-                className: 'platform-grass',
-                friction: 1.0
-            },
-            {
-                name: 'stone',
-                className: 'platform-stone',
-                friction: 1.0
-            },
-            {
-                name: 'ice',
-                className: 'platform-ice',
-                friction: 0.95 // Slippery
-            }
-        ];
-        
-        // Initialize player (original style)
+        // Initialize player
         function initPlayer() {
             playerX = 50;
-            playerY = 340; // Position player directly above the starting platform
+            playerY = 300; // Position player directly above the starting platform
             playerVelX = 0;
             playerVelY = 0;
             isJumping = false;
             hasDoubleJumped = false;
+            hasRespawned = false;
             isGrounded = true; // Start as grounded
             
             // Apply character properties
             playerSpeed = characters[currentCharacter].speed;
             jumpForce = characters[currentCharacter].jumpForce;
             canDoubleJump = characters[currentCharacter].doubleJump;
+            canRespawn = characters[currentCharacter].respawn;
             
             // Update player appearance
             player.style.backgroundColor = characters[currentCharacter].color;
@@ -512,7 +639,7 @@
             player.style.left = (playerX - cameraOffset) + 'px';
             player.style.top = playerY + 'px';
             
-            // Add a little tilt based on velocity (from original game)
+            // Add a little tilt based on velocity
             if (playerVelX > 0) {
                 player.style.transform = 'rotate(5deg)';
             } else if (playerVelX < 0) {
@@ -522,14 +649,31 @@
             }
         }
         
-        // Create platform
+        // Create platform with level-specific types
         function createPlatform(x, y, width) {
             const platform = document.createElement('div');
             platform.className = 'platform';
             
-            // Select a random platform type, weighted towards normal platforms
-            const platformTypeIndex = Math.random() < 0.7 ? 0 : Math.floor(Math.random() * platformTypes.length);
-            const platformType = platformTypes[platformTypeIndex];
+            // Get level-specific platform types
+            const levelPlatformTypes = levels[currentLevel].platformTypes;
+            
+            // Select a platform type based on weights
+            let platformType;
+            const rand = Math.random();
+            let cumulativeWeight = 0;
+            
+            for (let type of levelPlatformTypes) {
+                cumulativeWeight += type.weight;
+                if (rand <= cumulativeWeight) {
+                    platformType = type;
+                    break;
+                }
+            }
+            
+            // If no type was selected (shouldn't happen), use the first type
+            if (!platformType) {
+                platformType = levelPlatformTypes[0];
+            }
             
             platform.classList.add(platformType.className);
             platform.style.left = (x - cameraOffset) + 'px';
@@ -592,14 +736,14 @@
             spikes = [];
             
             // Starting platform - make it wider and ensure it's properly positioned
-            createPlatform(0, 400, 300);
+            createPlatform(0, 350, 300);
             
             // Generate some random platforms with better spacing
             let lastX = 250; // Start after the first platform
             for (let i = 0; i < 20; i++) {
                 const x = lastX + 50 + Math.random() * 150; // Ensure platforms aren't too far apart
-                const y = 300 + Math.random() * 150; // Keep platforms at reasonable heights
-                const width = 70 + Math.random() * 130;
+                const y = 250 + Math.random() * 150; // Keep platforms at reasonable heights
+                const width = 70 + Math.random() * 100;
                 createPlatform(x, y, width);
                 lastX = x + width;
             }
@@ -614,8 +758,8 @@
                 let newLastX = lastX;
                 for (let i = 0; i < 5; i++) {
                     const x = newLastX + 50 + Math.random() * 150;
-                    const y = 300 + Math.random() * 150;
-                    const width = 70 + Math.random() * 130;
+                    const y = 250 + Math.random() * 150;
+                    const width = 70 + Math.random() * 100;
                     createPlatform(x, y, width);
                     newLastX = x + width;
                 }
@@ -661,10 +805,10 @@
                 const spikeY = parseFloat(spike.style.top);
                 
                 // Improved spike collision detection with smaller, more accurate hitbox
-                const spikeWidth = 12; // Smaller than the visual width (was 16)
-                const spikeHeight = 12; // Shorter than the visual height (was 16)
+                const spikeWidth = 12; // Smaller than the visual width
+                const spikeHeight = 12; // Shorter than the visual height
                 const spikeOffsetX = 0; // Center offset
-                const spikeOffsetY = 4; // Move hitbox up a bit to match the visual part
+                const spikeOffsetY = 4; // Move hitbox up a bit
                 
                 if (playerX + player.offsetWidth > spikeX - spikeWidth/2 + spikeOffsetX && 
                     playerX < spikeX + spikeWidth/2 + spikeOffsetX &&
@@ -735,7 +879,7 @@
             }
         }
         
-        // Update score based on distance
+        // Update score based on distance with level-specific backgrounds
         function updateScore() {
             score = Math.floor(playerX / 100);
             scoreDisplay.textContent = 'Score: ' + score;
@@ -744,12 +888,35 @@
             // Change background based on score
             if (score > 100) {
                 // Night mode
-                gameContainer.style.backgroundColor = '#191970'; // Midnight blue
+                gameContainer.style.backgroundColor = levels[currentLevel].nightBackgroundColor;
                 
                 // Update parallax background colors for night
-                backgroundFar.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600"><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%23729FCF"/></svg>\')';
-                backgroundMid.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%235C95CF"/></svg>\')';
-                backgroundClose.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%23356AA0"/></svg>\')';
+                backgroundFar.style.backgroundImage = levels[currentLevel].nightBackgroundFar;
+                backgroundMid.style.backgroundImage = levels[currentLevel].nightBackgroundMid;
+                backgroundClose.style.backgroundImage = levels[currentLevel].nightBackgroundClose;
+                
+                // Add stars to the background
+                if (!document.getElementById('stars')) {
+                    const stars = document.createElement('div');
+                    stars.id = 'stars';
+                    stars.style.position = 'absolute';
+                    stars.style.top = '0';
+                    stars.style.left = '0';
+                    stars.style.width = '100%';
+                    stars.style.height = '100%';
+                    stars.style.backgroundImage = 'radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 8px)';
+                    stars.style.backgroundSize = '100px 100px';
+                    stars.style.zIndex = '0';
+                    gameContainer.insertBefore(stars, backgroundFar);
+                }
+            } else {
+                // Day mode
+                gameContainer.style.backgroundColor = levels[currentLevel].backgroundColor;
+                
+                // Update parallax background colors for day
+                backgroundFar.style.backgroundImage = levels[currentLevel].backgroundFar;
+                backgroundMid.style.backgroundImage = levels[currentLevel].backgroundMid;
+                backgroundClose.style.backgroundImage = levels[currentLevel].backgroundClose;
                 
                 // Remove stars if they exist
                 const stars = document.getElementById('stars');
@@ -782,12 +949,12 @@
             
             if (weatherMode === 'rain') {
                 // Create raindrops
-                for (let i = 0; i < 100; i++) {
+                for (let i = 0; i < 50; i++) {
                     createRaindrop();
                 }
             } else if (weatherMode === 'snow') {
                 // Create snowflakes
-                for (let i = 0; i < 50; i++) {
+                for (let i = 0; i < 30; i++) {
                     createSnowflake();
                 }
             }
@@ -880,6 +1047,74 @@
         
         // Game over
         function gameOver() {
+            // Check if player can respawn (Steve's ability)
+            if (canRespawn && !hasRespawned) {
+                // Allow one respawn
+                hasRespawned = true;
+                
+                // Reset player position to just above the closest platform
+                let closestPlatform = null;
+                let minDistance = Infinity;
+                
+                platforms.forEach(platform => {
+                    const platformX = parseFloat(platform.dataset.origX);
+                    const platformWidth = parseFloat(platform.style.width);
+                    const platformY = parseFloat(platform.style.top);
+                    
+                    // Find a platform that is ahead of player but not too far
+                    if (platformX > playerX - 100 && platformX < playerX + 300) {
+                        const distance = Math.abs(platformX - playerX);
+                        if (distance < minDistance) {
+                            minDistance = distance;
+                            closestPlatform = platform;
+                        }
+                    }
+                });
+                
+                if (closestPlatform) {
+                    const platformX = parseFloat(closestPlatform.dataset.origX);
+                    const platformY = parseFloat(closestPlatform.style.top);
+                    
+                    // Position player on top of platform
+                    playerX = platformX + 50; // Little offset from edge
+                    playerY = platformY - player.offsetHeight;
+                    playerVelX = 0;
+                    playerVelY = 0;
+                    isGrounded = true;
+                    
+                    // Show respawn message
+                    const respawnMsg = document.createElement('div');
+                    respawnMsg.textContent = "RESPAWNED!";
+                    respawnMsg.style.position = 'absolute';
+                    respawnMsg.style.left = (playerX - cameraOffset) + 'px';
+                    respawnMsg.style.top = (playerY - 30) + 'px';
+                    respawnMsg.style.color = '#FFD700';
+                    respawnMsg.style.fontWeight = 'bold';
+                    respawnMsg.style.fontSize = '18px';
+                    respawnMsg.style.zIndex = '7';
+                    gameContainer.appendChild(respawnMsg);
+                    
+                    // Remove message after 2 seconds
+                    setTimeout(() => {
+                        if (respawnMsg.parentNode) {
+                            gameContainer.removeChild(respawnMsg);
+                        }
+                    }, 2000);
+                    
+                    // Update player position immediately
+                    updatePlayerPosition();
+                    
+                    // Make sure game is still running
+                    gameRunning = true;
+                    
+                    // Continue game loop manually
+                    requestAnimationFrame(gameLoop);
+                    
+                    return;
+                }
+            }
+            
+            // Regular game over logic
             gameRunning = false;
             
             // Check for high score
@@ -892,9 +1127,20 @@
                 newHighScoreDisplay.style.display = 'none';
             }
             
-            // Check for character unlocks
+            // Check for character unlocks and level unlocks
             let newUnlock = false;
             if (highScore >= 100) {
+                // Steve unlock at 100 points
+                if (!characters.steve.unlocked) {
+                    characters.steve.unlocked = true;
+                    newUnlock = true;
+                    unlockMessageDisplay.textContent = "Steve unlocked!";
+                    document.querySelector('[data-character="steve"]').classList.remove('locked');
+                }
+            }
+            
+            if (highScore >= 200) {
+                // Character unlocks at 200 points
                 if (!characters.piper.unlocked) {
                     characters.piper.unlocked = true;
                     newUnlock = true;
@@ -910,6 +1156,16 @@
                 }
             }
             
+            if (highScore >= 250) {
+                // Ice level unlock at 250 points
+                const iceLevelElement = document.querySelector('[data-level="icelands"]');
+                if (iceLevelElement.classList.contains('locked')) {
+                    iceLevelElement.classList.remove('locked');
+                    newUnlock = true;
+                    unlockMessageDisplay.textContent = "Ice Lands level unlocked!";
+                }
+            }
+            
             if (newUnlock) {
                 unlockMessageDisplay.style.display = 'block';
             } else {
@@ -922,11 +1178,11 @@
             highScoreDisplay.textContent = 'High Score: ' + highScore;
         }
         
-        // Game loop (using original physics)
+        // Game loop
         function gameLoop() {
             if (!gameRunning) return;
             
-            // Apply gravity (original fixed value)
+            // Apply gravity
             playerVelY += gravity;
             
             // Apply horizontal movement based on key input
@@ -958,7 +1214,7 @@
             // Update jump key state
             jumpKeyWasPressed = jumpKeyPressed;
             
-            // Apply velocities (original fixed values)
+            // Apply velocities
             playerX += playerVelX;
             playerY += playerVelY;
             
@@ -1002,6 +1258,26 @@
             requestAnimationFrame(gameLoop);
         }
         
+        // Level selection
+        function selectLevel(level) {
+            if (level === 'icelands' && highScore < 250) {
+                // Can't select locked level
+                return;
+            }
+            
+            currentLevel = level;
+            
+            // Update selection UI
+            const levelElements = document.querySelectorAll('.level');
+            levelElements.forEach(el => {
+                if (el.dataset.level === level) {
+                    el.classList.add('selected');
+                } else {
+                    el.classList.remove('selected');
+                }
+            });
+        }
+        
         // Character selection
         function selectCharacter(character) {
             if (characters[character].unlocked) {
@@ -1018,6 +1294,20 @@
             }
         }
         
+        // Apply level settings
+        function applyLevelSettings() {
+            // Apply background
+            gameContainer.style.backgroundColor = levels[currentLevel].backgroundColor;
+            backgroundFar.style.backgroundImage = levels[currentLevel].backgroundFar;
+            backgroundMid.style.backgroundImage = levels[currentLevel].backgroundMid;
+            backgroundClose.style.backgroundImage = levels[currentLevel].backgroundClose;
+            
+            // Initialize weather
+            weatherMode = 'none';
+            weatherToggle.textContent = 'Toggle Weather: Off';
+            clearWeather();
+        }
+        
         // Event listeners
         document.addEventListener('keydown', function(e) {
             keys[e.key] = true;
@@ -1027,6 +1317,28 @@
             keys[e.key] = false;
         });
         
+        // Secret cheat code - click the 'A' in the title
+        document.getElementById('secretCheat').addEventListener('click', function() {
+            highScore = 1000;
+            highScoreDisplay.textContent = 'High Score: ' + highScore;
+            
+            // Unlock all characters and levels
+            characters.steve.unlocked = true;
+            characters.piper.unlocked = true;
+            characters.link.unlocked = true;
+            
+            // Update UI to show unlocked characters
+            document.querySelector('[data-character="steve"]').classList.remove('locked');
+            document.querySelector('[data-character="piper"]').classList.remove('locked');
+            document.querySelector('[data-character="link"]').classList.remove('locked');
+            
+            // Unlock ice level
+            document.querySelector('[data-level="icelands"]').classList.remove('locked');
+            
+            // Show a message
+            alert('Cheat activated: 1000 points added and all content unlocked!');
+        });
+        
         // Character selection event listeners
         characterElements.forEach(el => {
             el.addEventListener('click', function() {
@@ -1034,6 +1346,15 @@
                 if (characters[character].unlocked) {
                     selectCharacter(character);
                 }
+            });
+        });
+        
+        // Level selection event listeners
+        const levelElements = document.querySelectorAll('.level');
+        levelElements.forEach(el => {
+            el.addEventListener('click', function() {
+                const level = this.dataset.level;
+                selectLevel(level);
             });
         });
         
@@ -1052,6 +1373,9 @@
             });
             spikes = [];
             
+            // Apply the selected level settings
+            applyLevelSettings();
+            
             updateScore();
             initPlayer();
             generateInitialPlatforms();
@@ -1066,8 +1390,8 @@
         
         // Handle window resize
         function handleResize() {
-            containerWidth = window.innerWidth;
-            containerHeight = window.innerHeight;
+            containerWidth = gameContainer.offsetWidth;
+            containerHeight = gameContainer.offsetHeight;
         }
         
         // Listen for window resize
@@ -1076,32 +1400,13 @@
         // Initialize the game
         window.addEventListener('load', function() {
             handleResize();
+            
+            // Set initial level background immediately when page loads
+            applyLevelSettings();
+            
             initPlayer();
             highScoreDisplay.textContent = 'High Score: ' + highScore;
         });
     </script>
 </body>
-</html><path d="M0,150 L100,120 L200,170 L300,110 L400,160 L500,130 L600,175 L700,115 L800,165 L900,125 L1000,150 L1000,600 L0,600 Z" fill="%23000033"/></svg>\')';
-                backgroundMid.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600"><path d="M0,200 L150,170 L300,220 L450,170 L600,230 L750,180 L900,240 L1050,190 L1200,210 L1200,600 L0,600 Z" fill="%23000066"/></svg>\')';
-                backgroundClose.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="600" viewBox="0 0 1500 600"><path d="M0,250 L150,220 L300,270 L450,230 L600,280 L750,240 L900,290 L1050,250 L1200,300 L1350,260 L1500,280 L1500,600 L0,600 Z" fill="%23000099"/></svg>\')';
-                
-                // Add stars to the background
-                if (!document.getElementById('stars')) {
-                    const stars = document.createElement('div');
-                    stars.id = 'stars';
-                    stars.style.position = 'absolute';
-                    stars.style.top = '0';
-                    stars.style.left = '0';
-                    stars.style.width = '100%';
-                    stars.style.height = '100%';
-                    stars.style.backgroundImage = 'radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 8px)';
-                    stars.style.backgroundSize = '100px 100px';
-                    stars.style.zIndex = '0';
-                    gameContainer.insertBefore(stars, backgroundFar);
-                }
-            } else {
-                // Day mode
-                gameContainer.style.backgroundColor = '#87CEEB'; // Sky blue (day)
-                
-                // Update parallax background colors for day
-                backgroundFar.style.backgroundImage = 'url(\'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="600" viewBox="0 0 1000 600">
+</html>
