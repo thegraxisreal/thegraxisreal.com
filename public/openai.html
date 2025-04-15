@@ -30,27 +30,44 @@
     header {
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 20px;
-      text-align: center;
       position: fixed;
       top: 0;
       width: 100%;
       z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
     header h1 {
       font-size: 1.8rem;
       color: var(--dark);
-      margin-bottom: 10px;
+    }
+    .mode-toggle {
+      display: flex;
+      gap: 10px;
+    }
+    .mode-toggle button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--gradient);
+      color: #fff;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .mode-toggle button.active {
+      background: var(--dark);
     }
     #chat-box {
       flex: 1;
       overflow-y: auto;
       padding: 20px;
-      margin: 100px 20px 20px; /* leave room for the fixed header */
+      margin: 100px 20px 20px; /* leave room for fixed header */
       background: #fff;
       border-radius: 8px;
-      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
       display: flex;
       flex-direction: column;
       gap: 15px;
@@ -71,13 +88,14 @@
     }
     #input-area {
       display: flex;
-      padding: 20px;
+      flex-wrap: wrap;
       gap: 10px;
+      padding: 20px;
       border-top: 1px solid #ddd;
       margin: 0 20px 20px;
       background: var(--light);
     }
-    #input-area input {
+    #input-area input[type="text"] {
       flex: 1;
       padding: 10px;
       font-size: 1rem;
@@ -97,94 +115,185 @@
     #input-area button:hover {
       transform: translateY(-3px);
     }
+    #input-area input[type="file"] {
+      display: none;
+    }
   </style>
 </head>
 <body>
   <header>
-    <h1>Klani</h1>
+    <h1 id="modeTitle">Klani</h1>
+    <div class="mode-toggle">
+      <button id="klaniModeBtn" class="active">Basic</button>
+      <button id="klaniPlusModeBtn">Advanced</button>
+    </div>
   </header>
   <div id="chat-box"></div>
   <div id="input-area">
     <input id="message" type="text" placeholder="Type your message..." />
-    <button onclick="sendMessage()">Send</button>
+    <button onclick="sendTextMessage()">Send</button>
+    <!-- Image input and send button (visible only in Advanced mode) -->
+    <input id="imageInput" type="file" accept="image/*" onchange="sendImage()" />
+    <button id="sendImageButton" style="display: none;" onclick="triggerImageInput()">Send Image</button>
   </div>
-
+  
   <script>
-  const FREE_LIMIT = 5;
-  const FREE_PERIOD = 5 * 60 * 60 * 1000; // 5 hours in ms
-
-  function getMessageLimitData() {
-    let data = localStorage.getItem('klaniMessageLimit');
-    const now = Date.now();
-    if (data) {
-      data = JSON.parse(data);
-      if (now - data.lastReset >= FREE_PERIOD) {
-        data.count = 0;
-        data.lastReset = now;
-        localStorage.setItem('klaniMessageLimit', JSON.stringify(data));
-      }
-      return data;
-    } else {
-      const newData = { count: 0, lastReset: now };
-      localStorage.setItem('klaniMessageLimit', JSON.stringify(newData));
-      return newData;
-    }
-  }
-
-  function checkMessageLimit() {
-    const data = getMessageLimitData();
-    if (data.count >= FREE_LIMIT) {
-      alert("Message limit reached. You can only send 5 messages per 5 hours.");
-      return false;
-    }
-    return true;
-  }
-
-  function incrementMessageCount() {
-    let data = getMessageLimitData();
-    data.count++;
-    localStorage.setItem('klaniMessageLimit', JSON.stringify(data));
-    if (data.count === 3) {
-      alert("Warning: You have 2 free messages left in this 5-hour period.");
-    }
-  }
-
-  async function sendMessage() {
-    const input = document.getElementById('message');
-    const text = input.value.trim();
-    if (!text) return;
-
-    if (!checkMessageLimit()) return;
-
-    addMessage(text, 'user');
-    input.value = '';
-    incrementMessageCount();
-
-    try {
-      const model = "gpt-3.5-turbo";
-      const res = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, model })
-      });
-      const data = await res.json();
-      if (data.reply) {
-        addMessage(data.reply, 'bot');
+    // Time period (2 hours in ms)
+    const TWO_HOURS = 2 * 60 * 60 * 1000;
+    // Limits for Basic mode (Klani - GPT-4.1 Nano)
+    const KLANI_TEXT_LIMIT = 20;
+    // Limits for Advanced mode (Klani+ - GPT-4o Mini)
+    const KLANIP_TEXT_LIMIT = 10;
+    const KLANIP_IMAGE_LIMIT = 3;
+    
+    // Mode management: "basic" for Klani, "advanced" for Klani+
+    let currentMode = "basic";
+    
+    // UI Elements for mode toggle
+    const modeTitleEl = document.getElementById("modeTitle");
+    const klaniModeBtn = document.getElementById("klaniModeBtn");
+    const klaniPlusModeBtn = document.getElementById("klaniPlusModeBtn");
+    const sendImageButton = document.getElementById("sendImageButton");
+    const imageInput = document.getElementById("imageInput");
+    
+    klaniModeBtn.addEventListener("click", () => {
+      currentMode = "basic";
+      modeTitleEl.textContent = "Klani";
+      klaniModeBtn.classList.add("active");
+      klaniPlusModeBtn.classList.remove("active");
+      sendImageButton.style.display = "none";
+    });
+    
+    klaniPlusModeBtn.addEventListener("click", () => {
+      currentMode = "advanced";
+      modeTitleEl.textContent = "Klani+";
+      klaniPlusModeBtn.classList.add("active");
+      klaniModeBtn.classList.remove("active");
+      sendImageButton.style.display = "inline-block";
+    });
+    
+    // Utility functions to manage rate limits (stored in localStorage)
+    function getLimitData(key, period) {
+      let data = localStorage.getItem(key);
+      const now = Date.now();
+      if (data) {
+        data = JSON.parse(data);
+        if (now - data.lastReset >= period) {
+          data.count = 0;
+          data.lastReset = now;
+          localStorage.setItem(key, JSON.stringify(data));
+        }
+        return data;
       } else {
-        addMessage('Error: No response from server.', 'bot');
+        const newData = { count: 0, lastReset: now };
+        localStorage.setItem(key, JSON.stringify(newData));
+        return newData;
       }
-    } catch (err) {
-      addMessage('Error sending message.', 'bot');
     }
-  }
-
-  function addMessage(text, sender) {
-    const msg = document.createElement('div');
-    msg.className = 'message ' + sender;
-    msg.textContent = text;
-    document.getElementById('chat-box').appendChild(msg);
-    msg.scrollIntoView({ behavior: 'smooth' });
-  }
+    
+    function checkLimit(key, limit, period, message) {
+      const data = getLimitData(key, period);
+      if (data.count >= limit) {
+        alert(message);
+        return false;
+      }
+      return true;
+    }
+    
+    function incrementLimit(key, period) {
+      let data = getLimitData(key, period);
+      data.count++;
+      localStorage.setItem(key, JSON.stringify(data));
+      return data.count;
+    }
+    
+    // Send text messages using the appropriate model and rate limits
+    async function sendTextMessage() {
+      const input = document.getElementById("message");
+      const text = input.value.trim();
+      if (!text) return;
+      
+      // Check limits based on current mode
+      if (currentMode === "basic") {
+        if (!checkLimit("klani_text", KLANI_TEXT_LIMIT, TWO_HOURS, "Text message limit reached for Klani (20 messages per 2 hours).")) return;
+        incrementLimit("klani_text", TWO_HOURS);
+      } else {
+        if (!checkLimit("klaniplus_text", KLANIP_TEXT_LIMIT, TWO_HOURS, "Text prompt limit reached for Klani+ (10 prompts per 2 hours).")) return;
+        incrementLimit("klaniplus_text", TWO_HOURS);
+      }
+      
+      addMessage(text, "user");
+      input.value = "";
+      
+      try {
+        // Choose the model based on current mode (do not reveal model details to user)
+        const model = (currentMode === "basic") ? "gpt-4.1-nano" : "gpt-4o-mini";
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text, model })
+        });
+        const data = await res.json();
+        if (data.reply) {
+          addMessage(data.reply, "bot");
+        } else {
+          addMessage("Error: No response from server.", "bot");
+        }
+      } catch (err) {
+        addMessage("Error sending message.", "bot");
+      }
+    }
+    
+    // Functions for sending images (only available in Advanced mode)
+    function triggerImageInput() {
+      imageInput.click();
+    }
+    
+    async function sendImage() {
+      if (currentMode !== "advanced") {
+        alert("Image sending is only available in Klani+ mode.");
+        return;
+      }
+      
+      if (!checkLimit("klaniplus_image", KLANIP_IMAGE_LIMIT, TWO_HOURS, "Image limit reached for Klani+ (3 images per 2 hours).")) return;
+      incrementLimit("klaniplus_image", TWO_HOURS);
+      
+      const file = imageInput.files[0];
+      if (!file) return;
+      
+      // Create FormData to upload image
+      const formData = new FormData();
+      formData.append("image", file);
+      formData.append("model", "gpt-4o-mini");
+      formData.append("isImage", "true");
+      
+      addMessage("[Image uploaded]", "user");
+      
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          body: formData
+        });
+        const data = await res.json();
+        if (data.reply) {
+          addMessage(data.reply, "bot");
+        } else {
+          addMessage("Error: No response from server.", "bot");
+        }
+      } catch (err) {
+        addMessage("Error sending image.", "bot");
+      }
+      imageInput.value = "";
+    }
+    
+    // Utility function to add messages to the chat box
+    function addMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.className = "message " + sender;
+      msg.textContent = text;
+      document.getElementById("chat-box").appendChild(msg);
+      msg.scrollIntoView({ behavior: "smooth" });
+    }
   </script>
 </body>
 </html>
