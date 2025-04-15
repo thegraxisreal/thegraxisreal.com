@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Chat with GPT</title>
+  <title>Klani</title>
   <!-- Import Poppins font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
@@ -42,12 +42,6 @@
       font-size: 1.8rem;
       color: var(--dark);
       margin-bottom: 10px;
-    }
-    header select {
-      padding: 10px;
-      font-size: 1rem;
-      border: 1px solid #ddd;
-      border-radius: 8px;
     }
     #chat-box {
       flex: 1;
@@ -107,15 +101,7 @@
 </head>
 <body>
   <header>
-    <h1>Chat with GPT</h1>
-    <select id="model">
-      <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
-      <option value="gpt-4.1">GPT-4.1</option>
-      <option value="gpt-4.1-nano">GPT-4.1 Nano</option>
-      <option value="gpt-4.1-mini">GPT-4.1 Mini</option>
-      <option value="gpt-4o">GPT-4o</option>
-      <option value="gpt-4.5">GPT-4.5</option>
-    </select>
+    <h1>Klani</h1>
   </header>
   <div id="chat-box"></div>
   <div id="input-area">
@@ -124,39 +110,81 @@
   </div>
 
   <script>
-    async function sendMessage() {
-      const input = document.getElementById('message');
-      const model = document.getElementById('model').value;
-      const text = input.value.trim();
-      if (!text) return;
+  const FREE_LIMIT = 5;
+  const FREE_PERIOD = 5 * 60 * 60 * 1000; // 5 hours in ms
 
-      addMessage(text, 'user');
-      input.value = '';
-
-      try {
-        const res = await fetch('/api/chat', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ message: text, model })
-        });
-        const data = await res.json();
-        if (data.reply) {
-          addMessage(data.reply, 'bot');
-        } else {
-          addMessage('Error: No response from server.', 'bot');
-        }
-      } catch (err) {
-        addMessage('Error sending message.', 'bot');
+  function getMessageLimitData() {
+    let data = localStorage.getItem('klaniMessageLimit');
+    const now = Date.now();
+    if (data) {
+      data = JSON.parse(data);
+      if (now - data.lastReset >= FREE_PERIOD) {
+        data.count = 0;
+        data.lastReset = now;
+        localStorage.setItem('klaniMessageLimit', JSON.stringify(data));
       }
+      return data;
+    } else {
+      const newData = { count: 0, lastReset: now };
+      localStorage.setItem('klaniMessageLimit', JSON.stringify(newData));
+      return newData;
     }
+  }
 
-    function addMessage(text, sender) {
-      const msg = document.createElement('div');
-      msg.className = 'message ' + sender;
-      msg.textContent = text;
-      document.getElementById('chat-box').appendChild(msg);
-      msg.scrollIntoView({ behavior: 'smooth' });
+  function checkMessageLimit() {
+    const data = getMessageLimitData();
+    if (data.count >= FREE_LIMIT) {
+      alert("Message limit reached. You can only send 5 messages per 5 hours.");
+      return false;
     }
+    return true;
+  }
+
+  function incrementMessageCount() {
+    let data = getMessageLimitData();
+    data.count++;
+    localStorage.setItem('klaniMessageLimit', JSON.stringify(data));
+    if (data.count === 3) {
+      alert("Warning: You have 2 free messages left in this 5-hour period.");
+    }
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById('message');
+    const text = input.value.trim();
+    if (!text) return;
+
+    if (!checkMessageLimit()) return;
+
+    addMessage(text, 'user');
+    input.value = '';
+    incrementMessageCount();
+
+    try {
+      const model = "gpt-3.5-turbo";
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text, model })
+      });
+      const data = await res.json();
+      if (data.reply) {
+        addMessage(data.reply, 'bot');
+      } else {
+        addMessage('Error: No response from server.', 'bot');
+      }
+    } catch (err) {
+      addMessage('Error sending message.', 'bot');
+    }
+  }
+
+  function addMessage(text, sender) {
+    const msg = document.createElement('div');
+    msg.className = 'message ' + sender;
+    msg.textContent = text;
+    document.getElementById('chat-box').appendChild(msg);
+    msg.scrollIntoView({ behavior: 'smooth' });
+  }
   </script>
 </body>
 </html>
