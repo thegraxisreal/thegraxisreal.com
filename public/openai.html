@@ -4,8 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Klani</title>
+  
   <!-- Import Poppins font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Highlight.js stylesheet -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+
   <style>
     :root {
       --primary: #5e60ce;
@@ -77,7 +82,7 @@
       border-radius: 8px;
       max-width: 70%;
       line-height: 1.4;
-      position: relative;
+      white-space: pre-wrap; /* Preserve newlines and spaces */
     }
     .user {
       align-self: flex-end;
@@ -87,16 +92,12 @@
       align-self: flex-start;
       background: #eeeeee;
     }
-    .run-html-btn {
-      margin-top: 10px;
-      padding: 6px 12px;
-      font-size: 0.9rem;
-      border: none;
+    /* Additional styling for code blocks */
+    pre {
+      background: #f8f8f8;
       border-radius: 6px;
-      background: var(--secondary);
-      color: #fff;
-      cursor: pointer;
-      transition: var(--transition);
+      padding: 10px;
+      overflow-x: auto;
     }
     #input-area {
       display: flex;
@@ -127,30 +128,6 @@
     #input-area button:hover {
       transform: translateY(-3px);
     }
-    /* Preview container styles */
-    #preview-container {
-      display: none;
-      flex-direction: column;
-      margin: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    #preview-container button {
-      align-self: flex-end;
-      margin: 10px;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      background: var(--gradient);
-      color: #fff;
-      cursor: pointer;
-    }
-    #preview-canvas {
-      width: 100%;
-      height: 400px;
-      border: none;
-    }
   </style>
 </head>
 <body>
@@ -162,24 +139,21 @@
     </div>
   </header>
   <div id="chat-box"></div>
-  
-  <!-- Preview container for HTML output -->
-  <div id="preview-container">
-    <button onclick="closePreview()">Close Preview</button>
-    <iframe id="preview-canvas"></iframe>
-  </div>
-  
   <div id="input-area">
     <input id="message" type="text" placeholder="Type your message..." />
     <button onclick="sendTextMessage()">Send</button>
   </div>
   
+  <!-- Import marked.js for Markdown parsing -->
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Import highlight.js for code highlighting -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  
   <script>
-    // Time period (2 hours in ms)
+    // Time period: 2 hours in milliseconds
     const TWO_HOURS = 2 * 60 * 60 * 1000;
-    // Limits for Basic mode (Klani - GPT-4.1 Nano)
+    // Rate limits for Klani (Basic) and Klani+ (Advanced)
     const KLANI_TEXT_LIMIT = 20;
-    // Limits for Advanced mode (Klani+ - GPT-4.1 Mini)
     const KLANIP_TEXT_LIMIT = 10;
     
     // Mode management: "basic" for Klani, "advanced" for Klani+
@@ -204,7 +178,7 @@
       klaniModeBtn.classList.remove("active");
     });
     
-    // Utility functions to manage rate limits (stored in localStorage)
+    // Rate limiting functions stored in localStorage
     function getLimitData(key, period) {
       let data = localStorage.getItem(key);
       const now = Date.now();
@@ -239,13 +213,13 @@
       return data.count;
     }
     
-    // Send text messages using the appropriate model and rate limits
+    // Send a text message
     async function sendTextMessage() {
       const input = document.getElementById("message");
       const text = input.value.trim();
       if (!text) return;
       
-      // Check limits based on current mode
+      // Check rate limits based on current mode
       if (currentMode === "basic") {
         if (!checkLimit("klani_text", KLANI_TEXT_LIMIT, TWO_HOURS, "Text message limit reached for Klani (20 messages per 2 hours).")) return;
         incrementLimit("klani_text", TWO_HOURS);
@@ -254,11 +228,12 @@
         incrementLimit("klaniplus_text", TWO_HOURS);
       }
       
+      // Add the user's message
       addMessage(text, "user");
       input.value = "";
       
       try {
-        // Use updated model strings: "gpt-4.1-nano" for basic and "gpt-4.1-mini" for advanced
+        // Choose model based on current mode
         const model = (currentMode === "basic") ? "gpt-4.1-nano" : "gpt-4.1-mini";
         const res = await fetch("/api/chat", {
           method: "POST",
@@ -276,45 +251,21 @@
       }
     }
     
-    // Function to add messages to the chat box
+    // Add message to the chat box with Markdown parsing and code highlighting
     function addMessage(text, sender) {
       const msg = document.createElement("div");
       msg.className = "message " + sender;
-      msg.textContent = text;
       
-      // In Advanced mode, for bot messages that look like an HTML document, add a "Run HTML" button
-      if (sender === "bot" && currentMode === "advanced" && isHTMLDocument(text)) {
-        const runButton = document.createElement("button");
-        runButton.className = "run-html-btn";
-        runButton.textContent = "Run HTML";
-        runButton.addEventListener("click", () => runHTMLPreview(text));
-        msg.appendChild(runButton);
-      }
+      // Parse Markdown to HTML using marked
+      msg.innerHTML = marked.parse(text);
+      
+      // Apply syntax highlighting to any code blocks
+      msg.querySelectorAll('pre code').forEach((block) => {
+        hljs.highlightElement(block);
+      });
       
       document.getElementById("chat-box").appendChild(msg);
       msg.scrollIntoView({ behavior: "smooth" });
-    }
-    
-    // Heuristic: check if text starts with a DOCTYPE or <html tag
-    function isHTMLDocument(text) {
-      const trimmed = text.trim().toLowerCase();
-      return trimmed.startsWith("<!doctype html") || trimmed.startsWith("<html");
-    }
-    
-    // Function to run the HTML preview in the canvas (iframe)
-    function runHTMLPreview(htmlContent) {
-      const previewContainer = document.getElementById("preview-container");
-      const iframe = document.getElementById("preview-canvas");
-      previewContainer.style.display = "flex";
-      const doc = iframe.contentWindow.document;
-      doc.open();
-      doc.write(htmlContent);
-      doc.close();
-    }
-    
-    // Function to close the preview canvas
-    function closePreview() {
-      document.getElementById("preview-container").style.display = "none";
     }
   </script>
 </body>
