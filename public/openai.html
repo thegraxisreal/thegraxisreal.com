@@ -77,6 +77,7 @@
       border-radius: 8px;
       max-width: 70%;
       line-height: 1.4;
+      position: relative;
     }
     .user {
       align-self: flex-end;
@@ -85,6 +86,17 @@
     .bot {
       align-self: flex-start;
       background: #eeeeee;
+    }
+    .run-html-btn {
+      margin-top: 10px;
+      padding: 6px 12px;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 6px;
+      background: var(--secondary);
+      color: #fff;
+      cursor: pointer;
+      transition: var(--transition);
     }
     #input-area {
       display: flex;
@@ -115,6 +127,30 @@
     #input-area button:hover {
       transform: translateY(-3px);
     }
+    /* Preview container styles */
+    #preview-container {
+      display: none;
+      flex-direction: column;
+      margin: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    #preview-container button {
+      align-self: flex-end;
+      margin: 10px;
+      padding: 6px 12px;
+      border: none;
+      border-radius: 6px;
+      background: var(--gradient);
+      color: #fff;
+      cursor: pointer;
+    }
+    #preview-canvas {
+      width: 100%;
+      height: 400px;
+      border: none;
+    }
   </style>
 </head>
 <body>
@@ -126,6 +162,13 @@
     </div>
   </header>
   <div id="chat-box"></div>
+  
+  <!-- Preview container for HTML output -->
+  <div id="preview-container">
+    <button onclick="closePreview()">Close Preview</button>
+    <iframe id="preview-canvas"></iframe>
+  </div>
+  
   <div id="input-area">
     <input id="message" type="text" placeholder="Type your message..." />
     <button onclick="sendTextMessage()">Send</button>
@@ -233,13 +276,45 @@
       }
     }
     
-    // Utility function to add messages to the chat box
+    // Function to add messages to the chat box
     function addMessage(text, sender) {
       const msg = document.createElement("div");
       msg.className = "message " + sender;
       msg.textContent = text;
+      
+      // In Advanced mode, for bot messages that look like an HTML document, add a "Run HTML" button
+      if (sender === "bot" && currentMode === "advanced" && isHTMLDocument(text)) {
+        const runButton = document.createElement("button");
+        runButton.className = "run-html-btn";
+        runButton.textContent = "Run HTML";
+        runButton.addEventListener("click", () => runHTMLPreview(text));
+        msg.appendChild(runButton);
+      }
+      
       document.getElementById("chat-box").appendChild(msg);
       msg.scrollIntoView({ behavior: "smooth" });
+    }
+    
+    // Heuristic: check if text starts with a DOCTYPE or <html tag
+    function isHTMLDocument(text) {
+      const trimmed = text.trim().toLowerCase();
+      return trimmed.startsWith("<!doctype html") || trimmed.startsWith("<html");
+    }
+    
+    // Function to run the HTML preview in the canvas (iframe)
+    function runHTMLPreview(htmlContent) {
+      const previewContainer = document.getElementById("preview-container");
+      const iframe = document.getElementById("preview-canvas");
+      previewContainer.style.display = "flex";
+      const doc = iframe.contentWindow.document;
+      doc.open();
+      doc.write(htmlContent);
+      doc.close();
+    }
+    
+    // Function to close the preview canvas
+    function closePreview() {
+      document.getElementById("preview-container").style.display = "none";
     }
   </script>
 </body>
