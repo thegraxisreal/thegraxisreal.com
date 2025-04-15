@@ -115,9 +115,6 @@
     #input-area button:hover {
       transform: translateY(-3px);
     }
-    #input-area input[type="file"] {
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -132,9 +129,6 @@
   <div id="input-area">
     <input id="message" type="text" placeholder="Type your message..." />
     <button onclick="sendTextMessage()">Send</button>
-    <!-- Image input and send button (visible only in Advanced mode) -->
-    <input id="imageInput" type="file" accept="image/*" onchange="sendImage()" />
-    <button id="sendImageButton" style="display: none;" onclick="triggerImageInput()">Send Image</button>
   </div>
   
   <script>
@@ -142,9 +136,8 @@
     const TWO_HOURS = 2 * 60 * 60 * 1000;
     // Limits for Basic mode (Klani - GPT-4.1 Nano)
     const KLANI_TEXT_LIMIT = 20;
-    // Limits for Advanced mode (Klani+ - GPT-4o Mini)
+    // Limits for Advanced mode (Klani+ - GPT-4.1 Mini)
     const KLANIP_TEXT_LIMIT = 10;
-    const KLANIP_IMAGE_LIMIT = 3;
     
     // Mode management: "basic" for Klani, "advanced" for Klani+
     let currentMode = "basic";
@@ -153,15 +146,12 @@
     const modeTitleEl = document.getElementById("modeTitle");
     const klaniModeBtn = document.getElementById("klaniModeBtn");
     const klaniPlusModeBtn = document.getElementById("klaniPlusModeBtn");
-    const sendImageButton = document.getElementById("sendImageButton");
-    const imageInput = document.getElementById("imageInput");
     
     klaniModeBtn.addEventListener("click", () => {
       currentMode = "basic";
       modeTitleEl.textContent = "Klani";
       klaniModeBtn.classList.add("active");
       klaniPlusModeBtn.classList.remove("active");
-      sendImageButton.style.display = "none";
     });
     
     klaniPlusModeBtn.addEventListener("click", () => {
@@ -169,7 +159,6 @@
       modeTitleEl.textContent = "Klani+";
       klaniPlusModeBtn.classList.add("active");
       klaniModeBtn.classList.remove("active");
-      sendImageButton.style.display = "inline-block";
     });
     
     // Utility functions to manage rate limits (stored in localStorage)
@@ -226,8 +215,8 @@
       input.value = "";
       
       try {
-        // Choose the model based on current mode (do not reveal model details to user)
-        const model = (currentMode === "basic") ? "gpt-4.1-nano" : "gpt-4o-mini";
+        // Use updated model strings: "gpt-4.1-nano" for basic and "gpt-4.1-mini" for advanced
+        const model = (currentMode === "basic") ? "gpt-4.1-nano" : "gpt-4.1-mini";
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -242,48 +231,6 @@
       } catch (err) {
         addMessage("Error sending message.", "bot");
       }
-    }
-    
-    // Functions for sending images (only available in Advanced mode)
-    function triggerImageInput() {
-      imageInput.click();
-    }
-    
-    async function sendImage() {
-      if (currentMode !== "advanced") {
-        alert("Image sending is only available in Klani+ mode.");
-        return;
-      }
-      
-      if (!checkLimit("klaniplus_image", KLANIP_IMAGE_LIMIT, TWO_HOURS, "Image limit reached for Klani+ (3 images per 2 hours).")) return;
-      incrementLimit("klaniplus_image", TWO_HOURS);
-      
-      const file = imageInput.files[0];
-      if (!file) return;
-      
-      // Create FormData to upload image
-      const formData = new FormData();
-      formData.append("image", file);
-      formData.append("model", "gpt-4o-mini");
-      formData.append("isImage", "true");
-      
-      addMessage("[Image uploaded]", "user");
-      
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          body: formData
-        });
-        const data = await res.json();
-        if (data.reply) {
-          addMessage(data.reply, "bot");
-        } else {
-          addMessage("Error: No response from server.", "bot");
-        }
-      } catch (err) {
-        addMessage("Error sending image.", "bot");
-      }
-      imageInput.value = "";
     }
     
     // Utility function to add messages to the chat box
