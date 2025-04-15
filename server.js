@@ -1,5 +1,4 @@
-// Express server with dynamic model selection for ChatGPT
-require('dotenv').config();
+// Express server with dynamic model selection for ChatGPT (Render-ready)
 const express = require('express');
 const path = require('path');
 const { OpenAI } = require('openai');
@@ -7,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 10000;
 
 const openai = new OpenAI({
-  apiKey: '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'
+  apiKey: process.env.OPENAI_API_KEY
 });
 
 app.use(express.json());
