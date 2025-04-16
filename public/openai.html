@@ -114,16 +114,18 @@ const ONE_HOUR = 60 * 60 * 1000;
     const KLANI_TEXT_LIMIT = 20;
     const KLANIP_TEXT_LIMIT = 2;
     let currentMode = "basic";
+let conversationHistory = [];
 
     document.getElementById("klaniModeBtn").onclick = () => switchMode("basic");
     document.getElementById("klaniPlusModeBtn").onclick = () => switchMode("advanced");
 
     function switchMode(mode) {
-      currentMode = mode;
-      document.getElementById("modeTitle").textContent = mode === "basic" ? "Klani" : "Klani+";
-      document.getElementById("klaniModeBtn").classList.toggle("active", mode === "basic");
-      document.getElementById("klaniPlusModeBtn").classList.toggle("active", mode === "advanced");
-    }
+  currentMode = mode;
+  document.getElementById("modeTitle").textContent = mode === "basic" ? "Klani" : "Klani+";
+  document.getElementById("klaniModeBtn").classList.toggle("active", mode === "basic");
+  document.getElementById("klaniPlusModeBtn").classList.toggle("active", mode === "advanced");
+  conversationHistory = [];
+}
 
     function getLimitData(key, limit, period) {
       const now = Date.now();
@@ -155,13 +157,23 @@ const ONE_HOUR = 60 * 60 * 1000;
 
       try {
         const model = currentMode === "basic" ? "gpt-4.1-nano" : "gpt-4.1-mini";
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text, model })
-        });
+        const messages = [
+  { role: "system", content: "You are Klani, a helpful assistant." },
+  ...conversationHistory.slice(-10),
+  { role: "user", content: text }
+];
+
+const res = await fetch("/api/chat", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ messages, model })
+});
         const data = await res.json();
-        if (data.reply) addMessage(data.reply, "bot");
+        if (data.reply) {
+  addMessage(data.reply, "bot");
+  conversationHistory.push({ role: "user", content: text });
+  conversationHistory.push({ role: "assistant", content: data.reply });
+}
         else addMessage("No response from server.", "bot");
       } catch (err) {
         addMessage("Error sending message.", "bot");
