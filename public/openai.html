@@ -4,8 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Klani</title>
+  
+  <!-- Import Poppins font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Highlight.js stylesheet -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
+
   <style>
     body {
       font-family: 'Poppins', sans-serif;
@@ -106,94 +111,108 @@
     <input id="message" type="text" placeholder="Type your message..." />
     <button onclick="sendTextMessage()">Send</button>
   </div>
+  
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+  
   <script>
-    const TWO_HOURS = 2 * 60 * 60 * 1000;
-const ONE_HOUR = 60 * 60 * 1000;
-    const KLANI_TEXT_LIMIT = 20;
-    const KLANIP_TEXT_LIMIT = 2;
-    let currentMode = "basic";
-let conversationHistory = [];
-
+    const TWO_HOURS = 2 * 60 * 60 * 1000;    // 2 hours in milliseconds
+    const ONE_HOUR = 60 * 60 * 1000;           // 1 hour in milliseconds
+    
+    // Rate limits:
+    const KLANI_TEXT_LIMIT = 20;      // Klani (Basic) - 20 messages per 2 hours
+    const KLANIP_TEXT_LIMIT = 2;       // Klani+ (Advanced) - 2 messages per hour
+    
+    let currentMode = "basic"; // "basic" for Klani, "advanced" for Klani+
+    
+    // Mode toggle event listeners
     document.getElementById("klaniModeBtn").onclick = () => switchMode("basic");
     document.getElementById("klaniPlusModeBtn").onclick = () => switchMode("advanced");
-
+    
     function switchMode(mode) {
-  currentMode = mode;
-  document.getElementById("modeTitle").textContent = mode === "basic" ? "Klani" : "Klani+";
-  document.getElementById("klaniModeBtn").classList.toggle("active", mode === "basic");
-  document.getElementById("klaniPlusModeBtn").classList.toggle("active", mode === "advanced");
-  conversationHistory = [];
-}
-
-    function getLimitData(key, limit, period) {
+      currentMode = mode;
+      document.getElementById("modeTitle").textContent = mode === "basic" ? "Klani" : "Klani+";
+      document.getElementById("klaniModeBtn").classList.toggle("active", mode === "basic");
+      document.getElementById("klaniPlusModeBtn").classList.toggle("active", mode === "advanced");
+    }
+    
+    // Rate limiting functions using localStorage
+    function getLimitData(key, period) {
       const now = Date.now();
       let data = JSON.parse(localStorage.getItem(key)) || { count: 0, lastReset: now };
       if (now - data.lastReset >= period) {
         data = { count: 0, lastReset: now };
       }
-      if (data.count >= limit) return false;
+      return data;
+    }
+    
+    function checkAndIncrementLimit(key, limit, period, message) {
+      let data = getLimitData(key, period);
+      if (data.count >= limit) {
+        alert(message);
+        return false;
+      }
       data.count++;
       localStorage.setItem(key, JSON.stringify(data));
       return true;
     }
-
+    
+    // Send a text message
     async function sendTextMessage() {
       const input = document.getElementById("message");
       const text = input.value.trim();
       if (!text) return;
-
+      
+      // Use different rate limits based on mode:
       const limitKey = currentMode === "basic" ? "klani_text" : "klaniplus_text";
       const limitVal = currentMode === "basic" ? KLANI_TEXT_LIMIT : KLANIP_TEXT_LIMIT;
-      const limitPeriod = currentMode === "basic" ? TWO_HOURS : ONE_HOUR;
-      if (!getLimitData(limitKey, limitVal, limitPeriod)) {
-        alert("Rate limit reached for this mode.");
+      const period = currentMode === "basic" ? TWO_HOURS : ONE_HOUR;
+      
+      if (!checkAndIncrementLimit(limitKey, limitVal, period, currentMode === "basic"
+          ? "Text message limit reached for Klani (20 messages per 2 hours)."
+          : "Text prompt limit reached for Klani+ (2 messages per hour).")) {
         return;
       }
-
+      
       addMessage(text, "user");
       input.value = "";
-
+      
       try {
         const model = currentMode === "basic" ? "gpt-4.1-nano" : "gpt-4.1-mini";
-        const messages = [
-  { role: "system", content: "You are Klani, a helpful assistant." },
-  ...conversationHistory.slice(-10),
-  { role: "user", content: text }
-];
-
-const res = await fetch("/api/chat", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({ messages, model })
-});
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: text, model })
+        });
         const data = await res.json();
         if (data.reply) {
-  addMessage(data.reply, "bot");
-  conversationHistory.push({ role: "user", content: text });
-  conversationHistory.push({ role: "assistant", content: data.reply });
-}
-        else addMessage("No response from server.", "bot");
+          addMessage(data.reply, "bot");
+        } else {
+          addMessage("Error: No response from server.", "bot");
+        }
       } catch (err) {
         addMessage("Error sending message.", "bot");
       }
     }
-
+    
+    // Add a message to the chat box using Markdown and syntax highlighting
     function addMessage(text, sender) {
       const msg = document.createElement("div");
       msg.className = "message " + sender;
+      
       msg.innerHTML = marked.parse(text);
       msg.querySelectorAll("pre code").forEach(block => {
         hljs.highlightElement(block);
+        
+        // Add code actions (Copy and Run buttons)
         const wrapper = block.parentElement;
         const actions = document.createElement("div");
         actions.className = "code-actions";
-
+        
         const copyBtn = document.createElement("button");
         copyBtn.textContent = "Copy";
         copyBtn.onclick = () => navigator.clipboard.writeText(block.textContent);
-
+        
         const runBtn = document.createElement("button");
         runBtn.textContent = "Run";
         runBtn.onclick = () => {
@@ -201,13 +220,13 @@ const res = await fetch("/api/chat", {
           const url = URL.createObjectURL(blob);
           window.open(url, "_blank");
         };
-
+        
         actions.appendChild(copyBtn);
         actions.appendChild(runBtn);
         wrapper.style.position = "relative";
         wrapper.appendChild(actions);
       });
-
+      
       document.getElementById("chat-box").appendChild(msg);
       msg.scrollIntoView({ behavior: "smooth" });
     }
