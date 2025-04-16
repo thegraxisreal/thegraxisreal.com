@@ -4,141 +4,92 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Klani</title>
-  
-  <!-- Import Poppins font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Highlight.js stylesheet -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-
   <style>
-    :root {
-      --primary: #5e60ce;
-      --secondary: #48bfe3;
-      --light: #f8f9fa;
-      --dark: #1e1e2c;
-      --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      --transition: all 0.3s ease;
-    }
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
     body {
       font-family: 'Poppins', sans-serif;
-      background: var(--light);
+      margin: 0;
+      padding: 0;
+      background: #f8f9fa;
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
     header {
-      background: rgba(255, 255, 255, 0.95);
-      backdrop-filter: blur(10px);
+      background: white;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
       position: fixed;
-      top: 0;
       width: 100%;
       z-index: 100;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    header h1 {
-      font-size: 1.8rem;
-      color: var(--dark);
-    }
-    .mode-toggle {
-      display: flex;
-      gap: 10px;
-    }
-    .mode-toggle button {
-      padding: 8px 16px;
-      border: none;
-      border-radius: 8px;
-      background: var(--gradient);
-      color: #fff;
-      cursor: pointer;
-      transition: var(--transition);
-    }
-    .mode-toggle button.active {
-      background: var(--dark);
     }
     #chat-box {
+      margin-top: 100px;
       flex: 1;
       overflow-y: auto;
       padding: 20px;
-      margin: 100px 20px 20px; /* leave room for fixed header */
-      background: #fff;
-      border-radius: 8px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-      display: flex;
-      flex-direction: column;
-      gap: 15px;
     }
     .message {
+      max-width: 70%;
+      margin-bottom: 15px;
       padding: 15px;
       border-radius: 8px;
-      max-width: 70%;
-      line-height: 1.4;
-      white-space: pre-wrap; /* Preserve whitespace */
+      white-space: pre-wrap;
       position: relative;
     }
-    .user {
-      align-self: flex-end;
-      background: rgba(94, 96, 206, 0.2);
-    }
-    .bot {
-      align-self: flex-start;
-      background: #eeeeee;
-    }
-    /* Styling for code blocks */
-    pre {
-      background: #f8f8f8;
-      border-radius: 6px;
-      padding: 10px;
-      overflow-x: auto;
-    }
+    .user { background: #dce4ff; align-self: flex-end; }
+    .bot { background: #e2e2e2; align-self: flex-start; }
     #input-area {
       display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
       padding: 20px;
-      border-top: 1px solid #ddd;
-      margin: 0 20px 20px;
-      background: var(--light);
+      background: white;
+      border-top: 1px solid #ccc;
     }
-    #input-area input[type="text"] {
+    #message {
       flex: 1;
       padding: 10px;
-      font-size: 1rem;
-      border: 1px solid #ddd;
       border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
     }
-    #input-area button {
+    button {
+      margin-left: 10px;
       padding: 10px 20px;
-      font-size: 1rem;
       border: none;
       border-radius: 8px;
-      background: var(--gradient);
-      color: #fff;
+      background: #5e60ce;
+      color: white;
       cursor: pointer;
-      transition: var(--transition);
     }
-    #input-area button:hover {
-      transform: translateY(-3px);
+    .mode-toggle button.active {
+      background: #1e1e2c;
     }
-    .run-html-btn {
-      margin-top: 10px;
-      padding: 6px 12px;
-      font-size: 0.9rem;
+    pre {
+      background: #f0f0f0;
+      padding: 10px;
+      border-radius: 5px;
+      overflow-x: auto;
+      position: relative;
+    }
+    .code-actions {
+      position: absolute;
+      top: 5px;
+      right: 10px;
+      display: flex;
+      gap: 5px;
+    }
+    .code-actions button {
+      font-size: 0.75rem;
+      padding: 3px 8px;
+      background: #48bfe3;
+      color: white;
       border: none;
-      border-radius: 6px;
-      background: var(--secondary);
-      color: #fff;
+      border-radius: 5px;
       cursor: pointer;
-      transition: var(--transition);
     }
   </style>
 </head>
@@ -151,157 +102,100 @@
     </div>
   </header>
   <div id="chat-box"></div>
-  
   <div id="input-area">
     <input id="message" type="text" placeholder="Type your message..." />
     <button onclick="sendTextMessage()">Send</button>
   </div>
-  
-  <!-- Import marked.js for Markdown parsing -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- Import highlight.js for syntax highlighting -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-  
   <script>
-    // Define a 2-hour period in milliseconds
     const TWO_HOURS = 2 * 60 * 60 * 1000;
-    // Rate limits for Klani and Klani+
-    const KLANI_TEXT_LIMIT = 20;      // Basic mode (Klani)
-    const KLANIP_TEXT_LIMIT = 10;      // Advanced mode (Klani+)
-    
-    // Mode management: "basic" for Klani, "advanced" for Klani+
+    const KLANI_TEXT_LIMIT = 20;
+    const KLANIP_TEXT_LIMIT = 10;
     let currentMode = "basic";
-    
-    // UI elements for mode toggle
-    const modeTitleEl = document.getElementById("modeTitle");
-    const klaniModeBtn = document.getElementById("klaniModeBtn");
-    const klaniPlusModeBtn = document.getElementById("klaniPlusModeBtn");
-    
-    klaniModeBtn.addEventListener("click", () => {
-      currentMode = "basic";
-      modeTitleEl.textContent = "Klani";
-      klaniModeBtn.classList.add("active");
-      klaniPlusModeBtn.classList.remove("active");
-    });
-    
-    klaniPlusModeBtn.addEventListener("click", () => {
-      currentMode = "advanced";
-      modeTitleEl.textContent = "Klani+";
-      klaniPlusModeBtn.classList.add("active");
-      klaniModeBtn.classList.remove("active");
-    });
-    
-    // Rate limiting functions using localStorage
-    function getLimitData(key, period) {
-      let data = localStorage.getItem(key);
+
+    document.getElementById("klaniModeBtn").onclick = () => switchMode("basic");
+    document.getElementById("klaniPlusModeBtn").onclick = () => switchMode("advanced");
+
+    function switchMode(mode) {
+      currentMode = mode;
+      document.getElementById("modeTitle").textContent = mode === "basic" ? "Klani" : "Klani+";
+      document.getElementById("klaniModeBtn").classList.toggle("active", mode === "basic");
+      document.getElementById("klaniPlusModeBtn").classList.toggle("active", mode === "advanced");
+    }
+
+    function getLimitData(key, limit, period) {
       const now = Date.now();
-      if (data) {
-        data = JSON.parse(data);
-        if (now - data.lastReset >= period) {
-          data.count = 0;
-          data.lastReset = now;
-          localStorage.setItem(key, JSON.stringify(data));
-        }
-        return data;
-      } else {
-        const newData = { count: 0, lastReset: now };
-        localStorage.setItem(key, JSON.stringify(newData));
-        return newData;
+      let data = JSON.parse(localStorage.getItem(key)) || { count: 0, lastReset: now };
+      if (now - data.lastReset >= period) {
+        data = { count: 0, lastReset: now };
       }
-    }
-    
-    function checkLimit(key, limit, period, message) {
-      const data = getLimitData(key, period);
-      if (data.count >= limit) {
-        alert(message);
-        return false;
-      }
-      return true;
-    }
-    
-    function incrementLimit(key, period) {
-      let data = getLimitData(key, period);
+      if (data.count >= limit) return false;
       data.count++;
       localStorage.setItem(key, JSON.stringify(data));
-      return data.count;
+      return true;
     }
-    
-    // Send a text message to the server
+
     async function sendTextMessage() {
       const input = document.getElementById("message");
       const text = input.value.trim();
       if (!text) return;
-      
-      // Check rate limits based on current mode
-      if (currentMode === "basic") {
-        if (!checkLimit("klani_text", KLANI_TEXT_LIMIT, TWO_HOURS, "Text message limit reached for Klani (20 messages per 2 hours).")) return;
-        incrementLimit("klani_text", TWO_HOURS);
-      } else {
-        if (!checkLimit("klaniplus_text", KLANIP_TEXT_LIMIT, TWO_HOURS, "Text prompt limit reached for Klani+ (10 prompts per 2 hours).")) return;
-        incrementLimit("klaniplus_text", TWO_HOURS);
+
+      const limitKey = currentMode === "basic" ? "klani_text" : "klaniplus_text";
+      const limitVal = currentMode === "basic" ? KLANI_TEXT_LIMIT : KLANIP_TEXT_LIMIT;
+      if (!getLimitData(limitKey, limitVal, TWO_HOURS)) {
+        alert("Rate limit reached for this mode.");
+        return;
       }
-      
-      // Add the user's message
+
       addMessage(text, "user");
       input.value = "";
-      
+
       try {
-        // Select model based on current mode
-        const model = (currentMode === "basic") ? "gpt-4.1-nano" : "gpt-4.1-mini";
+        const model = currentMode === "basic" ? "gpt-4.1-nano" : "gpt-4.1-mini";
         const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ message: text, model })
         });
         const data = await res.json();
-        if (data.reply) {
-          addMessage(data.reply, "bot");
-        } else {
-          addMessage("Error: No response from server.", "bot");
-        }
+        if (data.reply) addMessage(data.reply, "bot");
+        else addMessage("No response from server.", "bot");
       } catch (err) {
         addMessage("Error sending message.", "bot");
       }
     }
-    
-    // Add message to the chat box with Markdown parsing and code highlighting
+
     function addMessage(text, sender) {
       const msg = document.createElement("div");
       msg.className = "message " + sender;
-      
-      // Parse Markdown into HTML using marked.js (this preserves code formatting)
       msg.innerHTML = marked.parse(text);
-      
-      // Apply syntax highlighting to any code blocks
-      msg.querySelectorAll("pre code").forEach((block) => {
+      msg.querySelectorAll("pre code").forEach(block => {
         hljs.highlightElement(block);
+        const wrapper = block.parentElement;
+        const actions = document.createElement("div");
+        actions.className = "code-actions";
+
+        const copyBtn = document.createElement("button");
+        copyBtn.textContent = "Copy";
+        copyBtn.onclick = () => navigator.clipboard.writeText(block.textContent);
+
+        const runBtn = document.createElement("button");
+        runBtn.textContent = "Run";
+        runBtn.onclick = () => {
+          const blob = new Blob([block.textContent], { type: "text/html" });
+          const url = URL.createObjectURL(blob);
+          window.open(url, "_blank");
+        };
+
+        actions.appendChild(copyBtn);
+        actions.appendChild(runBtn);
+        wrapper.style.position = "relative";
+        wrapper.appendChild(actions);
       });
-      
-      // In Advanced mode, if a bot message looks like a full HTML document, add a "Run HTML" button
-      if (sender === "bot" && currentMode === "advanced" && isHTMLDocument(text)) {
-        const runButton = document.createElement("button");
-        runButton.className = "run-html-btn";
-        runButton.textContent = "Run HTML";
-        runButton.addEventListener("click", () => runHTMLPreview(text));
-        msg.appendChild(runButton);
-      }
-      
+
       document.getElementById("chat-box").appendChild(msg);
       msg.scrollIntoView({ behavior: "smooth" });
-    }
-    
-    // Heuristic to check if text is a full HTML document
-    function isHTMLDocument(text) {
-      const trimmed = text.trim().toLowerCase();
-      return trimmed.startsWith("<!doctype html") || trimmed.startsWith("<html");
-    }
-    
-    // Run the HTML preview by opening a new window with the HTML content
-    function runHTMLPreview(htmlContent) {
-      const newWin = window.open("", "HTML Preview", "width=800,height=600");
-      newWin.document.open();
-      newWin.document.write(htmlContent);
-      newWin.document.close();
     }
   </script>
 </body>
