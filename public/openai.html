@@ -3,13 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Klani</title>
-  
+  <title>Chat with GPT</title>
   <!-- Import Poppins font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <!-- Highlight.js stylesheet -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-  
   <style>
     :root {
       --primary: #5e60ce;
@@ -32,265 +28,142 @@
       height: 100vh;
     }
     header {
-      background: white;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
       padding: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
+      text-align: center;
       position: fixed;
+      top: 0;
       width: 100%;
       z-index: 100;
     }
     header h1 {
       font-size: 1.8rem;
       color: var(--dark);
-      margin-right: 20px;
+      margin-bottom: 10px;
     }
-    .mode-toggle button, .admin-controls button {
-      padding: 8px 16px;
+    header select {
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    #chat-box {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      margin: 100px 20px 20px; /* leave room for the fixed header */
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+    .message {
+      padding: 15px;
+      border-radius: 8px;
+      max-width: 70%;
+      line-height: 1.4;
+    }
+    .user {
+      align-self: flex-end;
+      background: rgba(94, 96, 206, 0.2);
+    }
+    .bot {
+      align-self: flex-start;
+      background: #eeeeee;
+    }
+    #input-area {
+      display: flex;
+      padding: 20px;
+      gap: 10px;
+      border-top: 1px solid #ddd;
+      margin: 0 20px 20px;
+      background: var(--light);
+    }
+    #input-area input {
+      flex: 1;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+    #input-area button {
+      padding: 10px 20px;
+      font-size: 1rem;
       border: none;
       border-radius: 8px;
       background: var(--gradient);
       color: #fff;
       cursor: pointer;
       transition: var(--transition);
-      margin-right: 5px;
     }
-    .mode-toggle button.active {
-      background: var(--dark);
-    }
-    .admin-controls input[type="password"] {
-      padding: 5px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      margin-right: 5px;
-    }
-    #chat-box {
-      margin-top: 100px;
-      flex: 1;
-      overflow-y: auto;
-      padding: 20px;
-    }
-    .message {
-      max-width: 70%;
-      margin-bottom: 15px;
-      padding: 15px;
-      border-radius: 8px;
-      white-space: pre-wrap;
-      position: relative;
-    }
-    .user { background: #dce4ff; align-self: flex-end; }
-    .bot { background: #e2e2e2; align-self: flex-start; }
-    #input-area {
-      display: flex;
-      padding: 20px;
-      background: white;
-      border-top: 1px solid #ccc;
-    }
-    #message {
-      flex: 1;
-      padding: 10px;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-    }
-    button {
-      margin-left: 10px;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 8px;
-      background: var(--primary);
-      color: white;
-      cursor: pointer;
-    }
-    pre {
-      background: #f0f0f0;
-      padding: 10px;
-      border-radius: 5px;
-      overflow-x: auto;
-      position: relative;
-    }
-    .code-actions {
-      position: absolute;
-      top: 5px;
-      right: 10px;
-      display: flex;
-      gap: 5px;
-    }
-    .code-actions button {
-      font-size: 0.75rem;
-      padding: 3px 8px;
-      background: var(--secondary);
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    #input-area button:hover {
+      transform: translateY(-3px);
     }
   </style>
 </head>
 <body>
   <header>
-    <div style="display:flex; align-items: center; flex-wrap: wrap;">
-      <h1 id="modeTitle">Klani</h1>
-      <div class="mode-toggle">
-        <button id="klaniModeBtn" class="active">Basic</button>
-        <button id="klaniPlusModeBtn">Advanced</button>
-      </div>
-    </div>
-    <div class="admin-controls">
-      <!-- Admin password controls; password is obfuscated below in JavaScript -->
-      <input id="adminPassword" type="password" placeholder="Admin Password" />
-      <button onclick="unlockAdmin()">Unlock Admin</button>
-    </div>
+    <h1>Chat with GPT</h1>
+    <select id="model">
+      <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+      <option value="gpt-4.1">GPT-4.1</option>
+      <option value="deepseek">Klani (DeepSeek R1)</option>
+      <option value="gpt-4.1-nano">Klani+ (GPT-4.1 Nano)</option>
+      <option value="gpt-4o">GPT-4o</option>
+      <option value="gpt-4.5">GPT-4.5</option>
+    </select>
   </header>
   <div id="chat-box"></div>
   <div id="input-area">
     <input id="message" type="text" placeholder="Type your message..." />
-    <button onclick="sendTextMessage()">Send</button>
+    <button onclick="sendMessage()">Send</button>
   </div>
-  
-  <!-- Import marked.js for Markdown parsing -->
-  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-  <!-- Import highlight.js for syntax highlighting -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
-  
-  <script>
-    // Global flag; if true, bypass all rate limits.
-    let bypassMode = false;
 
-    // Encoded password (Base64) for admin access. In this example, password is "secret123"
-    const encodedPassword = "c2VjcmV0MTIz"; // Base64 for "secret123"
-    
-    // Function to unlock admin mode.
-    function unlockAdmin() {
-      const input = document.getElementById("adminPassword").value;
-      if (input === atob(encodedPassword)) {
-        bypassMode = true;
-        alert("Admin mode enabled: Rate limits bypassed.");
-      } else {
-        alert("Incorrect password.");
-      }
-      // Clear the password field
-      document.getElementById("adminPassword").value = "";
-    }
-    
-    // Time periods (in milliseconds)
-    const TWO_HOURS = 2 * 60 * 60 * 1000; // 2 hours
-    
-    // Rate limits:
-    const KLANI_TEXT_LIMIT = 5;         // Klani (Basic) - 5 messages per 2 hours
-    const KLANIP_TEXT_LIMIT = 2;         // Klani+ (Advanced) - 2 messages per 2 hours
-    
-    let currentMode = "basic"; // "basic" for Klani, "advanced" for Klani+
-    
-    // Mode toggle event listeners
-    document.getElementById("klaniModeBtn").onclick = () => switchMode("basic");
-    document.getElementById("klaniPlusModeBtn").onclick = () => switchMode("advanced");
-    
-    function switchMode(mode) {
-      currentMode = mode;
-      document.getElementById("modeTitle").textContent = mode === "basic" ? "Klani" : "Klani+";
-      document.getElementById("klaniModeBtn").classList.toggle("active", mode === "basic");
-      document.getElementById("klaniPlusModeBtn").classList.toggle("active", mode === "advanced");
-    }
-    
-    // Rate limiting functions using localStorage
-    function getLimitData(key, period) {
-      const now = Date.now();
-      let data = JSON.parse(localStorage.getItem(key)) || { count: 0, lastReset: now };
-      if (now - data.lastReset >= period) {
-        data = { count: 0, lastReset: now };
-      }
-      return data;
-    }
-    
-    function checkAndIncrementLimit(key, limit, period, message) {
-      if (bypassMode) return true;
-      let data = getLimitData(key, period);
-      if (data.count >= limit) {
-        alert(message);
-        return false;
-      }
-      data.count++;
-      localStorage.setItem(key, JSON.stringify(data));
-      return true;
-    }
-    
-    // Send a text message to the server
-    async function sendTextMessage() {
-      const input = document.getElementById("message");
+  <script>
+    async function sendMessage() {
+      const input = document.getElementById('message');
+      const model = document.getElementById('model').value;
       const text = input.value.trim();
       if (!text) return;
-      
-      // Select rate limit based on mode
-      const limitKey = currentMode === "basic" ? "klani_text" : "klaniplus_text";
-      const limitVal = currentMode === "basic" ? KLANI_TEXT_LIMIT : KLANIP_TEXT_LIMIT;
-      
-      if (!checkAndIncrementLimit(limitKey, limitVal, TWO_HOURS,
-          currentMode === "basic"
-            ? "Text message limit reached for Klani (5 messages per 2 hours)."
-            : "Text prompt limit reached for Klani+ (2 messages per 2 hours).")) {
-        return;
+
+      addMessage(text, 'user');
+      input.value = '';
+
+      let url, payload;
+      if (model === 'deepseek') {
+        url = 'https://44888e0a178a3eda158b163510fa4081.serveo.net/api/generate';
+        payload = { prompt: text };
+      } else {
+        url = '/api/chat';
+        payload = { message: text, model };
       }
-      
-      addMessage(text, "user");
-      input.value = "";
-      
-      try {
-        const model = currentMode === "basic" ? "gpt-4.1-nano" : "gpt-4.1-mini";
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text, model })
-        });
-        const data = await res.json();
-        if (data.reply) {
-          addMessage(data.reply, "bot");
-        } else {
-          addMessage("Error: No response from server.", "bot");
-        }
-      } catch (err) {
-        addMessage("Error sending message.", "bot");
-      }
-    }
-    
-    // Add a message to the chat box with Markdown parsing and syntax highlighting
-    function addMessage(text, sender) {
-      const msg = document.createElement("div");
-      msg.className = "message " + sender;
-      
-      // Parse markdown into HTML using marked.js
-      msg.innerHTML = marked.parse(text);
-      
-      // Apply syntax highlighting to any code blocks and add copy & run buttons
-      msg.querySelectorAll("pre code").forEach(block => {
-        hljs.highlightElement(block);
-        const wrapper = block.parentElement;
-        const actions = document.createElement("div");
-        actions.className = "code-actions";
-        
-        const copyBtn = document.createElement("button");
-        copyBtn.textContent = "Copy";
-        copyBtn.onclick = () => navigator.clipboard.writeText(block.textContent);
-        
-        const runBtn = document.createElement("button");
-        runBtn.textContent = "Run";
-        runBtn.onclick = () => {
-          const blob = new Blob([block.textContent], { type: "text/html" });
-          const url = URL.createObjectURL(blob);
-          window.open(url, "_blank");
-        };
-        
-        actions.appendChild(copyBtn);
-        actions.appendChild(runBtn);
-        wrapper.style.position = "relative";
-        wrapper.appendChild(actions);
+
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
-      
-      document.getElementById("chat-box").appendChild(msg);
-      msg.scrollIntoView({ behavior: "smooth" });
+      const data = await res.json();
+
+      let replyText;
+      if (model === 'deepseek') {
+        replyText = data.choices?.[0]?.message?.content || data.reply || 'Error: Invalid DeepSeek response';
+      } else {
+        replyText = data.reply || 'Error: No response from server.';
+      }
+      addMessage(replyText, 'bot');
+    }
+
+    function addMessage(text, sender) {
+      const msg = document.createElement('div');
+      msg.className = 'message ' + sender;
+      msg.textContent = text;
+      document.getElementById('chat-box').appendChild(msg);
+      msg.scrollIntoView({ behavior: 'smooth' });
     }
   </script>
 </body>
