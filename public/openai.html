@@ -7,16 +7,26 @@
   
   <!-- Import Poppins font -->
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-
   <!-- Highlight.js stylesheet -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/default.min.css">
-
+  
   <style>
-    body {
-      font-family: 'Poppins', sans-serif;
+    :root {
+      --primary: #5e60ce;
+      --secondary: #48bfe3;
+      --light: #f8f9fa;
+      --dark: #1e1e2c;
+      --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      --transition: all 0.3s ease;
+    }
+    * {
       margin: 0;
       padding: 0;
-      background: #f8f9fa;
+      box-sizing: border-box;
+    }
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--light);
       display: flex;
       flex-direction: column;
       height: 100vh;
@@ -26,11 +36,36 @@
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       padding: 20px;
       display: flex;
-      justify-content: space-between;
+      flex-wrap: wrap;
       align-items: center;
+      justify-content: space-between;
       position: fixed;
       width: 100%;
       z-index: 100;
+    }
+    header h1 {
+      font-size: 1.8rem;
+      color: var(--dark);
+      margin-right: 20px;
+    }
+    .mode-toggle button, .admin-controls button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 8px;
+      background: var(--gradient);
+      color: #fff;
+      cursor: pointer;
+      transition: var(--transition);
+      margin-right: 5px;
+    }
+    .mode-toggle button.active {
+      background: var(--dark);
+    }
+    .admin-controls input[type="password"] {
+      padding: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+      margin-right: 5px;
     }
     #chat-box {
       margin-top: 100px;
@@ -57,21 +92,18 @@
     #message {
       flex: 1;
       padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
       font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
     }
     button {
       margin-left: 10px;
       padding: 10px 20px;
       border: none;
       border-radius: 8px;
-      background: #5e60ce;
+      background: var(--primary);
       color: white;
       cursor: pointer;
-    }
-    .mode-toggle button.active {
-      background: #1e1e2c;
     }
     pre {
       background: #f0f0f0;
@@ -90,7 +122,7 @@
     .code-actions button {
       font-size: 0.75rem;
       padding: 3px 8px;
-      background: #48bfe3;
+      background: var(--secondary);
       color: white;
       border: none;
       border-radius: 5px;
@@ -100,10 +132,17 @@
 </head>
 <body>
   <header>
-    <h1 id="modeTitle">Klani</h1>
-    <div class="mode-toggle">
-      <button id="klaniModeBtn" class="active">Basic</button>
-      <button id="klaniPlusModeBtn">Advanced</button>
+    <div style="display:flex; align-items: center; flex-wrap: wrap;">
+      <h1 id="modeTitle">Klani</h1>
+      <div class="mode-toggle">
+        <button id="klaniModeBtn" class="active">Basic</button>
+        <button id="klaniPlusModeBtn">Advanced</button>
+      </div>
+    </div>
+    <div class="admin-controls">
+      <!-- Admin password controls; password is obfuscated below in JavaScript -->
+      <input id="adminPassword" type="password" placeholder="Admin Password" />
+      <button onclick="unlockAdmin()">Unlock Admin</button>
     </div>
   </header>
   <div id="chat-box"></div>
@@ -112,17 +151,37 @@
     <button onclick="sendTextMessage()">Send</button>
   </div>
   
+  <!-- Import marked.js for Markdown parsing -->
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <!-- Import highlight.js for syntax highlighting -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   
   <script>
-    // Time periods in milliseconds
-    const TWO_HOURS = 2 * 60 * 60 * 1000;  // For Basic (Klani)
-    const ONE_HOUR  = 60 * 60 * 1000;        // For Advanced (Klani+)
+    // Global flag; if true, bypass all rate limits.
+    let bypassMode = false;
+
+    // Encoded password (Base64) for admin access. In this example, password is "secret123"
+    const encodedPassword = "c2VjcmV0MTIz"; // Base64 for "secret123"
+    
+    // Function to unlock admin mode.
+    function unlockAdmin() {
+      const input = document.getElementById("adminPassword").value;
+      if (input === atob(encodedPassword)) {
+        bypassMode = true;
+        alert("Admin mode enabled: Rate limits bypassed.");
+      } else {
+        alert("Incorrect password.");
+      }
+      // Clear the password field
+      document.getElementById("adminPassword").value = "";
+    }
+    
+    // Time periods (in milliseconds)
+    const TWO_HOURS = 2 * 60 * 60 * 1000; // 2 hours
     
     // Rate limits:
-    const KLANI_TEXT_LIMIT = 5;    // Klani (Basic) - 5 messages per 2 hours
-    const KLANIP_TEXT_LIMIT = 2;   // Klani+ (Advanced) - 2 messages per hour
+    const KLANI_TEXT_LIMIT = 5;         // Klani (Basic) - 5 messages per 2 hours
+    const KLANIP_TEXT_LIMIT = 2;         // Klani+ (Advanced) - 2 messages per 2 hours
     
     let currentMode = "basic"; // "basic" for Klani, "advanced" for Klani+
     
@@ -148,6 +207,7 @@
     }
     
     function checkAndIncrementLimit(key, limit, period, message) {
+      if (bypassMode) return true;
       let data = getLimitData(key, period);
       if (data.count >= limit) {
         alert(message);
@@ -164,14 +224,14 @@
       const text = input.value.trim();
       if (!text) return;
       
-      // Apply different limits based on mode
+      // Select rate limit based on mode
       const limitKey = currentMode === "basic" ? "klani_text" : "klaniplus_text";
       const limitVal = currentMode === "basic" ? KLANI_TEXT_LIMIT : KLANIP_TEXT_LIMIT;
-      const period = currentMode === "basic" ? TWO_HOURS : ONE_HOUR;
       
-      if (!checkAndIncrementLimit(limitKey, limitVal, period, currentMode === "basic"
-          ? "Text message limit reached for Klani (5 messages per 2 hours)."
-          : "Text prompt limit reached for Klani+ (2 messages per hour).")) {
+      if (!checkAndIncrementLimit(limitKey, limitVal, TWO_HOURS,
+          currentMode === "basic"
+            ? "Text message limit reached for Klani (5 messages per 2 hours)."
+            : "Text prompt limit reached for Klani+ (2 messages per 2 hours).")) {
         return;
       }
       
@@ -179,7 +239,6 @@
       input.value = "";
       
       try {
-        // Use appropriate model for each mode
         const model = currentMode === "basic" ? "gpt-4.1-nano" : "gpt-4.1-mini";
         const res = await fetch("/api/chat", {
           method: "POST",
@@ -197,15 +256,15 @@
       }
     }
     
-    // Function to add a message to the chat box using Markdown and syntax highlighting
+    // Add a message to the chat box with Markdown parsing and syntax highlighting
     function addMessage(text, sender) {
       const msg = document.createElement("div");
       msg.className = "message " + sender;
       
-      // Parse markdown into HTML (preserving code formatting)
+      // Parse markdown into HTML using marked.js
       msg.innerHTML = marked.parse(text);
       
-      // Apply syntax highlighting to any code blocks and add copy/run buttons
+      // Apply syntax highlighting to any code blocks and add copy & run buttons
       msg.querySelectorAll("pre code").forEach(block => {
         hljs.highlightElement(block);
         const wrapper = block.parentElement;
