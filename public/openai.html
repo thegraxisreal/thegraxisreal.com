@@ -116,12 +116,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   
   <script>
-    const TWO_HOURS = 2 * 60 * 60 * 1000;    // 2 hours in milliseconds
-    const ONE_HOUR = 60 * 60 * 1000;           // 1 hour in milliseconds
+    // Time periods in milliseconds
+    const TWO_HOURS = 2 * 60 * 60 * 1000;  // For Basic (Klani)
+    const ONE_HOUR  = 60 * 60 * 1000;        // For Advanced (Klani+)
     
     // Rate limits:
-    const KLANI_TEXT_LIMIT = 20;      // Klani (Basic) - 20 messages per 2 hours
-    const KLANIP_TEXT_LIMIT = 2;       // Klani+ (Advanced) - 2 messages per hour
+    const KLANI_TEXT_LIMIT = 5;    // Klani (Basic) - 5 messages per 2 hours
+    const KLANIP_TEXT_LIMIT = 2;   // Klani+ (Advanced) - 2 messages per hour
     
     let currentMode = "basic"; // "basic" for Klani, "advanced" for Klani+
     
@@ -157,19 +158,19 @@
       return true;
     }
     
-    // Send a text message
+    // Send a text message to the server
     async function sendTextMessage() {
       const input = document.getElementById("message");
       const text = input.value.trim();
       if (!text) return;
       
-      // Use different rate limits based on mode:
+      // Apply different limits based on mode
       const limitKey = currentMode === "basic" ? "klani_text" : "klaniplus_text";
       const limitVal = currentMode === "basic" ? KLANI_TEXT_LIMIT : KLANIP_TEXT_LIMIT;
       const period = currentMode === "basic" ? TWO_HOURS : ONE_HOUR;
       
       if (!checkAndIncrementLimit(limitKey, limitVal, period, currentMode === "basic"
-          ? "Text message limit reached for Klani (20 messages per 2 hours)."
+          ? "Text message limit reached for Klani (5 messages per 2 hours)."
           : "Text prompt limit reached for Klani+ (2 messages per hour).")) {
         return;
       }
@@ -178,6 +179,7 @@
       input.value = "";
       
       try {
+        // Use appropriate model for each mode
         const model = currentMode === "basic" ? "gpt-4.1-nano" : "gpt-4.1-mini";
         const res = await fetch("/api/chat", {
           method: "POST",
@@ -195,16 +197,17 @@
       }
     }
     
-    // Add a message to the chat box using Markdown and syntax highlighting
+    // Function to add a message to the chat box using Markdown and syntax highlighting
     function addMessage(text, sender) {
       const msg = document.createElement("div");
       msg.className = "message " + sender;
       
+      // Parse markdown into HTML (preserving code formatting)
       msg.innerHTML = marked.parse(text);
+      
+      // Apply syntax highlighting to any code blocks and add copy/run buttons
       msg.querySelectorAll("pre code").forEach(block => {
         hljs.highlightElement(block);
-        
-        // Add code actions (Copy and Run buttons)
         const wrapper = block.parentElement;
         const actions = document.createElement("div");
         actions.className = "code-actions";
