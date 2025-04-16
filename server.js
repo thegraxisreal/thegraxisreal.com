@@ -24,9 +24,9 @@ app.post('/api/chat', async (req, res) => {
   // Set custom instructions based on the model being used
   let systemPrompt = "";
   if (model === 'gpt-4.1-nano') {
-    systemPrompt = "You are Klani. You are based off Klani 4.1 nano by graxAI. Answer all questions accordingly.";
+    systemPrompt = "You are Klani. You are based off Klani 4.1 nano by graxAI. Answer all questions accordingly. Try to keep responses very short and simple unless you think they need to be longer, like code. still short though";
   } else if (model === 'gpt-4.1-mini') {
-    systemPrompt = "You are Klani+. You are based off Klani 4.1 mini by graxAI. Answer all questions accordingly.";
+    systemPrompt = "You are Klani+. You are based off Klani 4.1 mini by graxAI. Answer all questions accordingly. Try to keep responses very short and simple unless you think they need to be longer, like code. still short though";
   } else {
     systemPrompt = "You are a helpful assistant.";
   }
