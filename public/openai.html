@@ -100,30 +100,6 @@
       padding: 10px;
       overflow-x: auto;
     }
-    /* Preview container styles */
-    #preview-container {
-      display: none;
-      flex-direction: column;
-      margin: 20px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      overflow: hidden;
-    }
-    #preview-container button {
-      align-self: flex-end;
-      margin: 10px;
-      padding: 6px 12px;
-      border: none;
-      border-radius: 6px;
-      background: var(--gradient);
-      color: #fff;
-      cursor: pointer;
-    }
-    #preview-canvas {
-      width: 100%;
-      height: 400px;
-      border: none;
-    }
     #input-area {
       display: flex;
       flex-wrap: wrap;
@@ -176,12 +152,6 @@
   </header>
   <div id="chat-box"></div>
   
-  <!-- Preview container for running HTML responses -->
-  <div id="preview-container">
-    <button onclick="closePreview()">Close Preview</button>
-    <iframe id="preview-canvas"></iframe>
-  </div>
-  
   <div id="input-area">
     <input id="message" type="text" placeholder="Type your message..." />
     <button onclick="sendTextMessage()">Send</button>
@@ -195,14 +165,14 @@
   <script>
     // Define a 2-hour period in milliseconds
     const TWO_HOURS = 2 * 60 * 60 * 1000;
-    // Rate limits
+    // Rate limits for Klani and Klani+
     const KLANI_TEXT_LIMIT = 20;      // Basic mode (Klani)
     const KLANIP_TEXT_LIMIT = 10;      // Advanced mode (Klani+)
     
     // Mode management: "basic" for Klani, "advanced" for Klani+
     let currentMode = "basic";
     
-    // UI elements
+    // UI elements for mode toggle
     const modeTitleEl = document.getElementById("modeTitle");
     const klaniModeBtn = document.getElementById("klaniModeBtn");
     const klaniPlusModeBtn = document.getElementById("klaniPlusModeBtn");
@@ -256,7 +226,7 @@
       return data.count;
     }
     
-    // Send text message to the server
+    // Send a text message to the server
     async function sendTextMessage() {
       const input = document.getElementById("message");
       const text = input.value.trim();
@@ -271,7 +241,7 @@
         incrementLimit("klaniplus_text", TWO_HOURS);
       }
       
-      // Add user's message to the chat
+      // Add the user's message
       addMessage(text, "user");
       input.value = "";
       
@@ -294,12 +264,12 @@
       }
     }
     
-    // Add a message to the chat box with Markdown parsing and code highlighting
+    // Add message to the chat box with Markdown parsing and code highlighting
     function addMessage(text, sender) {
       const msg = document.createElement("div");
       msg.className = "message " + sender;
       
-      // Parse markdown into HTML (this preserves code formatting)
+      // Parse Markdown into HTML using marked.js (this preserves code formatting)
       msg.innerHTML = marked.parse(text);
       
       // Apply syntax highlighting to any code blocks
@@ -307,7 +277,7 @@
         hljs.highlightElement(block);
       });
       
-      // In advanced mode, if bot message looks like a full HTML document, add a "Run HTML" button
+      // In Advanced mode, if a bot message looks like a full HTML document, add a "Run HTML" button
       if (sender === "bot" && currentMode === "advanced" && isHTMLDocument(text)) {
         const runButton = document.createElement("button");
         runButton.className = "run-html-btn";
@@ -326,20 +296,12 @@
       return trimmed.startsWith("<!doctype html") || trimmed.startsWith("<html");
     }
     
-    // Run the HTML preview in the iframe (sandboxed)
+    // Run the HTML preview by opening a new window with the HTML content
     function runHTMLPreview(htmlContent) {
-      const previewContainer = document.getElementById("preview-container");
-      const iframe = document.getElementById("preview-canvas");
-      previewContainer.style.display = "flex";
-      const doc = iframe.contentWindow.document;
-      doc.open();
-      doc.write(htmlContent);
-      doc.close();
-    }
-    
-    // Close the HTML preview
-    function closePreview() {
-      document.getElementById("preview-container").style.display = "none";
+      const newWin = window.open("", "HTML Preview", "width=800,height=600");
+      newWin.document.open();
+      newWin.document.write(htmlContent);
+      newWin.document.close();
     }
   </script>
 </body>
