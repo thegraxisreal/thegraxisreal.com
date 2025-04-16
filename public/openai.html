@@ -110,8 +110,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
   <script>
     const TWO_HOURS = 2 * 60 * 60 * 1000;
+const ONE_HOUR = 60 * 60 * 1000;
     const KLANI_TEXT_LIMIT = 20;
-    const KLANIP_TEXT_LIMIT = 10;
+    const KLANIP_TEXT_LIMIT = 2;
     let currentMode = "basic";
 
     document.getElementById("klaniModeBtn").onclick = () => switchMode("basic");
@@ -143,7 +144,8 @@
 
       const limitKey = currentMode === "basic" ? "klani_text" : "klaniplus_text";
       const limitVal = currentMode === "basic" ? KLANI_TEXT_LIMIT : KLANIP_TEXT_LIMIT;
-      if (!getLimitData(limitKey, limitVal, TWO_HOURS)) {
+      const limitPeriod = currentMode === "basic" ? TWO_HOURS : ONE_HOUR;
+      if (!getLimitData(limitKey, limitVal, limitPeriod)) {
         alert("Rate limit reached for this mode.");
         return;
       }
