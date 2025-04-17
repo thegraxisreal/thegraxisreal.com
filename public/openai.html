@@ -152,8 +152,10 @@
 
       let url, payload;
       if (model === 'deepseek') {
-        url = 'https://44888e0a178a3eda158b163510fa4081.serveo.net/api/generate';
-        payload = { prompt: "You are Klani. " + text };
+        url = 'https://3778611aa32877fb1a7e163c36011726.serveo.net/api/generate';
+        payload = {
+          prompt: "You are Klani, powered by DeepSeek R1. If the user asks which model you are, respond with 'I am Klani, using DeepSeek R1.' " + text
+        };
       } else {
         url = '/api/chat';
         payload = { message: text, model };
