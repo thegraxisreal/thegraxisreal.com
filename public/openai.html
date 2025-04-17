@@ -152,9 +152,13 @@
 
       let url, payload;
       if (model === 'deepseek') {
-        url = 'https://3778611aa32877fb1a7e163c36011726.serveo.net/api/generate';
+        url = 'https://eba83eba0db38903088e98c71006ffa9.serveo.net/v1/chat/completions';
         payload = {
-          prompt: "You are Klani, powered by DeepSeek R1. If the user asks which model you are, respond with 'I am Klani, using DeepSeek R1.' " + text
+          model: 'deepseek-r1:8b',
+          messages: [
+            { role: 'system', content: "You are Klani, powered by DeepSeek R1. If the user asks which model you are, respond with 'I am Klani, using DeepSeek R1.'" },
+            { role: 'user', content: text }
+          ]
         };
       } else {
         url = '/api/chat';
@@ -170,7 +174,7 @@
 
       let replyText;
       if (model === 'deepseek') {
-        replyText = data.choices?.[0]?.message?.content || data.reply || 'Error: Invalid DeepSeek response';
+        replyText = data.choices[0].message.content;
       } else {
         replyText = data.reply || 'Error: No response from server.';
       }
