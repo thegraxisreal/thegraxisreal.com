@@ -2,6 +2,8 @@
 const express = require('express');
 const path = require('path');
 const { OpenAI } = require('openai');
+// If `fetch` is not globally available, enable it:
+const fetch = (...args) => import('node-fetch').then(({default: fetch}) => fetch(...args));
 const app = express();
 const PORT = process.env.PORT || 10000;
 
@@ -42,6 +44,22 @@ app.post('/api/chat', async (req, res) => {
   } catch (error) {
     console.error('OpenAI API error:', error);
     res.status(500).json({ error: 'Failed to get response from ChatGPT' });
+  }
+});
+
+// Proxy DeepSeek requests through this server to avoid CORS issues
+app.post('/api/deepseek', async (req, res) => {
+  try {
+    const resp = await fetch('https://9817b04b5231eed98b05bfe01734eeeb.serveo.net/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(req.body),
+    });
+    const data = await resp.json();
+    res.json(data);
+  } catch (err) {
+    console.error('DeepSeek proxy error:', err);
+    res.status(500).json({ error: 'DeepSeek proxy failed' });
   }
 });
 
