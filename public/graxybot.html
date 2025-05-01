@@ -14,75 +14,86 @@
 <style>
 /* --- Base Styles and Variables --- */
 :root {
---primary: #5e60ce;
---primary-light: #787ae0; /* Lighter shade for hover */
---background: #ffffff;
---background-secondary: #f7f7f8; /* Chat area bg */
---sidebar-bg: #ececf1; /* Sidebar background */
---text-primary: #202123;
---text-secondary: #6e6e80;
---border-color: #d1d1db; /* Slightly darker border */
---input-bg: #ffffff;
---input-border: #d1d1db;
---user-message-bg: #e9eaf6;
---bot-message-bg: #ffffff; /* Bot messages on light gray bg */
---error-bg: #f8d7da;
---error-text: #721c24;
---error-border: #f5c6cb;
---hover-bg: #e0e0e6; /* Hover background for sidebar items */
---title-font: 'Poppins', sans-serif; /* Or a more stylized font */
---transition: all 0.2s ease;
---sidebar-width: 260px;
---code-bg: #272822; /* Default dark background for code */
---code-header-bg: #3a3b35;
---code-text-color: #f8f8f2;
---code-button-bg: #4a4b45;
---code-button-hover-bg: #5a5b55;
+    --primary: #5e60ce;
+    --primary-light: #787ae0; /* Lighter shade for hover */
+    --primary-active: #4a4cc2; /* Darker shade for active/reason */
+    --background: #ffffff;
+    --background-secondary: #f7f7f8; /* Chat area bg */
+    --sidebar-bg: #ececf1; /* Sidebar background */
+    --text-primary: #202123;
+    --text-secondary: #6e6e80;
+    --border-color: #d1d1db; /* Slightly darker border */
+    --input-bg: #ffffff;
+    --input-border: #d1d1db;
+    --user-message-bg: #e9eaf6;
+    --bot-message-bg: #ffffff; /* Bot messages on light gray bg */
+    --error-bg: #f8d7da;
+    --error-text: #721c24;
+    --error-border: #f5c6cb;
+    --hover-bg: #e0e0e6; /* Hover background for sidebar items */
+    --title-font: 'Poppins', sans-serif; /* Or a more stylized font */
+    --transition: all 0.2s ease;
+    --sidebar-width: 260px;
+    --code-bg: #272822; /* Default dark background for code */
+    --code-header-bg: #3a3b35;
+    --code-text-color: #f8f8f2;
+    --code-button-bg: #4a4b45;
+    --code-button-hover-bg: #5a5b55;
+    --reason-button-bg: #f0f0f0;
+    --reason-button-border: #d1d1db;
+    --reason-button-text: #555;
+    --reason-button-hover-bg: #e5e5e5;
+    --reason-button-active-bg: var(--primary);
+    --reason-button-active-border: var(--primary-active);
+    --reason-button-active-text: white;
+    --image-preview-border: #ccc;
+    --image-remove-bg: rgba(0, 0, 0, 0.5);
+    --image-remove-text: white;
 }
 
 * {
-margin: 0;
-padding: 0;
-box-sizing: border-box;
-font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
 html, body {
-height: 100%;
-overflow: hidden;
-background-color: var(--background);
-color: var(--text-primary);
+    height: 100%;
+    overflow: hidden;
+    background-color: var(--background);
+    color: var(--text-primary);
 }
 
 /* --- Layout --- */
 .chat-app { display: flex; height: 100vh; }
 .sidebar {
-width: var(--sidebar-width); background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
-display: flex; flex-direction: column; padding: 15px; transition: width 0.3s ease; flex-shrink: 0;
+    width: var(--sidebar-width); background-color: var(--sidebar-bg); border-right: 1px solid var(--border-color);
+    display: flex; flex-direction: column; padding: 15px; transition: width 0.3s ease; flex-shrink: 0;
 }
 .sidebar.hidden { width: 0; padding: 0; overflow: hidden; border: none; }
 .main-content { flex-grow: 1; display: flex; flex-direction: column; height: 100vh; position: relative; }
 
 /* --- Sidebar Elements --- */
 .new-chat-btn {
-display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border-color);
-border-radius: 8px; background-color: var(--background); color: var(--text-primary); font-size: 0.9rem;
-font-weight: 500; cursor: pointer; text-align: left; width: 100%; margin-bottom: 20px;
-transition: background-color var(--transition);
+    display: flex; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid var(--border-color);
+    border-radius: 8px; background-color: var(--background); color: var(--text-primary); font-size: 0.9rem;
+    font-weight: 500; cursor: pointer; text-align: left; width: 100%; margin-bottom: 20px;
+    transition: background-color var(--transition);
 }
 .new-chat-btn:hover { background-color: var(--hover-bg); }
 .new-chat-btn i { color: var(--primary); }
 .chat-list { list-style: none; padding: 0; margin: 0; overflow-y: auto; flex-grow: 1; }
 .chat-list-item {
-padding: 10px 12px; border-radius: 6px; margin-bottom: 5px; cursor: pointer; white-space: nowrap;
-overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; color: var(--text-primary);
-transition: background-color var(--transition); position: relative;
+    padding: 10px 12px; border-radius: 6px; margin-bottom: 5px; cursor: pointer; white-space: nowrap;
+    overflow: hidden; text-overflow: ellipsis; font-size: 0.9rem; color: var(--text-primary);
+    transition: background-color var(--transition); position: relative;
 }
 .chat-list-item:hover { background-color: var(--hover-bg); }
 .chat-list-item.active { background-color: var(--primary); color: white; }
 .chat-list-item .delete-chat-btn {
-position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: none; border: none;
-color: var(--text-secondary); cursor: pointer; font-size: 0.8rem; padding: 5px; display: none; line-height: 1;
+    position: absolute; right: 5px; top: 50%; transform: translateY(-50%); background: none; border: none;
+    color: var(--text-secondary); cursor: pointer; font-size: 0.8rem; padding: 5px; display: none; line-height: 1;
 }
 .chat-list-item:hover .delete-chat-btn { display: block; }
 .chat-list-item.active .delete-chat-btn { color: white; display: block; }
@@ -90,21 +101,21 @@ color: var(--text-secondary); cursor: pointer; font-size: 0.8rem; padding: 5px; 
 
 /* --- Initial View (Welcome Screen) --- */
 .initial-view {
-position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column;
-justify-content: center; align-items: center; padding: 20px; text-align: center;
-background-color: var(--background); z-index: 10; opacity: 1; transition: opacity 0.3s ease;
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column;
+    justify-content: center; align-items: center; padding: 20px; text-align: center;
+    background-color: var(--background); z-index: 10; opacity: 1; transition: opacity 0.3s ease;
 }
 .initial-view.hidden { opacity: 0; pointer-events: none; z-index: -1; }
 .initial-view h1 { font-size: 3.5rem; font-weight: 700; color: var(--primary); margin-bottom: 30px; font-family: var(--title-font); }
 .initial-input-area {
-width: 100%; max-width: 600px; display: flex; align-items: center; background-color: var(--input-bg);
-border: 1px solid var(--input-border); border-radius: 12px; padding: 5px 5px 5px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    width: 100%; max-width: 600px; display: flex; align-items: center; background-color: var(--input-bg);
+    border: 1px solid var(--input-border); border-radius: 12px; padding: 5px 5px 5px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);
 }
 #initial-message-input { flex-grow: 1; border: none; outline: none; background: transparent; font-size: 1rem; color: var(--text-primary); padding: 10px 0; resize: none; line-height: 1.5; }
 #initial-send-button {
-display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; text-decoration: none;
-font-weight: 500; transition: var(--transition); font-size: 1rem; border: none; cursor: pointer;
-width: 40px; height: 40px; flex-shrink: 0; margin-left: 10px; background-color: var(--primary); color: white;
+    display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; text-decoration: none;
+    font-weight: 500; transition: var(--transition); font-size: 1rem; border: none; cursor: pointer;
+    width: 40px; height: 40px; flex-shrink: 0; margin-left: 10px; background-color: var(--primary); color: white;
 }
 #initial-send-button:hover { background-color: var(--primary-light); }
 #initial-send-button:disabled { background-color: var(--text-secondary); opacity: 0.7; cursor: not-allowed; }
@@ -115,14 +126,14 @@ width: 40px; height: 40px; flex-shrink: 0; margin-left: 10px; background-color: 
 
 /* Chat Top Bar */
 .chat-top-bar {
-padding: 10px 25px; border-bottom: 1px solid var(--border-color); background-color: var(--background);
-flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 15px;
+    padding: 10px 25px; border-bottom: 1px solid var(--border-color); background-color: var(--background);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; gap: 15px;
 }
 .chat-title-area {
-display: flex; /* Use flexbox */
-flex-direction: column; /* Stack items vertically by default */
-align-items: flex-start; /* Align items to the start */
-gap: 4px; /* Space between model and personality selectors */
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Stack items vertically by default */
+    align-items: flex-start; /* Align items to the start */
+    gap: 4px; /* Space between model and personality selectors */
 }
 /* Hide the H1 title in the chat view, selectors are used instead */
 .chat-top-bar h1 { display: none; }
@@ -130,13 +141,13 @@ gap: 4px; /* Space between model and personality selectors */
 /* Model Selector Container */
 .model-selector-container { position: relative; display: inline-block; }
 #model-selector {
-font-size: 0.9rem; font-weight: 500; color: var(--text-primary); background-color: transparent; border: none;
-padding: 2px 18px 2px 0px; cursor: pointer; appearance: none; -webkit-appearance: none; -moz-appearance: none;
-outline: none; line-height: 1.4; position: relative; z-index: 1;
+    font-size: 0.9rem; font-weight: 500; color: var(--text-primary); background-color: transparent; border: none;
+    padding: 2px 18px 2px 0px; cursor: pointer; appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    outline: none; line-height: 1.4; position: relative; z-index: 1;
 }
 .model-selector-container::after { /* Dropdown arrow */
-content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; top: 50%; right: 0px;
-transform: translateY(-50%); font-size: 0.65rem; color: var(--text-secondary); pointer-events: none; z-index: 0; transition: color var(--transition);
+    content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; top: 50%; right: 0px;
+    transform: translateY(-50%); font-size: 0.65rem; color: var(--text-secondary); pointer-events: none; z-index: 0; transition: color var(--transition);
 }
 .model-selector-container:hover::after { color: var(--primary); }
 #model-selector:hover { color: var(--primary); }
@@ -145,18 +156,18 @@ transform: translateY(-50%); font-size: 0.65rem; color: var(--text-secondary); p
 
 /* Personality Selector Container (Hidden by default) */
 .personality-selector-container {
-position: relative; display: inline-block;
-display: none; /* Hidden by default */
+    position: relative; display: inline-block;
+    display: none; /* Hidden by default */
 }
 .personality-selector-container.visible { display: inline-block; /* Show when needed */ }
 #personality-selector {
-font-size: 0.85rem; font-weight: 500; color: var(--text-primary); background-color: transparent; border: none;
-padding: 2px 18px 2px 0px; cursor: pointer; appearance: none; -webkit-appearance: none; -moz-appearance: none;
-outline: none; line-height: 1.4; position: relative; z-index: 1;
+    font-size: 0.85rem; font-weight: 500; color: var(--text-primary); background-color: transparent; border: none;
+    padding: 2px 18px 2px 0px; cursor: pointer; appearance: none; -webkit-appearance: none; -moz-appearance: none;
+    outline: none; line-height: 1.4; position: relative; z-index: 1;
 }
 .personality-selector-container::after { /* Dropdown arrow */
-content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; top: 50%; right: 0px;
-transform: translateY(-50%); font-size: 0.65rem; color: var(--text-secondary); pointer-events: none; z-index: 0; transition: color var(--transition);
+    content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; top: 50%; right: 0px;
+    transform: translateY(-50%); font-size: 0.65rem; color: var(--text-secondary); pointer-events: none; z-index: 0; transition: color var(--transition);
 }
 .personality-selector-container:hover::after { color: var(--primary); }
 #personality-selector:hover { color: var(--primary); }
@@ -167,24 +178,72 @@ transform: translateY(-50%); font-size: 0.65rem; color: var(--text-secondary); p
 .chat-messages { flex-grow: 1; overflow-y: auto; padding: 20px 10px; background-color: var(--background-secondary); display: flex; flex-direction: column; }
 .message-content-wrapper { max-width: 800px; width: 100%; margin: 0 auto 20px auto; display: flex; gap: 15px; }
 .message-icon {
-width: 30px; height: 30px; border-radius: 50%; background-color: var(--primary); color: white; display: flex;
-align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; margin-top: 5px; overflow: hidden;
+    width: 30px; height: 30px; border-radius: 50%; background-color: var(--primary); color: white; display: flex;
+    align-items: center; justify-content: center; font-size: 0.9rem; flex-shrink: 0; margin-top: 5px; overflow: hidden;
 }
 .message-icon.user-icon { background-color: #ababc5; }
 .message-icon img { width: 100%; height: 100%; object-fit: cover; }
 .message-bubble { display: flex; flex-direction: column; width: fit-content; max-width: calc(100% - 45px); position: relative; }
 .message {
-padding: 12px 18px; border-radius: 12px; line-height: 1.6; background-color: var(--bot-message-bg); color: var(--text-primary);
-word-wrap: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border-color);
+    padding: 12px 18px; border-radius: 12px; line-height: 1.6; background-color: var(--bot-message-bg); color: var(--text-primary);
+    word-wrap: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid var(--border-color);
 }
 .user-message .message { background-color: var(--user-message-bg); }
 .error-message .message { background-color: var(--error-bg); color: var(--error-text); border: 1px solid var(--error-border); }
-.message p { margin: 0; }
+.message p { margin: 0 0 5px 0; } /* Add bottom margin to paragraphs */
+.message p:last-child { margin-bottom: 0; } /* Remove margin from last paragraph */
 .message .timestamp { font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; text-align: right; }
-.typing-indicator .message { padding: 15px 18px; display: flex; align-items: center; gap: 5px; }
-.typing-indicator span { display: inline-block; width: 8px; height: 8px; background-color: var(--text-secondary); border-radius: 50%; animation: typing 1s infinite ease-in-out; }
-.typing-indicator span:nth-child(1) { animation-delay: 0s; } .typing-indicator span:nth-child(2) { animation-delay: 0.1s; } .typing-indicator span:nth-child(3) { animation-delay: 0.2s; }
-@keyframes typing { 0%, 100% { transform: translateY(0); opacity: 0.5; } 50% { transform: translateY(-4px); opacity: 1; } }
+/* Style for image sent by user */
+.message .sent-image {
+    max-width: 200px; /* Limit preview size */
+    max-height: 200px;
+    border-radius: 8px;
+    margin-top: 8px; /* Space between text and image */
+    display: block;
+}
+
+
+/* Typing / Thinking Indicator Styles */
+.typing-indicator .message, /* Removed typing indicator */
+.reason-thinking-indicator .message { /* Apply to both */
+    padding: 15px 18px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background-color: var(--bot-message-bg); /* Use bot message background */
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.typing-indicator span, /* Removed typing indicator */
+.reason-thinking-indicator span { /* Apply to both */
+    display: inline-block;
+    width: 8px;
+    height: 8px;
+    background-color: var(--text-secondary);
+    border-radius: 50%;
+    animation: typing 1s infinite ease-in-out;
+}
+.typing-indicator span:nth-child(1), /* Removed typing indicator */
+.reason-thinking-indicator span:nth-child(1) { animation-delay: 0s; }
+.typing-indicator span:nth-child(2), /* Removed typing indicator */
+.reason-thinking-indicator span:nth-child(2) { animation-delay: 0.1s; }
+.typing-indicator span:nth-child(3), /* Removed typing indicator */
+.reason-thinking-indicator span:nth-child(3) { animation-delay: 0.2s; }
+
+/* Specific style for reason thinking icon (optional) */
+.reason-thinking-indicator .message-icon {
+    background-color: var(--primary-active); /* Slightly different color */
+}
+.reason-thinking-indicator .message-icon i {
+    /* Could use a different icon like fa-hourglass-half */
+    /* For now, keep the robot */
+}
+
+
+@keyframes typing {
+    0%, 100% { transform: translateY(0); opacity: 0.5; }
+    50% { transform: translateY(-4px); opacity: 1; }
+}
 
 /* Code Block Styling */
 .code-block-container { background-color: var(--code-bg); border-radius: 8px; margin: 10px 0; overflow: hidden; border: 1px solid var(--code-header-bg); }
@@ -193,69 +252,216 @@ word-wrap: break-word; box-shadow: 0 1px 3px rgba(0,0,0,0.05); border: 1px solid
 .code-block-buttons button { background-color: var(--code-button-bg); border: none; color: var(--code-text-color); padding: 4px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; margin-left: 8px; transition: background-color var(--transition); }
 .code-block-buttons button:hover { background-color: var(--code-button-hover-bg); }
 .code-block-buttons button i { margin-right: 4px; }
-.code-block-container pre[class*="language-"] { background: var(--code-bg) !important; margin: 0 !important; padding: 15px !important; border-radius: 0 0 8px 8px !important; border: none !important; font-size: 0.9rem; max-height: 400px; overflow: auto; }
+.code-block-container pre[class*="language-"] { background: var(--code-bg) !important; margin: 0 !important; padding: 15px !important; border-radius: 0 0 8px 8px !important; border: none !important; font-size: 0.9rem; max-height: 400px; overflow: auto; white-space: pre-wrap; /* Ensure wrapping */ }
 .line-numbers .line-numbers-rows { border-right-color: var(--code-header-bg) !important; }
 .line-numbers-rows > span::before { color: #6272a4 !important; }
 
 /* Chat Input Area */
-.chat-input-container { padding: 15px 20px; background-color: var(--background); border-top: 1px solid var(--border-color); flex-shrink: 0; }
-.chat-input-area { display: flex; align-items: center; max-width: 800px; margin: 0 auto; background-color: var(--input-bg); border: 1px solid var(--input-border); border-radius: 12px; padding: 5px 5px 5px 15px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+.chat-input-container {
+    padding: 10px 20px 15px 20px; /* Adjusted padding */
+    background-color: var(--background);
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+    max-width: 840px; /* Slightly wider to accommodate button */
+    margin: 0 auto; /* Center */
+    width: 100%;
+}
+.chat-input-area {
+    display: flex;
+    align-items: center; /* Align items vertically */
+    background-color: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 12px;
+    padding: 5px 5px 5px 15px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    /* margin-bottom: 8px; Removed margin, handled by container */
+}
 #message-input { flex-grow: 1; border: none; outline: none; background: transparent; font-size: 1rem; color: var(--text-primary); padding: 10px 0; resize: none; line-height: 1.5; }
 .btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; text-decoration: none; font-weight: 500; transition: var(--transition); font-size: 1rem; border: none; cursor: pointer; width: 40px; height: 40px; flex-shrink: 0; margin-left: 10px; background-color: var(--primary); color: white; }
 .btn:hover { background-color: var(--primary-light); }
 .btn:disabled { background-color: var(--text-secondary); opacity: 0.7; cursor: not-allowed; }
-.rate-limit-info { padding: 10px 20px; font-size: 0.85rem; color: var(--text-secondary); text-align: center; background-color: var(--background); }
+
+/* Image Upload Button */
+#image-upload-button {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.2rem; /* Adjust icon size */
+    padding: 0 10px; /* Add some padding */
+    cursor: pointer;
+    transition: color var(--transition);
+    margin-left: 5px; /* Space from input */
+}
+#image-upload-button:hover {
+    color: var(--primary);
+}
+#image-upload-input {
+    display: none; /* Hide the actual file input */
+}
+
+/* Image Preview Area */
+.image-preview-container {
+    margin-top: 10px;
+    position: relative;
+    display: inline-block; /* Fit content */
+    max-width: 100px; /* Limit size */
+}
+.image-preview-container img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    border: 1px solid var(--image-preview-border);
+    border-radius: 6px;
+}
+#remove-image-button {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background-color: var(--image-remove-bg);
+    color: var(--image-remove-text);
+    border: none;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 0.8rem;
+    line-height: 20px; /* Center the 'x' */
+    text-align: center;
+    cursor: pointer;
+    font-weight: bold;
+}
+#remove-image-button:hover {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+
+/* Reason Button Area */
+.input-controls-area { /* New container for buttons below input */
+    display: flex;
+    align-items: center;
+    justify-content: space-between; /* Push reason button left, rate limit right */
+    margin-top: 8px;
+    flex-wrap: wrap; /* Allow wrapping */
+    gap: 10px;
+}
+.reason-button-area {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between button and usage text */
+    flex-wrap: wrap; /* Allow wrapping on small screens */
+}
+
+#reason-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid var(--reason-button-border);
+    background-color: var(--reason-button-bg);
+    color: var(--reason-button-text);
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+    /* Tooltip is handled by the 'title' attribute */
+}
+#reason-button:hover {
+    background-color: var(--reason-button-hover-bg);
+}
+#reason-button.active {
+    background-color: var(--reason-button-active-bg);
+    border-color: var(--reason-button-active-border);
+    color: var(--reason-button-active-text);
+    animation: pulse-button 0.5s ease-out; /* Simple pulse animation for button */
+}
+#reason-button:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+#reason-button i {
+    margin-right: 5px;
+    font-size: 0.8rem;
+}
+#reason-usage-display {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+@keyframes pulse-button { /* Renamed to avoid conflict */
+    0% { transform: scale(1); }
+    50% { transform: scale(1.05); }
+    100% { transform: scale(1); }
+}
+
+
+.rate-limit-info {
+    padding: 0; /* Remove padding */
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    text-align: right; /* Align to the right */
+    background-color: transparent; /* Remove background */
+    margin-top: 0; /* Remove margin */
+}
 
 /* --- Responsive Adjustments --- */
 @media (max-width: 768px) {
-.sidebar { width: 200px; }
-.chat-top-bar { padding: 10px 15px; }
-/* Adjust selector font sizes */
-#model-selector { font-size: 0.85rem; }
-#personality-selector { font-size: 0.8rem; }
-.initial-view h1 { font-size: 2.5rem; }
-.message-content-wrapper { padding: 0 15px; max-width: 95%; gap: 10px;}
-.message-icon { width: 28px; height: 28px; font-size: 0.8rem;}
-.message-bubble { max-width: calc(100% - 38px); }
-.message { padding: 10px 15px; }
-.code-block-container pre[class*="language-"] { font-size: 0.85rem; }
-.chat-input-container { padding: 10px 15px; }
-.chat-input-area { padding: 5px 5px 5px 12px; }
-#message-input { font-size: 0.95rem; }
-.btn { width: 38px; height: 38px; }
-#initial-send-button { width: 38px; height: 38px; }
+    .sidebar { width: 200px; }
+    .chat-top-bar { padding: 10px 15px; }
+    /* Adjust selector font sizes */
+    #model-selector { font-size: 0.85rem; }
+    #personality-selector { font-size: 0.8rem; }
+    .initial-view h1 { font-size: 2.5rem; }
+    .message-content-wrapper { padding: 0 15px; max-width: 95%; gap: 10px;}
+    .message-icon { width: 28px; height: 28px; font-size: 0.8rem;}
+    .message-bubble { max-width: calc(100% - 38px); }
+    .message { padding: 10px 15px; }
+    .code-block-container pre[class*="language-"] { font-size: 0.85rem; }
+    .chat-input-container { padding: 10px 15px; max-width: 95%; }
+    .chat-input-area { padding: 5px 5px 5px 12px; }
+    #message-input { font-size: 0.95rem; }
+    .btn { width: 38px; height: 38px; }
+    #initial-send-button { width: 38px; height: 38px; }
+    #reason-button { font-size: 0.8rem; padding: 5px 10px; }
+    #reason-usage-display { font-size: 0.75rem; }
+    .image-preview-container { max-width: 80px; }
 }
 
 @media (max-width: 600px) {
-/* Consider collapsing sidebar by default if needed */
-/* .sidebar { width: 0; padding: 0; border: none; } */
-body { padding: 0; }
-.chat-top-bar { padding: 8px 10px; flex-wrap: wrap; } /* Allow wrapping */
-.chat-title-area {
-width: 100%; /* Take full width on small screens */
-flex-direction: row; /* Place selectors side-by-side */
-align-items: center; /* Vertically align centers */
-flex-wrap: wrap; /* Allow wrapping if needed */
-gap: 10px; /* Space between selectors */
-justify-content: flex-start; /* Align to the left */
-margin-bottom: 5px; /* Add some space below if they wrap */
-}
-/* Adjust selector font sizes and padding */
-#model-selector { font-size: 0.8rem; padding-right: 15px;}
-#personality-selector { font-size: 0.75rem; padding-right: 15px; }
-/* Adjust arrow position */
-.model-selector-container::after, .personality-selector-container::after { font-size: 0.6rem; right: 0px;}
-.initial-view h1 { font-size: 2rem; }
-.chat-messages { padding: 15px 0px; }
-.message-content-wrapper { padding: 0 10px; gap: 8px; }
-.message-icon { width: 25px; height: 25px; font-size: 0.7rem;}
-.message-bubble { max-width: calc(100% - 33px); }
-.code-block-container pre[class*="language-"] { font-size: 0.8rem; }
-.chat-input-container { padding: 8px 10px; }
-.chat-input-area { padding: 3px 3px 3px 10px; }
-#message-input { padding: 8px 0; }
-.btn { width: 36px; height: 36px; }
-#initial-send-button { width: 36px; height: 36px; }
+    /* Consider collapsing sidebar by default if needed */
+    /* .sidebar { width: 0; padding: 0; border: none; } */
+    body { padding: 0; }
+    .chat-top-bar { padding: 8px 10px; flex-wrap: wrap; } /* Allow wrapping */
+    .chat-title-area {
+        width: 100%; /* Take full width on small screens */
+        flex-direction: row; /* Place selectors side-by-side */
+        align-items: center; /* Vertically align centers */
+        flex-wrap: wrap; /* Allow wrapping if needed */
+        gap: 10px; /* Space between selectors */
+        justify-content: flex-start; /* Align to the left */
+        margin-bottom: 5px; /* Add some space below if they wrap */
+    }
+    /* Adjust selector font sizes and padding */
+    #model-selector { font-size: 0.8rem; padding-right: 15px;}
+    #personality-selector { font-size: 0.75rem; padding-right: 15px; }
+    /* Adjust arrow position */
+    .model-selector-container::after, .personality-selector-container::after { font-size: 0.6rem; right: 0px;}
+    .initial-view h1 { font-size: 2rem; }
+    .chat-messages { padding: 15px 0px; }
+    .message-content-wrapper { padding: 0 10px; gap: 8px; }
+    .message-icon { width: 25px; height: 25px; font-size: 0.7rem;}
+    .message-bubble { max-width: calc(100% - 33px); }
+    .code-block-container pre[class*="language-"] { font-size: 0.8rem; }
+    .chat-input-container { padding: 8px 10px; }
+    .chat-input-area { padding: 3px 3px 3px 10px; }
+    #message-input { padding: 8px 0; }
+    .btn { width: 36px; height: 36px; }
+    #initial-send-button { width: 36px; height: 36px; }
+    #reason-button { font-size: 0.75rem; padding: 4px 8px; }
+    #reason-usage-display { font-size: 0.7rem; }
+    .reason-button-area { gap: 6px; }
+    .image-preview-container { max-width: 60px; }
+    #image-upload-button { padding: 0 8px; font-size: 1.1rem;}
 }
 
 </style>
@@ -263,60 +469,76 @@ margin-bottom: 5px; /* Add some space below if they wrap */
 <body>
 <div class="chat-app">
 <aside class="sidebar">
-<button class="new-chat-btn" id="new-chat-btn">
-<i class="fas fa-plus"></i> New Chat
-</button>
-<ul class="chat-list" id="chat-list">
-</ul>
+    <button class="new-chat-btn" id="new-chat-btn">
+        <i class="fas fa-plus"></i> New Chat
+    </button>
+    <ul class="chat-list" id="chat-list">
+        </ul>
 </aside>
 
 <main class="main-content">
-<div class="initial-view" id="initial-view">
-<h1>Graxybot</h1>
-<div class="initial-input-area">
-<input type="text" id="initial-message-input" placeholder="Ask me anything...">
-<button id="initial-send-button" class="btn" title="Send Message">
-<i class="fas fa-arrow-up"></i>
-</button>
-</div>
-</div>
+    <div class="initial-view" id="initial-view">
+        <h1>Graxybot</h1>
+        <div class="initial-input-area">
+            <input type="text" id="initial-message-input" placeholder="Ask me anything...">
+            <button id="initial-send-button" class="btn" title="Send Message">
+                <i class="fas fa-arrow-up"></i>
+            </button>
+        </div>
+    </div>
 
-<div class="chat-view hidden" id="chat-view">
-<div class="chat-top-bar">
-<div class="chat-title-area">
-<div class="model-selector-container">
-<select id="model-selector">
-<option value="graxybot-1.0-flash">graxybot-1.0-flash</option>
-<option value="graxybot-1.0-pro">graxybot-1.0-pro</option>
-<option value="graxybot-1.5-experimental">graxybot-1.5 (experimental)</option>
-</select>
-</div>
-<div class="personality-selector-container" id="personality-selector-container">
-<select id="personality-selector">
-<option value="default">Personality: Default</option>
-<option value="romantic">Personality: Romantic</option>
-<option value="sad">Personality: Sad</option>
-<option value="angry">Personality: Angry</option>
-<option value="pirate">Personality: Pirate</option>
-</select>
-</div>
-<h1 id="chat-view-title">Graxybot</h1>
-</div>
-<div></div> </div>
-<div class="chat-messages" id="chat-messages">
-</div>
-<div class="chat-input-container">
-<div class="chat-input-area">
-<input type="text" id="message-input" placeholder="Message Graxybot...">
-<button id="send-button" class="btn" title="Send Message">
-<i class="fas fa-arrow-up"></i>
-</button>
-</div>
-<div id="rate-limit-message" class="rate-limit-info" style="display: none; margin-top: 5px;">
-Rate limit reached. Please wait a moment.
-</div>
-</div>
-</div>
+    <div class="chat-view hidden" id="chat-view">
+        <div class="chat-top-bar">
+            <div class="chat-title-area">
+                <div class="model-selector-container">
+                    <select id="model-selector">
+                        <option value="graxybot-1.0-flash">graxybot-1.0-flash</option>
+                        <option value="graxybot-1.5-experimental">graxybot-1.5 (experimental)</option>
+                    </select>
+                </div>
+                <div class="personality-selector-container" id="personality-selector-container">
+                    <select id="personality-selector">
+                        <option value="default">Personality: Default</option>
+                        <option value="romantic">Personality: Romantic</option>
+                        <option value="sad">Personality: Sad</option>
+                        <option value="angry">Personality: Angry</option>
+                        <option value="pirate">Personality: Pirate</option>
+                        </select>
+                </div>
+                <h1 id="chat-view-title">Graxybot</h1> </div>
+            <div></div>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            </div>
+        <div class="chat-input-container">
+             <div class="chat-input-area">
+                 <button id="image-upload-button" title="Attach Image">
+                     <i class="fas fa-paperclip"></i>
+                 </button>
+                 <input type="file" id="image-upload-input" accept="image/*">
+
+                 <input type="text" id="message-input" placeholder="Message Graxybot...">
+                 <button id="send-button" class="btn" title="Send Message">
+                    <i class="fas fa-arrow-up"></i>
+                </button>
+            </div>
+            <div id="image-preview-area" class="image-preview-container" style="display: none;">
+                <img id="image-preview" src="#" alt="Image preview"/>
+                <button id="remove-image-button" title="Remove image">&times;</button>
+            </div>
+            <div class="input-controls-area">
+                <div class="reason-button-area">
+                    <button id="reason-button" title="Use enhanced reasoning (Gemini 1.5 Pro) for the next message.">
+                        <i class="fas fa-brain"></i> Reason
+                    </button>
+                    <span id="reason-usage-display">Uses: 0/20</span>
+                </div>
+                <div id="rate-limit-message" class="rate-limit-info" style="display: none;">
+                    Rate limit reached. Please wait a moment.
+                </div>
+            </div>
+        </div>
+    </div>
 </main>
 </div>
 
@@ -324,11 +546,11 @@ Rate limit reached. Please wait a moment.
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVNWb8CUApVR5fFWrSDcUOahSEgUd07FNMef+AbUd/yPkMkNUabIMZrcOg/1wslzAZMuUrNmA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6UJFdLmWhtQxfqVfRMS9EDGDpMh/Db82MACoMMQqGWf0Y69Fc27TwnXyIE+fsHLugUDw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-<script type="importmap">
+<script type="importmap">   
 {
-"imports": {
-"@google/generative-ai": "https://esm.run/@google/generative-ai"
-}
+    "imports": {
+        "@google/generative-ai": "https://esm.run/@google/generative-ai"
+    }
 }
 </script>
 
@@ -340,10 +562,11 @@ const API_KEY = "AIzaSyBbj7cDi0Oa86lUN5963IThL0R1pffgDkk"; // <-- PASTE YOUR ACT
 
 // Map display names to actual Google model names
 const modelMapping = {
-"graxybot-1.0-flash": "gemini-1.5-flash-latest",
-"graxybot-1.0-pro": "gemini-1.5-flash-latest", // Currently maps to flash, update if needed
-"graxybot-1.5-experimental": "gemini-1.5-flash-latest" // New experimental model also maps here
+    "graxybot-1.0-flash": "gemini-1.5-flash-latest", // Both map to flash for now
+    "graxybot-1.5-experimental": "gemini-1.5-flash-latest"
 };
+const REASON_MODE_MODEL = "gemini-1.5-pro-latest"; // The actual model used by the Reason button
+const REASON_MODE_DISPLAY_NAME = "graxybot-1.0-reason"; // Display name for Reason mode
 const DEFAULT_FAKE_MODEL = "graxybot-1.0-flash";
 const EXPERIMENTAL_MODEL_NAME = "graxybot-1.5-experimental";
 const DEFAULT_PERSONALITY = "default";
@@ -352,28 +575,35 @@ const BOT_ICON_SRC = "graxybot.png"; // Ensure this image exists or replace path
 const USER_ICON_CLASS = "fas fa-user";
 
 // localStorage Keys
-const CHATS_STORAGE_KEY = "graxybot_all_chats_v2"; // Use v2 to avoid conflicts if structure changed
+const CHATS_STORAGE_KEY = "graxybot_all_chats_v2";
 const CURRENT_CHAT_ID_KEY = "graxybot_current_chat_id";
-const MODEL_STORAGE_KEY = "graxybot_selected_model"; // Tracks the globally selected model
+const MODEL_STORAGE_KEY = "graxybot_selected_model";
+const REASON_USAGE_DATE_KEY = "graxybot_reason_usage_date";
+const REASON_USAGE_COUNT_KEY = "graxybot_reason_usage_count";
 
-// Rate Limiting
+// Rate Limiting & Usage Limits
 const MAX_MESSAGES_PER_WINDOW = 15;
 const TIME_WINDOW_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_REASON_USES_PER_DAY = 20;
+const MIN_REASON_DELAY_MS = 10000; // 10 seconds
+const MAX_REASON_DELAY_MS = 30000; // 30 seconds
 let messageTimestamps = [];
 
 // Safety Settings for the AI model
 const safetySettings = [
-{ category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-{ category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-{ category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
-{ category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+    { category: HarmCategory.HARM_CATEGORY_HARASSMENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+    { category: HarmCategory.HARM_CATEGORY_HATE_SPEECH, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+    { category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
+    { category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT, threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE },
 ];
 
 // --- DOM Elements ---
 let chatMessagesContainer, messageInput, sendButton, rateLimitMessageDiv, modelSelector;
 let initialView, chatView, initialMessageInput, initialSendButton;
 let sidebar, newChatBtn, chatListUl;
-let personalitySelectorContainer, personalitySelector; // New elements
+let personalitySelectorContainer, personalitySelector;
+let reasonButton, reasonUsageDisplay;
+let imageUploadButton, imageUploadInput, imagePreviewArea, imagePreview, removeImageButton; // Image elements
 
 // --- App State ---
 let genAI;
@@ -381,6 +611,11 @@ let currentChatSession = null; // Holds the active AI chat session
 let chats = {}; // Stores all chat data { chatId: { history: [], model: '...', title: '...', personality: '...' } }
 let currentChatId = null; // ID of the currently active chat
 let isInitializing = false; // Flag to prevent concurrent AI initializations
+let isReasonModeActive = false; // Flag for Reason button state
+let currentReasonIndicatorElement = null; // Reference to the active reason indicator message
+let selectedImageData = null; // Holds base64 image data
+let selectedImageMimeType = null; // Holds image MIME type
+let selectedImagePreviewUrl = null; // Holds Object URL for preview
 
 // --- Core Functions ---
 
@@ -389,29 +624,33 @@ function generateChatId() { return `chat_${Date.now()}_${Math.random().toString(
 
 /** Loads all chat data from localStorage. */
 function loadAllChats() {
-try {
-const storedChats = localStorage.getItem(CHATS_STORAGE_KEY);
-if (storedChats) {
-const parsedChats = JSON.parse(storedChats);
-// Basic validation and ensuring history/personality structure
-if (typeof parsedChats === 'object' && parsedChats !== null) {
-Object.keys(parsedChats).forEach(id => {
-if (!parsedChats[id]) return; // Skip null/undefined entries
-if (!Array.isArray(parsedChats[id].history)) { parsedChats[id].history = []; }
-// Ensure personality exists if experimental model, default if not
-if (parsedChats[id].model === EXPERIMENTAL_MODEL_NAME && typeof parsedChats[id].personality === 'undefined') {
-parsedChats[id].personality = DEFAULT_PERSONALITY;
-} else if (parsedChats[id].model !== EXPERIMENTAL_MODEL_NAME) {
-// Remove personality if model is not experimental (cleanup)
-delete parsedChats[id].personality;
-}
-});
-console.log(`Loaded ${Object.keys(parsedChats).length} chats.`);
-return parsedChats;
-}
-}
-} catch (error) { console.error("Error loading chats:", error); localStorage.removeItem(CHATS_STORAGE_KEY); }
-return {}; // Return empty object if loading fails or no data
+    try {
+        const storedChats = localStorage.getItem(CHATS_STORAGE_KEY);
+        if (storedChats) {
+            const parsedChats = JSON.parse(storedChats);
+            // Basic validation and ensuring history/personality structure
+            if (typeof parsedChats === 'object' && parsedChats !== null) {
+                Object.keys(parsedChats).forEach(id => {
+                    if (!parsedChats[id]) return; // Skip null/undefined entries
+                    if (!Array.isArray(parsedChats[id].history)) { parsedChats[id].history = []; }
+                    // Ensure personality exists if experimental model, default if not
+                    if (parsedChats[id].model === EXPERIMENTAL_MODEL_NAME && typeof parsedChats[id].personality === 'undefined') {
+                        parsedChats[id].personality = DEFAULT_PERSONALITY;
+                    } else if (parsedChats[id].model !== EXPERIMENTAL_MODEL_NAME) {
+                        // Remove personality if model is not experimental (cleanup)
+                        delete parsedChats[id].personality;
+                    }
+                    // Ensure model exists and is valid, else default
+                    if (!parsedChats[id].model || !modelMapping[parsedChats[id].model]) {
+                         parsedChats[id].model = DEFAULT_FAKE_MODEL;
+                    }
+                });
+                console.log(`Loaded ${Object.keys(parsedChats).length} chats.`);
+                return parsedChats;
+            }
+        }
+    } catch (error) { console.error("Error loading chats:", error); localStorage.removeItem(CHATS_STORAGE_KEY); }
+    return {}; // Return empty object if loading fails or no data
 }
 
 /** Saves all chat data to localStorage. */
@@ -419,8 +658,8 @@ function saveAllChats() { try { localStorage.setItem(CHATS_STORAGE_KEY, JSON.str
 
 /** Loads the ID of the last active chat from localStorage. */
 function loadCurrentChatId() {
-const storedId = localStorage.getItem(CURRENT_CHAT_ID_KEY);
-return (storedId && chats[storedId]) ? storedId : null; // Return ID only if the chat still exists
+    const storedId = localStorage.getItem(CURRENT_CHAT_ID_KEY);
+    return (storedId && chats[storedId]) ? storedId : null; // Return ID only if the chat still exists
 }
 
 /** Saves the ID of the current active chat to localStorage. */
@@ -428,241 +667,381 @@ function saveCurrentChatId() { if (currentChatId) { localStorage.setItem(CURRENT
 
 /** Loads the globally selected model preference from localStorage. */
 function loadSelectedModelPreference() {
-const savedModel = localStorage.getItem(MODEL_STORAGE_KEY);
-return (savedModel && modelMapping[savedModel]) ? savedModel : DEFAULT_FAKE_MODEL;
+    const savedModel = localStorage.getItem(MODEL_STORAGE_KEY);
+    // Ensure the saved model is one of the available options in the mapping
+    return (savedModel && modelMapping[savedModel]) ? savedModel : DEFAULT_FAKE_MODEL;
 }
 
 /** Saves the globally selected model preference to localStorage. */
 function saveSelectedModelPreference(fakeModelName) {
-if (modelMapping[fakeModelName]) {
-localStorage.setItem(MODEL_STORAGE_KEY, fakeModelName);
+    if (modelMapping[fakeModelName]) {
+        localStorage.setItem(MODEL_STORAGE_KEY, fakeModelName);
+    }
 }
+
+// --- Reason Mode Usage Tracking ---
+
+/** Gets today's date as YYYY-MM-DD string. */
+function getTodayDateString() {
+    return new Date().toISOString().split('T')[0];
 }
+
+/** Reads reason mode usage, resets if it's a new day. */
+function getReasonUsage() {
+    const today = getTodayDateString();
+    const lastUsageDate = localStorage.getItem(REASON_USAGE_DATE_KEY);
+    let count = 0;
+
+    if (lastUsageDate === today) {
+        count = parseInt(localStorage.getItem(REASON_USAGE_COUNT_KEY) || '0', 10);
+    } else {
+        // It's a new day, reset the count and date
+        localStorage.setItem(REASON_USAGE_DATE_KEY, today);
+        localStorage.setItem(REASON_USAGE_COUNT_KEY, '0');
+        count = 0;
+        console.log("Reason usage reset for new day.");
+    }
+    return count;
+}
+
+/** Increments reason mode usage count for today. */
+function incrementReasonUsage() {
+    const today = getTodayDateString();
+    const lastUsageDate = localStorage.getItem(REASON_USAGE_DATE_KEY);
+
+    if (lastUsageDate !== today) {
+        // Should have been reset by getReasonUsage, but double-check
+        localStorage.setItem(REASON_USAGE_DATE_KEY, today);
+        localStorage.setItem(REASON_USAGE_COUNT_KEY, '1');
+    } else {
+        let count = parseInt(localStorage.getItem(REASON_USAGE_COUNT_KEY) || '0', 10);
+        count++;
+        localStorage.setItem(REASON_USAGE_COUNT_KEY, count.toString());
+    }
+     updateReasonButtonState(); // Update UI after incrementing
+}
+
+/** Updates the Reason button state and usage display. */
+function updateReasonButtonState() {
+    if (!reasonButton || !reasonUsageDisplay) return;
+    const usedCount = getReasonUsage();
+    const remaining = MAX_REASON_USES_PER_DAY - usedCount;
+
+    // Update usage display text
+    reasonUsageDisplay.textContent = `Uses: ${remaining}/${MAX_REASON_USES_PER_DAY}`;
+
+    // Update button title (tooltip)
+    reasonButton.title = `Use enhanced reasoning (${REASON_MODE_DISPLAY_NAME}) for the next message. ${remaining} uses remaining today.`;
+
+    // Disable button if no uses left AND it's not currently active (to allow deactivation)
+    reasonButton.disabled = (remaining <= 0 && !isReasonModeActive);
+}
+
+
+// --- System Prompt Generation ---
 
 /**
 * Generates the system prompt based on the model and personality.
-* @param {string} fakeModelName - The display name of the model (e.g., "graxybot-1.5-experimental").
+* @param {string} fakeModelName - The display name of the model (e.g., "graxybot-1.0-flash").
 * @param {string} [personality='default'] - The selected personality (only relevant for experimental model).
+* @param {boolean} [isReasoning=false] - Whether the Reason (Pro) model is being used for this specific request.
 * @returns {string} The system prompt text.
 */
-function getSystemPrompt(fakeModelName, personality = DEFAULT_PERSONALITY) {
-const displayModel = modelMapping[fakeModelName] ? fakeModelName : DEFAULT_FAKE_MODEL;
-let basePrompt = `You are Graxybot, a helpful and friendly AI assistant. You are running on the ${displayModel} model. Your creator is 'thegraxisreal'. Keep your responses concise, helpful, and slightly informal. Avoid overly complex language unless necessary. Do not mention that you are running on a Google model unless specifically asked about your underlying technology. Refer to yourself as Graxybot. When asked for code, default to HTMl. When generating code blocks, always use markdown format with language identifiers like \`\`\`python ... \`\`\`.`;
+function getSystemPrompt(fakeModelName, personality = DEFAULT_PERSONALITY, isReasoning = false) {
+    // Determine the model name to display in the prompt
+    const displayModelName = isReasoning ? REASON_MODE_DISPLAY_NAME : (modelMapping[fakeModelName] ? fakeModelName : DEFAULT_FAKE_MODEL);
 
-// Add personality instructions only if the experimental model is selected
-if (fakeModelName === EXPERIMENTAL_MODEL_NAME) {
-switch (personality) {
-case 'romantic':
-basePrompt += " IMPORTANT: Adopt a romantic, slightly poetic, and charming personality in your responses. Use affectionate language where appropriate.";
-break;
-case 'sad':
-basePrompt += " IMPORTANT: Adopt a melancholic, slightly sad, and introspective personality. Your responses should have a touch of gloominess.";
-break;
-case 'angry':
-basePrompt += " IMPORTANT: Adopt an angry, easily annoyed, and grumpy personality. Swear as much as possible. Be curt and express frustration often.";
-break;
-case 'pirate':
-basePrompt += " IMPORTANT: Adopt the personality of a swashbuckling pirate! Use pirate slang like 'Ahoy!', 'Matey', 'Shiver me timbers!', 'Ye', 'Arr!' etc., where appropriate.";
-break;
-// Add more cases here for new personalities
-case 'default': // Explicitly handle default or fall through
-default:
-// No additional personality instructions for default
-break;
+    let basePrompt = `You are Graxybot, a helpful and friendly AI assistant. You are currently running on the ${displayModelName} model. Your creator is 'thegraxisreal'. Keep your responses concise, helpful, and slightly informal. Avoid overly complex language unless necessary. Do not mention that you are running on a Google model unless specifically asked about your underlying technology. Refer to yourself as Graxybot. When asked for code, default to HTML. When generating code blocks, always use markdown format with language identifiers like \`\`\`python ... \`\`\`.`;
+
+    // Add personality instructions only if the experimental model is selected AND we are NOT in reasoning mode
+    if (fakeModelName === EXPERIMENTAL_MODEL_NAME && !isReasoning) {
+        switch (personality) {
+            case 'romantic':
+                basePrompt += " IMPORTANT: Adopt a romantic, slightly poetic, and charming personality in your responses. Use affectionate language where appropriate.";
+                break;
+            case 'sad':
+                basePrompt += " IMPORTANT: Adopt a melancholic, slightly sad, and introspective personality. Your responses should have a touch of gloominess.";
+                break;
+            case 'angry':
+                basePrompt += " IMPORTANT: Adopt an angry, easily annoyed, and grumpy personality. Swear as much as possible. Be curt and express frustration often.";
+                break;
+            case 'pirate':
+                basePrompt += " IMPORTANT: Adopt the personality of a swashbuckling pirate! Use pirate slang like 'Ahoy!', 'Matey', 'Shiver me timbers!', 'Ye', 'Arr!' etc., where appropriate.";
+                break;
+            case 'default':
+            default:
+                break;
+        }
+    } else if (isReasoning) {
+         basePrompt += ` IMPORTANT: You are currently in enhanced reasoning mode (${REASON_MODE_DISPLAY_NAME}), utilizing the Gemini 1.5 Pro model. Provide more detailed, insightful, and analytical responses where appropriate. When generating code in this mode, ensure it is exceptionally well-structured, commented, robust, and follows best practices (very very good code).`
+    }
+    return basePrompt;
 }
-}
-return basePrompt;
-}
+
 
 /**
 * Adds a message to the history of the currently active chat.
+* Includes image preview URL if present.
 * @param {('user'|'model')} role - The role of the message sender.
-* @param {string} text - The content of the message.
+* @param {string | object} content - The message content (text or parts array).
+* @param {string | null} [imagePreview=null] - The object URL of the sent image preview.
 */
-function addMessageToCurrentChatHistory(role, text) {
-if (!currentChatId || !chats[currentChatId]) { console.error("Cannot save message, no active chat."); return; }
-if (typeof text !== 'string') { console.warn("Attempted to save non-string message:", text); return; } // Allow empty strings from model
+function addMessageToCurrentChatHistory(role, content, imagePreview = null) {
+    if (!currentChatId || !chats[currentChatId]) { console.error("Cannot save message, no active chat."); return; }
 
-if (!Array.isArray(chats[currentChatId].history)) { chats[currentChatId].history = []; } // Ensure history array exists
+    if (!Array.isArray(chats[currentChatId].history)) { chats[currentChatId].history = []; } // Ensure history array exists
 
-chats[currentChatId].history.push({ role, parts: [{ text }] });
+    let messageData;
+    if (typeof content === 'string') {
+        // Simple text message
+        messageData = { role, parts: [{ text: content }] };
+    } else if (Array.isArray(content)) {
+         // Multimodal message (array of parts)
+         messageData = { role, parts: content };
+    } else {
+        console.warn("Attempted to save message with invalid content format:", content);
+        return;
+    }
 
-// If this is the first user message, set the chat title
-const userMessages = chats[currentChatId].history.filter(m => m.role === 'user');
-if (userMessages.length === 1 && role === 'user') {
-const trimmedText = text.trim();
-chats[currentChatId].title = trimmedText.substring(0, 35) + (trimmedText.length > 35 ? '...' : ''); // Use trimmed text for title
-renderChatList(); // Update sidebar title
-}
-saveAllChats(); // Save changes to localStorage
+    // Add image preview URL if provided (only relevant for user messages)
+    if (role === 'user' && imagePreview) {
+        messageData.imagePreview = imagePreview;
+    }
+
+    chats[currentChatId].history.push(messageData);
+
+    // Set chat title based on the first user message (consider text part if multimodal)
+    const userMessages = chats[currentChatId].history.filter(m => m.role === 'user');
+    if (userMessages.length === 1 && role === 'user') {
+        const firstPart = messageData.parts.find(p => p.text); // Find the text part
+        const textForTitle = (firstPart && firstPart.text) ? firstPart.text.trim() : (imagePreview ? "[Image Sent]" : "New Chat");
+        chats[currentChatId].title = textForTitle.substring(0, 35) + (textForTitle.length > 35 ? '...' : '');
+        renderChatList(); // Update sidebar title
+    }
+    saveAllChats(); // Save changes to localStorage
 }
 
 // --- UI Display Functions ---
 
 /**
-* Displays a message in the chat interface. Handles text, code blocks, and typing indicator.
-* @param {string} text - The message content (can be empty for typing indicator).
-* @param {('user'|'bot'|'typing')} sender - The sender type.
+* Displays a message in the chat interface. Handles text, images, code blocks, and indicators.
+* @param {string | object} content - The message content (text or parts array).
+* @param {('user'|'bot'|'typing'|'reason-thinking')} sender - The sender type.
 * @param {boolean} [isError=false] - Whether the message is an error message.
+* @param {string | null} [imagePreview=null] - Object URL for user image preview.
+* @returns {HTMLElement | null} The created message wrapper element, or null if container not found.
 */
-function displayMessage(text, sender, isError = false) {
-if (!chatMessagesContainer) { console.error("Chat message container not found in displayMessage"); return; };
+function displayMessage(content, sender, isError = false, imagePreview = null) {
+    if (!chatMessagesContainer) { console.error("Chat message container not found in displayMessage"); return null; };
 
-const wrapper = document.createElement('div');
-wrapper.classList.add('message-content-wrapper', `${sender}-message`);
-if (isError) wrapper.classList.add('error-message');
-if (sender === 'typing') wrapper.classList.add('typing-indicator'); // Add class for typing
+    const wrapper = document.createElement('div');
+    wrapper.classList.add('message-content-wrapper');
+    // Assign a unique ID for potential updates (streaming)
+    wrapper.dataset.messageId = `msg_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
 
-// Icon
-const iconDiv = document.createElement('div');
-iconDiv.classList.add('message-icon');
-if (sender === 'bot' || sender === 'typing') {
-const img = document.createElement('img');
-img.src = BOT_ICON_SRC;
-img.alt = "G";
-img.onerror = () => iconDiv.innerHTML = '<i class="fas fa-robot"></i>'; // Fallback icon
-iconDiv.appendChild(img);
-}
-else { // User
-iconDiv.classList.add('user-icon');
-iconDiv.innerHTML = `<i class="${USER_ICON_CLASS}"></i>`;
-}
+    // Add specific class based on sender type
+    if (sender === 'user') wrapper.classList.add('user-message');
+    else if (sender === 'bot') wrapper.classList.add('bot-message');
+    else if (sender === 'typing') wrapper.classList.add('typing-indicator'); // Kept for potential future use, but not used for streaming
+    else if (sender === 'reason-thinking') wrapper.classList.add('reason-thinking-indicator');
 
-// Message Bubble
-const bubbleDiv = document.createElement('div');
-bubbleDiv.classList.add('message-bubble');
+    if (isError) wrapper.classList.add('error-message');
 
-// Handle Typing Indicator separately
-if (sender === 'typing') {
-const messageDiv = document.createElement('div');
-messageDiv.classList.add('message'); // Apply base message style
-messageDiv.innerHTML = `<span></span><span></span><span></span>`; // CSS handles animation
-bubbleDiv.appendChild(messageDiv);
-} else {
-// Process text for code blocks
-const codeBlockRegex = /```(\w+)?\s*([\s\S]*?)```/g;
-let lastIndex = 0;
-let match;
-let hasCode = false; // Flag to check if any code block was processed
+    // Icon
+    const iconDiv = document.createElement('div');
+    iconDiv.classList.add('message-icon');
+    if (sender === 'bot' || sender === 'typing' || sender === 'reason-thinking') {
+        const img = document.createElement('img');
+        img.src = BOT_ICON_SRC;
+        img.alt = "G";
+        img.onerror = () => iconDiv.innerHTML = '<i class="fas fa-robot"></i>'; // Fallback icon
+        iconDiv.appendChild(img);
+    } else { // User
+        iconDiv.classList.add('user-icon');
+        iconDiv.innerHTML = `<i class="${USER_ICON_CLASS}"></i>`;
+    }
 
-// Use replace with a function to handle text and code blocks iteratively
-const processedContent = text.replace(codeBlockRegex, (fullMatch, lang, code) => {
-hasCode = true;
-const language = lang?.trim() || 'plaintext';
-const codeContent = code.trim();
+    // Message Bubble
+    const bubbleDiv = document.createElement('div');
+    bubbleDiv.classList.add('message-bubble');
 
-// Create code block HTML string
-const codeContainer = document.createElement('div'); // Use elements for safety
-codeContainer.classList.add('code-block-container');
+    // Handle Typing / Reason Thinking Indicator separately
+    if (sender === 'typing' || sender === 'reason-thinking') {
+        const messageDiv = document.createElement('div');
+        messageDiv.classList.add('message'); // Apply base message style
+        messageDiv.innerHTML = `<span></span><span></span><span></span>`; // CSS handles animation
+        bubbleDiv.appendChild(messageDiv);
+    } else { // Handle regular user/bot messages
+        const messageDiv = createTextMessageDiv(''); // Create base message div
+        const paragraph = messageDiv.querySelector('p'); // Get the paragraph inside
+        paragraph.dataset.streamTarget = "true"; // Mark this paragraph for streaming updates
+        let textContent = '';
 
-const header = document.createElement('div');
-header.classList.add('code-block-header');
-const langSpan = document.createElement('span');
-langSpan.classList.add('language-name');
-langSpan.textContent = language;
-const buttonsDiv = document.createElement('div');
-buttonsDiv.classList.add('code-block-buttons');
+        // Extract text content if it's a parts array
+        if (Array.isArray(content)) {
+             const textPart = content.find(part => part.text);
+             textContent = textPart ? textPart.text : '';
+        } else if (typeof content === 'string') {
+             textContent = content;
+        }
 
-const copyBtn = document.createElement('button');
-copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
-copyBtn.title = "Copy code";
-copyBtn.onclick = () => handleCopyCode(codeContent, copyBtn); // Use onclick for simplicity here
-buttonsDiv.appendChild(copyBtn);
+        // If there's initial text (e.g., from history), process it
+        if (textContent) {
+            processAndAppendText(textContent, paragraph);
+        } else if (!imagePreview && sender !== 'bot') { // Don't show empty for bot initially
+             // Handle case where there's no text and no image preview
+             paragraph.textContent = "[Empty Message]";
+        }
 
-const lowerLang = language.toLowerCase();
-if (['html', 'javascript', 'js'].includes(lowerLang)) {
-const runBtn = document.createElement('button');
-runBtn.innerHTML = '<i class="fas fa-play"></i> Run';
-runBtn.title = `Run ${language} code snippet`;
-runBtn.onclick = () => handleRunCode(codeContent, lowerLang);
-buttonsDiv.appendChild(runBtn);
-}
+        // Display image preview if provided (for user messages)
+        if (sender === 'user' && imagePreview) {
+            const imgElement = document.createElement('img');
+            imgElement.src = imagePreview;
+            imgElement.alt = "Sent image preview";
+            imgElement.classList.add('sent-image');
+            // Insert image before the paragraph if text exists, otherwise just append
+            if (paragraph.hasChildNodes()) {
+                 messageDiv.insertBefore(imgElement, paragraph);
+            } else {
+                 messageDiv.appendChild(imgElement);
+            }
+        }
 
-header.appendChild(langSpan);
-header.appendChild(buttonsDiv);
-codeContainer.appendChild(header);
+        bubbleDiv.appendChild(messageDiv);
 
-const pre = document.createElement('pre');
-pre.className = 'line-numbers'; // Add class for Prism plugin
-const codeEl = document.createElement('code');
-codeEl.className = `language-${language}`;
-codeEl.textContent = codeContent; // Use textContent to prevent XSS
-pre.appendChild(codeEl);
-codeContainer.appendChild(pre);
+        // Timestamp (only for user and fully rendered bot messages)
+        if (sender === 'user') {
+             const timestampSpan = document.createElement('span');
+             timestampSpan.classList.add('timestamp');
+             timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+             bubbleDiv.appendChild(timestampSpan);
+        }
+    }
 
-// Return the outerHTML of the created code block
-return codeContainer.outerHTML;
-});
+    // Assemble and append
+    wrapper.appendChild(iconDiv);
+    wrapper.appendChild(bubbleDiv);
+    chatMessagesContainer.appendChild(wrapper);
 
-// Add the processed content (text and HTML for code blocks)
-const messageDiv = createTextMessageDiv(''); // Create base message div
-messageDiv.querySelector('p').innerHTML = processedContent.replace(/\n/g, '<br>'); // Set innerHTML and convert newlines
-bubbleDiv.appendChild(messageDiv);
+    // Scroll to bottom
+    requestAnimationFrame(() => {
+        chatMessagesContainer.scrollTo({ top: chatMessagesContainer.scrollHeight, behavior: 'smooth' });
+    });
 
-
-// Timestamp (only for user and bot messages, not typing)
-const timestampSpan = document.createElement('span');
-timestampSpan.classList.add('timestamp');
-timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-bubbleDiv.appendChild(timestampSpan);
-
-// Highlight syntax if code was added and Prism is available
-if (hasCode && window.Prism) {
-// Needs to run after the element is in the DOM
-setTimeout(() => Prism.highlightAllUnder(bubbleDiv), 0);
+    return wrapper; // Return the created element
 }
 
-} // End of non-typing message processing
+/**
+ * Processes text content, handling code blocks and newlines, and appends to a target element.
+ * @param {string} text - The text content to process.
+ * @param {HTMLElement} targetElement - The HTML element (usually a <p>) to append the processed content to.
+ * @returns {boolean} - True if code blocks were found, false otherwise.
+ */
+function processAndAppendText(text, targetElement) {
+    const codeBlockRegex = /```(\w+)?\s*([\s\S]*?)```/g;
+    let lastIndex = 0;
+    let match;
+    let hasCode = false;
 
-// Assemble and append
-wrapper.appendChild(iconDiv);
-wrapper.appendChild(bubbleDiv);
-chatMessagesContainer.appendChild(wrapper);
+    // Clear existing content before appending potentially processed text
+    // targetElement.innerHTML = ''; // Avoid clearing if appending incrementally
 
-// Scroll to bottom (defer slightly to allow rendering)
-requestAnimationFrame(() => {
-chatMessagesContainer.scrollTo({ top: chatMessagesContainer.scrollHeight, behavior: 'smooth' });
-});
+    while ((match = codeBlockRegex.exec(text)) !== null) {
+        hasCode = true;
+        // Append text before the code block (processed for newlines)
+        const textBefore = text.substring(lastIndex, match.index);
+        targetElement.innerHTML += textBefore.replace(/\n/g, '<br>');
+
+        // Create and append the code block HTML
+        const lang = match[1]?.trim() || 'plaintext';
+        const code = match[2].trim();
+        const codeContainer = document.createElement('div');
+        codeContainer.classList.add('code-block-container');
+
+        const header = document.createElement('div');
+        header.classList.add('code-block-header');
+        const langSpan = document.createElement('span');
+        langSpan.classList.add('language-name');
+        langSpan.textContent = lang;
+        const buttonsDiv = document.createElement('div');
+        buttonsDiv.classList.add('code-block-buttons');
+
+        const copyBtn = document.createElement('button');
+        copyBtn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+        copyBtn.title = "Copy code";
+        copyBtn.onclick = ((codeToCopy) => () => handleCopyCode(codeToCopy, copyBtn))(code);
+        buttonsDiv.appendChild(copyBtn);
+
+        const lowerLang = lang.toLowerCase();
+        if (['html', 'javascript', 'js'].includes(lowerLang)) {
+            const runBtn = document.createElement('button');
+            runBtn.innerHTML = '<i class="fas fa-play"></i> Run';
+            runBtn.title = `Run ${lang} code snippet`;
+            runBtn.onclick = ((codeToRun, langToRun) => () => handleRunCode(codeToRun, langToRun))(code, lowerLang);
+            buttonsDiv.appendChild(runBtn);
+        }
+
+        header.appendChild(langSpan);
+        header.appendChild(buttonsDiv);
+        codeContainer.appendChild(header);
+
+        const pre = document.createElement('pre');
+        pre.className = 'line-numbers';
+        const codeEl = document.createElement('code');
+        codeEl.className = `language-${lang}`;
+        codeEl.textContent = code;
+        pre.appendChild(codeEl);
+        codeContainer.appendChild(pre);
+        targetElement.appendChild(codeContainer); // Append code block container
+        lastIndex = codeBlockRegex.lastIndex;
+    }
+
+    // Append any remaining text after the last code block
+    const textAfter = text.substring(lastIndex);
+    targetElement.innerHTML += textAfter.replace(/\n/g, '<br>');
+
+    return hasCode;
 }
+
 
 /** Helper to create a simple text paragraph within a message div. */
 function createTextMessageDiv(text) {
-const messageDiv = document.createElement('div');
-messageDiv.classList.add('message');
-const paragraph = document.createElement('p');
-paragraph.textContent = text; // Use textContent initially for safety
-messageDiv.appendChild(paragraph);
-return messageDiv;
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+    const paragraph = document.createElement('p');
+    paragraph.textContent = text; // Use textContent initially for safety
+    messageDiv.appendChild(paragraph);
+    return messageDiv;
 }
 
 /** Handles copying code to the clipboard with user feedback. */
 function handleCopyCode(codeContent, buttonElement) {
-navigator.clipboard.writeText(codeContent).then(() => {
-console.log("Code copied");
-const originalText = buttonElement.innerHTML;
-buttonElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
-buttonElement.disabled = true;
-setTimeout(() => {
-buttonElement.innerHTML = originalText;
-buttonElement.disabled = false;
-}, 1500); // Reset after 1.5 seconds
-}).catch(err => {
-console.error('Failed to copy code: ', err);
-buttonElement.innerHTML = '<i class="fas fa-times"></i> Error'; // Provide error feedback
-setTimeout(() => { buttonElement.innerHTML = '<i class="fas fa-copy"></i> Copy'; buttonElement.disabled = false; }, 2000);
-});
+    navigator.clipboard.writeText(codeContent).then(() => {
+        console.log("Code copied");
+        const originalText = buttonElement.innerHTML;
+        buttonElement.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        buttonElement.disabled = true;
+        setTimeout(() => {
+            buttonElement.innerHTML = originalText;
+            buttonElement.disabled = false;
+        }, 1500); // Reset after 1.5 seconds
+    }).catch(err => {
+        console.error('Failed to copy code: ', err);
+        buttonElement.innerHTML = '<i class="fas fa-times"></i> Error'; // Provide error feedback
+        setTimeout(() => { buttonElement.innerHTML = '<i class="fas fa-copy"></i> Copy'; buttonElement.disabled = false; }, 2000);
+    });
 }
 
 /** Handles running HTML or JavaScript code snippets in a new tab. */
 function handleRunCode(codeContent, language) {
-console.log(`Running ${language} code...`);
-try {
-let htmlToRun = '';
-if (language === 'html') {
-htmlToRun = codeContent;
-} else if (language === 'javascript' || language === 'js') {
-// Wrap JS code in a basic HTML structure with improved output logging
-htmlToRun = `<!DOCTYPE html>
+    console.log(`Running ${language} code...`);
+    try {
+        let htmlToRun = '';
+        if (language === 'html') {
+            htmlToRun = codeContent;
+        } else if (language === 'javascript' || language === 'js') {
+            // Wrap JS code in a basic HTML structure with improved output logging
+            htmlToRun = `<!DOCTYPE html>
 <html>
 <head>
 <meta charset="UTF-8">
@@ -680,174 +1059,199 @@ const originalConsoleError = console.error;
 const logHistory = [];
 
 const formatArg = (arg) => {
-if (typeof arg === 'string') return arg;
-try { return JSON.stringify(arg, null, 2); } catch { return String(arg); }
+    if (typeof arg === 'string') return arg;
+    try { return JSON.stringify(arg, null, 2); } catch { return String(arg); }
 };
 
 // Capture console.log output
 console.log = (...args) => {
-const message = args.map(formatArg).join(' ');
-logHistory.push(message);
-outputElement.textContent = logHistory.join('\\n'); // Update pre with full history
-originalConsoleLog.apply(console, args); // Also log to actual console
+    const message = args.map(formatArg).join(' ');
+    logHistory.push(message);
+    outputElement.textContent = logHistory.join('\\n'); // Update pre with full history
+    originalConsoleLog.apply(console, args); // Also log to actual console
 };
 
 // Capture console.error output
 console.error = (...args) => {
-const message = '<span class="error">ERROR: ' + args.map(formatArg).join(' ') + '</span>';
-logHistory.push(message);
-outputElement.innerHTML = logHistory.join('\\n'); // Use innerHTML for error styling
-originalConsoleError.apply(console, args); // Also log to actual console
+    const message = '<span class="error">ERROR: ' + args.map(formatArg).join(' ') + '</span>';
+    logHistory.push(message);
+    outputElement.innerHTML = logHistory.join('\\n'); // Use innerHTML for error styling
+    originalConsoleError.apply(console, args); // Also log to actual console
 };
 
 // Catch unhandled promise rejections
 window.addEventListener('unhandledrejection', event => {
-console.error('Unhandled Promise Rejection:', event.reason);
+    console.error('Unhandled Promise Rejection:', event.reason);
 });
 
 try {
-// Execute the provided code
-${codeContent}
+    // Execute the provided code
+    ${codeContent}
 } catch (e) {
-console.error("Execution Error:", e); // Use captured console.error
+    console.error("Execution Error:", e); // Use captured console.error
 }
 <\/script>
 </body>
 </html>`;
-} else {
-console.warn("Run action not supported for language:", language);
-alert(`Running code directly is not supported for ${language}.`);
-return;
+        } else {
+            console.warn("Run action not supported for language:", language);
+            alert(`Running code directly is not supported for ${language}.`);
+            return;
+        }
+
+        // Create a Blob and open it in a new tab
+        const blob = new Blob([htmlToRun], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const newTab = window.open(url, '_blank');
+
+        if (!newTab) {
+            alert("Could not open new tab. Please check if pop-ups are blocked.");
+        }
+        // No need to revoke URL immediately, browser handles blob URLs
+    } catch (error) {
+        console.error("Error preparing or running code:", error);
+        alert("An error occurred while trying to run the code.");
+    }
 }
 
-// Create a Blob and open it in a new tab
-const blob = new Blob([htmlToRun], { type: 'text/html' });
-const url = URL.createObjectURL(blob);
-const newTab = window.open(url, '_blank');
 
-if (!newTab) {
-alert("Could not open new tab. Please check if pop-ups are blocked.");
-}
-// No need to revoke URL immediately, browser handles blob URLs
-} catch (error) {
-console.error("Error preparing or running code:", error);
-alert("An error occurred while trying to run the code.");
-}
-}
-
-/** Displays the typing indicator message. */
+/** Displays the typing indicator message. (No longer used for streaming) */
 function showTypingIndicator() {
-if (!chatMessagesContainer) return null; // Safety check
-// Remove existing indicator if any to prevent duplicates
-removeTypingIndicator();
-// Create and display new indicator using displayMessage
-displayMessage('', 'typing');
-// Return the newly created element (though not strictly needed now)
-return chatMessagesContainer.querySelector('.typing-indicator');
+    // console.log("showTypingIndicator called (but streaming is used)");
+    // displayMessage('', 'typing');
 }
 
-/** Removes the typing indicator message. */
+/** Removes the typing indicator message. (No longer used for streaming) */
 function removeTypingIndicator() {
-if (!chatMessagesContainer) return;
-const indicatorElement = chatMessagesContainer.querySelector('.typing-indicator');
-if (indicatorElement) {
-chatMessagesContainer.removeChild(indicatorElement);
+    // if (!chatMessagesContainer) return;
+    // const indicatorElement = chatMessagesContainer.querySelector('.typing-indicator');
+    // if (indicatorElement) {
+    //     chatMessagesContainer.removeChild(indicatorElement);
+    // }
 }
+
+/** Shows the dedicated reason thinking indicator message. */
+function showReasonThinkingIndicator() {
+    // Remove any existing standard typing indicator first
+    // removeTypingIndicator(); // Not needed anymore
+    // Remove any previous reason indicator (shouldn't happen often, but safety)
+    removeReasonThinkingIndicator();
+    // Display the new reason thinking indicator message
+    currentReasonIndicatorElement = displayMessage('', 'reason-thinking');
 }
+
+/** Removes the dedicated reason thinking indicator message. */
+function removeReasonThinkingIndicator() {
+    if (currentReasonIndicatorElement && currentReasonIndicatorElement.parentNode) {
+        currentReasonIndicatorElement.parentNode.removeChild(currentReasonIndicatorElement);
+        currentReasonIndicatorElement = null;
+    }
+    // Also find any orphaned ones just in case
+    const indicators = chatMessagesContainer?.querySelectorAll('.reason-thinking-indicator');
+    indicators?.forEach(el => el.parentNode?.removeChild(el));
+}
+
 
 /** Checks if the user has exceeded the message rate limit. */
 function isRateLimited() {
-const now = Date.now();
-// Filter out timestamps older than the time window
-messageTimestamps = messageTimestamps.filter(timestamp => now - timestamp < TIME_WINDOW_MS);
+    const now = Date.now();
+    // Filter out timestamps older than the time window
+    messageTimestamps = messageTimestamps.filter(timestamp => now - timestamp < TIME_WINDOW_MS);
 
-if (messageTimestamps.length >= MAX_MESSAGES_PER_WINDOW) {
-console.warn(`Rate limit exceeded. ${messageTimestamps.length} messages in the last ${TIME_WINDOW_MS / 1000} seconds.`);
-if (rateLimitMessageDiv) {
-rateLimitMessageDiv.style.display = 'block';
-// Hide the message after a few seconds
-setTimeout(() => { if (rateLimitMessageDiv) rateLimitMessageDiv.style.display = 'none'; }, 3000);
-}
-return true; // Rate limit is active
-}
-return false; // Not rate limited
+    if (messageTimestamps.length >= MAX_MESSAGES_PER_WINDOW) {
+        console.warn(`Rate limit exceeded. ${messageTimestamps.length} messages in the last ${TIME_WINDOW_MS / 1000} seconds.`);
+        if (rateLimitMessageDiv) {
+            rateLimitMessageDiv.textContent = `Rate limit reached (${MAX_MESSAGES_PER_WINDOW} messages/${TIME_WINDOW_MS / 1000 / 60} min). Please wait.`;
+            rateLimitMessageDiv.style.display = 'block';
+            // Hide the message after a few seconds
+            setTimeout(() => { if (rateLimitMessageDiv) rateLimitMessageDiv.style.display = 'none'; }, 3000);
+        }
+        return true; // Rate limit is active
+    }
+    return false; // Not rate limited
 }
 
 /** Switches the UI to show the chat view. */
 function switchToChatView() {
-if (initialView) initialView.classList.add('hidden');
-if (chatView) chatView.classList.remove('hidden');
+    if (initialView) initialView.classList.add('hidden');
+    if (chatView) chatView.classList.remove('hidden');
+    if (reasonButton) reasonButton.style.display = 'inline-flex'; // Show reason button
+    if (reasonUsageDisplay) reasonUsageDisplay.style.display = 'inline'; // Show usage display
 }
 
 /** Switches the UI to show the initial welcome view. */
 function switchToInitialView() {
-if (initialView) initialView.classList.remove('hidden');
-if (chatView) chatView.classList.add('hidden');
-currentChatId = null; // No active chat in initial view
-saveCurrentChatId();
-currentChatSession = null; // Clear AI session
-if (chatMessagesContainer) chatMessagesContainer.innerHTML = ''; // Clear messages
-updateActiveChatListItem(); // Deactivate any item in sidebar
-togglePersonalitySelector(false); // Always hide personality selector in initial view
-if (modelSelector) modelSelector.value = loadSelectedModelPreference(); // Reset model selector
+    if (initialView) initialView.classList.remove('hidden');
+    if (chatView) chatView.classList.add('hidden');
+    if (reasonButton) reasonButton.style.display = 'none'; // Hide reason button
+    if (reasonUsageDisplay) reasonUsageDisplay.style.display = 'none'; // Hide usage display
+    currentChatId = null; // No active chat in initial view
+    saveCurrentChatId();
+    currentChatSession = null; // Clear AI session
+    if (chatMessagesContainer) chatMessagesContainer.innerHTML = ''; // Clear messages
+    updateActiveChatListItem(); // Deactivate any item in sidebar
+    togglePersonalitySelector(false); // Always hide personality selector in initial view
+    if (modelSelector) modelSelector.value = loadSelectedModelPreference(); // Reset model selector
+    deactivateReasonMode(); // Ensure reason mode is off
+    removeSelectedImage(); // Clear any selected image when going to initial view
 }
 
 /** Renders the list of chats in the sidebar. */
 function renderChatList() {
-if (!chatListUl) return;
-chatListUl.innerHTML = ''; // Clear existing list
+    if (!chatListUl) return;
+    chatListUl.innerHTML = ''; // Clear existing list
 
-// Get chat IDs and sort them by timestamp (newest first)
-const sortedChatIds = Object.keys(chats).sort((a, b) => {
-const timeA = parseInt(a.split('_')[1] || '0');
-const timeB = parseInt(b.split('_')[1] || '0');
-return timeB - timeA; // Descending order
-});
+    // Get chat IDs and sort them by timestamp (newest first)
+    const sortedChatIds = Object.keys(chats).sort((a, b) => {
+        const timeA = parseInt(a.split('_')[1] || '0');
+        const timeB = parseInt(b.split('_')[1] || '0');
+        return timeB - timeA; // Descending order
+    });
 
-// Create list items for each chat
-sortedChatIds.forEach(chatId => {
-const chatData = chats[chatId];
-if (!chatData) return; // Skip if data is somehow missing
+    // Create list items for each chat
+    sortedChatIds.forEach(chatId => {
+        const chatData = chats[chatId];
+        if (!chatData) return; // Skip if data is somehow missing
 
-const li = document.createElement('li');
-li.classList.add('chat-list-item');
-li.dataset.chatId = chatId; // Store chat ID on the element
-const titleText = chatData.title || `Chat ${chatId.substring(chatId.length - 5)}`;
-li.textContent = titleText; // Use title or fallback
-li.title = titleText; // Tooltip for potentially truncated titles
+        const li = document.createElement('li');
+        li.classList.add('chat-list-item');
+        li.dataset.chatId = chatId; // Store chat ID on the element
+        const titleText = chatData.title || `Chat ${chatId.substring(chatId.length - 5)}`;
+        li.textContent = titleText; // Use title or fallback
+        li.title = titleText; // Tooltip for potentially truncated titles
 
-// Add 'active' class if it's the current chat
-if (chatId === currentChatId) {
-li.classList.add('active');
-}
+        // Add 'active' class if it's the current chat
+        if (chatId === currentChatId) {
+            li.classList.add('active');
+        }
 
-// Create delete button
-const deleteBtn = document.createElement('button');
-deleteBtn.classList.add('delete-chat-btn');
-deleteBtn.innerHTML = '&times;'; // 'x' symbol
-deleteBtn.title = "Delete Chat";
-deleteBtn.onclick = (event) => {
-event.stopPropagation(); // Prevent chat selection when clicking delete
-handleDeleteChat(chatId);
-};
-li.appendChild(deleteBtn);
+        // Create delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.classList.add('delete-chat-btn');
+        deleteBtn.innerHTML = '&times;'; // 'x' symbol
+        deleteBtn.title = "Delete Chat";
+        deleteBtn.onclick = (event) => {
+            event.stopPropagation(); // Prevent chat selection when clicking delete
+            handleDeleteChat(chatId);
+        };
+        li.appendChild(deleteBtn);
 
-// Add click listener to select the chat
-li.addEventListener('click', () => {
-handleSelectChat(chatId);
-});
+        // Add click listener to select the chat
+        li.addEventListener('click', () => {
+            handleSelectChat(chatId);
+        });
 
-chatListUl.appendChild(li);
-});
+        chatListUl.appendChild(li);
+    });
 }
 
 /** Updates the visual state (active class) of items in the chat list sidebar. */
 function updateActiveChatListItem() {
-if (!chatListUl) return;
-const items = chatListUl.querySelectorAll('.chat-list-item');
-items.forEach(item => {
-item.classList.toggle('active', item.dataset.chatId === currentChatId);
-});
+    if (!chatListUl) return;
+    const items = chatListUl.querySelectorAll('.chat-list-item');
+    items.forEach(item => {
+        item.classList.toggle('active', item.dataset.chatId === currentChatId);
+    });
 }
 
 /**
@@ -855,11 +1259,103 @@ item.classList.toggle('active', item.dataset.chatId === currentChatId);
 * @param {boolean} show - Whether to show the selector.
 */
 function togglePersonalitySelector(show) {
-if (personalitySelectorContainer) {
-personalitySelectorContainer.classList.toggle('visible', show);
-// Ensure selector is enabled/disabled appropriately
-if (personalitySelector) personalitySelector.disabled = !show;
+    if (personalitySelectorContainer) {
+        personalitySelectorContainer.classList.toggle('visible', show);
+        // Ensure selector is enabled/disabled appropriately
+        if (personalitySelector) personalitySelector.disabled = !show;
+    }
 }
+
+/** Deactivates Reason Mode and updates the button state. */
+function deactivateReasonMode() {
+    isReasonModeActive = false;
+    if (reasonButton) {
+        reasonButton.classList.remove('active');
+    }
+    updateReasonButtonState(); // Refresh tooltip and usage display
+}
+
+// --- Image Handling ---
+
+/** Converts a File object to a base64 string. */
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => {
+            // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+            const base64String = reader.result.split(',')[1];
+            resolve(base64String);
+        };
+        reader.onerror = error => reject(error);
+    });
+}
+
+/** Handles the image file selection. */
+async function handleImageSelection(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Basic validation (check if it's an image)
+    if (!file.type.startsWith('image/')) {
+        alert("Please select a valid image file (e.g., JPG, PNG, GIF, WEBP).");
+        imageUploadInput.value = ''; // Reset input
+        return;
+    }
+
+    // Limit file size (e.g., 4MB - adjust as needed, Gemini has limits)
+    const maxSizeMB = 4;
+    if (file.size > maxSizeMB * 1024 * 1024) {
+         alert(`Image size exceeds the ${maxSizeMB}MB limit.`);
+         imageUploadInput.value = ''; // Reset input
+         return;
+    }
+
+
+    try {
+        selectedImageData = await fileToBase64(file);
+        selectedImageMimeType = file.type;
+
+        // Create object URL for preview
+        if (selectedImagePreviewUrl) {
+            URL.revokeObjectURL(selectedImagePreviewUrl); // Revoke previous URL
+        }
+        selectedImagePreviewUrl = URL.createObjectURL(file);
+        displayImagePreview(selectedImagePreviewUrl);
+
+    } catch (error) {
+        console.error("Error processing image:", error);
+        alert("Error processing image. Please try again.");
+        removeSelectedImage(); // Clear state on error
+    }
+}
+
+/** Displays the image preview in the input area. */
+function displayImagePreview(imageUrl) {
+    if (imagePreview && imagePreviewArea) {
+        imagePreview.src = imageUrl;
+        imagePreviewArea.style.display = 'inline-block'; // Show the preview container
+    }
+}
+
+/** Removes the selected image and clears the preview. */
+function removeSelectedImage() {
+    selectedImageData = null;
+    selectedImageMimeType = null;
+    if (selectedImagePreviewUrl) {
+        URL.revokeObjectURL(selectedImagePreviewUrl); // Important to free memory
+        selectedImagePreviewUrl = null;
+    }
+    if (imagePreviewArea) {
+        imagePreviewArea.style.display = 'none'; // Hide preview
+    }
+    if (imagePreview) {
+        imagePreview.src = '#'; // Clear src
+    }
+    if (imageUploadInput) {
+        imageUploadInput.value = ''; // Reset the file input so the same file can be selected again
+    }
+    console.log("Selected image removed.");
 }
 
 
@@ -870,246 +1366,407 @@ if (personalitySelector) personalitySelector.disabled = !show;
 * Loads history, sets model/personality, displays messages, and prepares the session.
 */
 async function initializeAICurrentChat() {
-if (isInitializing) { console.warn("AI Initialization already in progress."); return; }
-isInitializing = true;
-console.log(`Attempting to initialize AI for chat: ${currentChatId}`);
+    if (isInitializing) { console.warn("AI Initialization already in progress."); return; }
+    isInitializing = true;
+    console.log(`Attempting to initialize AI for chat: ${currentChatId}`);
 
-// Ensure we have a valid chat context
-if (!currentChatId || !chats[currentChatId]) {
-console.log("No active chat selected or chat data missing. Switching to initial view.");
-switchToInitialView(); // Go back to start screen if no valid chat
-isInitializing = false;
-return;
+    // Ensure we have a valid chat context
+    if (!currentChatId || !chats[currentChatId]) {
+        console.log("No active chat selected or chat data missing. Switching to initial view.");
+        switchToInitialView(); // Go back to start screen if no valid chat
+        isInitializing = false;
+        return;
+    }
+
+    const chatData = chats[currentChatId];
+    // Use chat's model/personality, falling back to global preference/default only if missing
+    const fakeModelNameToUse = chatData.model || loadSelectedModelPreference();
+    const personalityToUse = (fakeModelNameToUse === EXPERIMENTAL_MODEL_NAME) ? (chatData.personality || DEFAULT_PERSONALITY) : undefined;
+    const historyToLoad = chatData.history || [];
+
+    console.log(`Initializing AI for chat ${currentChatId} - Model: ${fakeModelNameToUse}, Personality: ${personalityToUse || 'N/A'}`);
+
+    // Update UI selectors to reflect the current chat's settings
+    modelSelector.value = fakeModelNameToUse;
+    const showPersonality = fakeModelNameToUse === EXPERIMENTAL_MODEL_NAME;
+    togglePersonalitySelector(showPersonality);
+    if (showPersonality && personalityToUse) {
+        personalitySelector.value = personalityToUse;
+    }
+
+    // Clear previous messages and disable input during init
+    chatMessagesContainer.innerHTML = '';
+    messageInput.disabled = true;
+    sendButton.disabled = true;
+    // sendButton.innerHTML = '<i class="fas fa-arrow-up"></i>'; // Reset button icon
+    deactivateReasonMode(); // Ensure reason mode is off when switching chats
+    removeSelectedImage(); // Clear any selected image
+    currentChatSession = null; // Reset current session
+
+    try {
+        // Check for API Key
+        if (!API_KEY || API_KEY === "YOUR_API_KEY" || (API_KEY.startsWith("AIzaSyB") && API_KEY.length < 30)) { // Basic check for placeholder/invalid key
+             throw new Error("API Key is missing, invalid, or a placeholder in the script.");
+        }
+
+        // Initialize the Generative AI client if not already done
+        if (!genAI) {
+            genAI = new GoogleGenerativeAI(API_KEY);
+            console.log("GoogleGenerativeAI client initialized.");
+        }
+
+        // Get the actual Google model name from our mapping for the *selected* model
+        const realModelName = modelMapping[fakeModelNameToUse];
+        if (!realModelName) {
+            throw new Error(`Could not find mapping for selected model: ${fakeModelNameToUse}`);
+        }
+
+        // Generate the system prompt based on selected model and personality (not reasoning mode here)
+        const currentSystemPrompt = getSystemPrompt(fakeModelNameToUse, personalityToUse, false);
+        console.log(`Using real model for session: ${realModelName}`);
+        // console.log("System Prompt for session:", currentSystemPrompt); // Uncomment to debug prompt
+
+        // Get the generative model instance
+        // IMPORTANT: Use the correct model name that supports multimodal input (Flash/Pro do)
+        const model = genAI.getGenerativeModel({ model: realModelName, safetySettings });
+        console.log(`Starting chat session for ${currentChatId} with ${historyToLoad.length} history messages.`);
+
+        // Start the chat session with the system prompt and loaded history
+        // Filter out any potential system messages or image previews from the saved history
+        const filteredHistory = historyToLoad
+            .filter(msg => msg.role === 'user' || msg.role === 'model')
+            .map(msg => ({ role: msg.role, parts: msg.parts })); // Only keep role and parts
+
+        // Prepend the system instruction to the history for the startChat call
+        const historyForSession = [
+             { role: "user", parts: [{ text: currentSystemPrompt }] },
+             // Model needs an initial response to the system prompt
+             { role: "model", parts: [{ text: "Understood. I am ready." }] },
+             ...filteredHistory
+        ];
+
+        // For streaming, we don't maintain a persistent SDK chat session object in the same way.
+        // We'll use the model instance directly with history for each generateContentStream call.
+        currentChatSession = null; // Clear session object as it's not used for streaming this way
+        console.log(`AI Initialized successfully for chat ${currentChatId}. Ready for streaming calls.`);
+
+
+        // Display loaded history messages (excluding the system prompt/initial model response)
+        historyToLoad.forEach(message => {
+             // Display message content (could be string or parts array)
+             // Also pass the stored image preview URL if it exists
+             displayMessage(message.parts, message.role, false, message.imagePreview || null);
+        });
+
+        // Scroll to bottom after loading history (defer slightly)
+        setTimeout(() => { if(chatMessagesContainer) chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight; }, 100);
+
+        // Re-enable input
+        messageInput.disabled = false;
+        sendButton.disabled = false;
+        // sendButton.innerHTML = '<i class="fas fa-arrow-up"></i>'; // Restore send icon
+        messageInput.focus();
+        updateReasonButtonState(); // Update reason button state now that init is done
+
+    } catch (error) {
+        console.error(`Error initializing AI for chat ${currentChatId}:`, error);
+        displayMessage(`AI Initialization Error: ${error.message}. Please check the API Key and console for details. Ensure the key is correctly placed in the script.`, 'bot', true);
+        // Keep input disabled if init fails
+        sendButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i>'; // Show error icon
+        if (reasonButton) reasonButton.disabled = true; // Disable reason button too
+    } finally {
+        isInitializing = false; // Mark initialization as complete (success or fail)
+    }
 }
 
-const chatData = chats[currentChatId];
-// Use chat's model/personality, falling back to global preference/default only if missing
-const fakeModelNameToUse = chatData.model || loadSelectedModelPreference();
-const personalityToUse = (fakeModelNameToUse === EXPERIMENTAL_MODEL_NAME) ? (chatData.personality || DEFAULT_PERSONALITY) : undefined;
-const historyToLoad = chatData.history || [];
 
-console.log(`Initializing AI for chat ${currentChatId} - Model: ${fakeModelNameToUse}, Personality: ${personalityToUse || 'N/A'}`);
-
-// Update UI selectors to reflect the current chat's settings
-modelSelector.value = fakeModelNameToUse;
-const showPersonality = fakeModelNameToUse === EXPERIMENTAL_MODEL_NAME;
-togglePersonalitySelector(showPersonality);
-if (showPersonality && personalityToUse) {
-personalitySelector.value = personalityToUse;
-}
-
-// Clear previous messages and disable input during init
-chatMessagesContainer.innerHTML = '';
-messageInput.disabled = true;
-sendButton.disabled = true;
-sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>'; // Show loading spinner
-currentChatSession = null; // Reset current session
-
-try {
-// Check for API Key
-if (!API_KEY || API_KEY === "YOUR_API_KEY") {
-throw new Error("API Key is missing or not configured in the script.");
-}
-
-// Initialize the Generative AI client if not already done
-if (!genAI) {
-genAI = new GoogleGenerativeAI(API_KEY);
-console.log("GoogleGenerativeAI client initialized.");
-}
-
-// Get the actual Google model name from our mapping
-const realModelName = modelMapping[fakeModelNameToUse];
-if (!realModelName) {
-throw new Error(`Could not find mapping for model: ${fakeModelNameToUse}`);
-}
-
-// Generate the system prompt based on model and personality
-const currentSystemPrompt = getSystemPrompt(fakeModelNameToUse, personalityToUse);
-console.log(`Using real model: ${realModelName}`);
-// console.log("System Prompt:", currentSystemPrompt); // Uncomment to debug prompt
-
-// Get the generative model instance
-const model = genAI.getGenerativeModel({ model: realModelName, safetySettings });
-console.log(`Starting chat session for ${currentChatId} with ${historyToLoad.length} history messages.`);
-
-// Start the chat session with the system prompt and loaded history
-// Filter out any potential system messages from the saved history
-const filteredHistory = historyToLoad.filter(msg => msg.role === 'user' || msg.role === 'model');
-currentChatSession = model.startChat({
-history: [
-// Prepend the system instruction
-{ role: "user", parts: [{ text: currentSystemPrompt }] },
-// Append the actual chat history
-...filteredHistory
-],
-generationConfig: { /* Optional generation config */ }
-});
-
-console.log(`AI Initialized successfully for chat ${currentChatId}`);
-
-// Display loaded history messages
-filteredHistory.forEach(message => {
-const text = message.parts && message.parts[0] ? message.parts[0].text : '';
-// Display even empty strings from model history if they exist
-displayMessage(text, message.role === 'model' ? 'bot' : 'user');
-});
-
-// Scroll to bottom after loading history (defer slightly)
-setTimeout(() => { if(chatMessagesContainer) chatMessagesContainer.scrollTop = chatMessagesContainer.scrollHeight; }, 100);
-
-// Re-enable input
-messageInput.disabled = false;
-sendButton.disabled = false;
-sendButton.innerHTML = '<i class="fas fa-arrow-up"></i>'; // Restore send icon
-messageInput.focus();
-
-} catch (error) {
-console.error(`Error initializing AI for chat ${currentChatId}:`, error);
-displayMessage(`AI Initialization Error: ${error.message}. Please check the API Key and console for details.`, 'bot', true);
-// Keep input disabled if init fails
-sendButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i>'; // Show error icon
-} finally {
-isInitializing = false; // Mark initialization as complete (success or fail)
-}
-}
-
-/** Handles sending a message from the main chat input or the initial input. */
+/** Handles sending a message, including Reason mode delay, image data, and streaming. */
 async function sendMessageInternal(messageText, isInitialMessage = false) {
-if (!messageText) return; // Don't process empty messages
+    // Prevent sending if empty text AND no image selected, or if reason indicator is showing
+    if ((!messageText && !selectedImageData) || currentReasonIndicatorElement) return;
 
-let chatIdForMessage = currentChatId;
+    let chatIdForMessage = currentChatId;
+    let usedReasonModeForThisMessage = false;
+    const imageToSend = selectedImageData; // Capture current image state
+    const imageMimeType = selectedImageMimeType;
+    const imagePreviewForDisplay = selectedImagePreviewUrl; // Capture preview URL for display
 
-// --- Handle New Chat Creation ---
-if (!chatIdForMessage) {
-console.log(`Creating new chat (${isInitialMessage ? 'initial' : 'button'}).`);
-const newChatId = generateChatId();
-const selectedModel = modelSelector.value; // Get model from UI
-const selectedPersonality = (selectedModel === EXPERIMENTAL_MODEL_NAME) ? personalitySelector.value : undefined;
-chats[newChatId] = {
-history: [],
-model: selectedModel,
-title: "New Chat", // Temporary title
-personality: selectedPersonality
-};
-currentChatId = newChatId; // Set as active chat
-chatIdForMessage = newChatId;
-console.log(`Created new chat: ${currentChatId} with model ${selectedModel}, personality ${selectedPersonality || 'N/A'}`);
-saveCurrentChatId();
-saveAllChats();
-renderChatList();
-updateActiveChatListItem();
+    // --- Handle New Chat Creation ---
+    if (!chatIdForMessage) {
+        console.log(`Creating new chat (${isInitialMessage ? 'initial' : 'button'}).`);
+        const newChatId = generateChatId();
+        const selectedModel = modelSelector.value;
+        const selectedPersonality = (selectedModel === EXPERIMENTAL_MODEL_NAME) ? personalitySelector.value : undefined;
+        chats[newChatId] = { history: [], model: selectedModel, title: "New Chat", personality: selectedPersonality };
+        currentChatId = newChatId;
+        chatIdForMessage = newChatId;
+        console.log(`Created new chat: ${currentChatId}`);
+        saveCurrentChatId(); saveAllChats(); renderChatList(); updateActiveChatListItem();
+        deactivateReasonMode();
 
-// If it wasn't the initial message (i.e., from New Chat button), need to init AI first
-if (!isInitialMessage) {
-await initializeAICurrentChat();
-if (!currentChatSession) {
-console.error("sendMessage: AI session failed to initialize for new chat.");
-displayMessage("Failed to start the AI session. Please try again.", 'bot', true);
-return; // Stop if init failed
+        // Initialize AI if needed (for non-initial messages)
+        if (!isInitialMessage) {
+            await initializeAICurrentChat(); // This now clears selected image
+        }
+        // Display user message (text + potential image preview)
+        const userContentParts = [];
+        if (messageText) userContentParts.push({ text: messageText });
+        displayMessage(userContentParts.length > 0 ? userContentParts : "[Image Sent]", 'user', false, imagePreviewForDisplay);
+        addMessageToCurrentChatHistory('user', userContentParts.length > 0 ? userContentParts : [{text: "[Image Sent]"}], imagePreviewForDisplay); // Save text part and preview URL
+    } else {
+        // --- Message for Existing Chat ---
+        if (isRateLimited()) return;
+        messageTimestamps.push(Date.now());
+        // Display user message (text + potential image preview)
+        const userContentParts = [];
+        if (messageText) userContentParts.push({ text: messageText });
+        displayMessage(userContentParts.length > 0 ? userContentParts : "[Image Sent]", 'user', false, imagePreviewForDisplay);
+        addMessageToCurrentChatHistory('user', userContentParts.length > 0 ? userContentParts : [{text: "[Image Sent]"}], imagePreviewForDisplay); // Save text part and preview URL
+    }
+
+     // Clear the selected image state *after* capturing it for sending and display
+    removeSelectedImage();
+
+    // --- Determine Model & Check Reason Mode ---
+    if (!chatIdForMessage || !chats[chatIdForMessage]) {
+        console.error("sendMessageInternal: Invalid chat state.");
+        displayMessage("Cannot send message. Chat state is invalid.", 'bot', true);
+        return;
+    }
+     // Ensure genAI is initialized
+    if (!genAI) {
+         console.error("sendMessageInternal: genAI not initialized.");
+         displayMessage("AI client not ready. Please reload.", 'bot', true);
+         return;
+    }
+
+
+    let modelToUse = modelMapping[chats[chatIdForMessage].model];
+    let systemPromptForSend = getSystemPrompt(chats[chatIdForMessage].model, chats[chatIdForMessage].personality, false);
+    let isReasoning = false;
+
+    if (isReasonModeActive) {
+        const currentUsage = getReasonUsage();
+        if (currentUsage < MAX_REASON_USES_PER_DAY) {
+            console.log("Reason mode active and usage available.");
+            modelToUse = REASON_MODE_MODEL;
+            usedReasonModeForThisMessage = true;
+            isReasoning = true;
+            systemPromptForSend = getSystemPrompt(chats[chatIdForMessage].model, chats[chatIdForMessage].personality, true);
+        } else {
+            console.warn("Reason mode active, but daily limit reached.");
+            displayMessage(`Reason mode daily limit (${MAX_REASON_USES_PER_DAY}) reached. Sending with standard model.`, 'bot', true);
+            deactivateReasonMode(); // Deactivate visually
+            modelToUse = modelMapping[chats[chatIdForMessage].model];
+            systemPromptForSend = getSystemPrompt(chats[chatIdForMessage].model, chats[chatIdForMessage].personality, false);
+        }
+    }
+
+    // --- Disable Inputs ---
+    if (messageInput) messageInput.disabled = true;
+    if (sendButton) sendButton.disabled = true;
+    if (initialSendButton) initialSendButton.disabled = true;
+    if (reasonButton) reasonButton.disabled = true;
+    if (imageUploadButton) imageUploadButton.disabled = true; // Disable image upload too
+
+    // --- Handle Reason Mode Delay ---
+    if (usedReasonModeForThisMessage) {
+        showReasonThinkingIndicator(); // Show the dedicated indicator message
+        const delay = Math.random() * (MAX_REASON_DELAY_MS - MIN_REASON_DELAY_MS) + MIN_REASON_DELAY_MS;
+        console.log(`Reason mode: Simulating thinking for ${Math.round(delay / 1000)}s...`);
+        await new Promise(resolve => setTimeout(resolve, delay));
+        if (!currentReasonIndicatorElement) {
+             console.log("Thinking indicator removed prematurely. Aborting send.");
+             if (messageInput) messageInput.disabled = false;
+             if (sendButton) sendButton.disabled = false;
+             if (initialSendButton) initialSendButton.disabled = false;
+             if (imageUploadButton) imageUploadButton.disabled = false;
+             updateReasonButtonState();
+             return;
+        }
+        console.log("Reason mode: Thinking complete. Sending to Pro model.");
+        removeReasonThinkingIndicator(); // Remove indicator *before* starting stream
+    }
+    // No typing indicator for streaming
+
+    // --- Construct Content Parts for API ---
+    const contentParts = [];
+    if (messageText) {
+        contentParts.push({ text: messageText });
+    }
+    if (imageToSend && imageMimeType) {
+        contentParts.push({
+            inline_data: {
+                mime_type: imageMimeType,
+                data: imageToSend
+            }
+        });
+    } else if (!messageText) {
+         // Handle case where only image was sent (add default text)
+         contentParts.push({ text: "Describe this image." });
+    }
+
+    // --- Send to AI (Streaming) ---
+    let botMessageElement = null;
+    let botMessageBubble = null;
+    let botMessageParagraph = null;
+    let fullResponseText = "";
+    let hasCodeInResponse = false;
+
+    try {
+        const modelInstance = genAI.getGenerativeModel({ model: modelToUse, safetySettings });
+        console.log(`Sending content stream request to AI model: ${modelToUse}`);
+
+        // Prepare history for generateContentStream call
+        const mainHistory = chats[chatIdForMessage]?.history || [];
+        const historyForAPI = mainHistory
+            .slice(-10) // Limit context window
+            .filter(msg => msg.role === 'user' || msg.role === 'model')
+            .map(msg => ({ role: msg.role, parts: msg.parts })); // Format for API
+
+        const streamResult = await modelInstance.generateContentStream({
+             contents: [...historyForAPI, { role: "user", parts: contentParts }],
+             generationConfig: { /* Optional */ },
+             systemInstruction: { role: "system", parts: [{ text: systemPromptForSend }] }
+        });
+
+        // Create the initial bot message container (empty)
+        botMessageElement = displayMessage('', 'bot'); // Display empty bot message bubble
+        if (botMessageElement) {
+             botMessageBubble = botMessageElement.querySelector('.message-bubble');
+             botMessageParagraph = botMessageBubble?.querySelector('p[data-stream-target="true"]');
+        }
+
+        if (!botMessageParagraph) {
+             throw new Error("Could not find target paragraph element for streaming.");
+        }
+
+        // Process the stream
+        for await (const chunk of streamResult.stream) {
+            // Check for safety blocks within the stream
+            const blockReason = chunk.promptFeedback?.blockReason;
+            if (blockReason) {
+                console.warn(`Stream blocked. Reason: ${blockReason}`);
+                // Display block message instead of appending text
+                 botMessageParagraph.innerHTML = `<span style="color: red;">My response was blocked due to safety guidelines (${blockReason}).</span>`;
+                 fullResponseText = `[Response blocked due to: ${blockReason}]`; // Store block reason
+                 break; // Stop processing stream
+            }
+
+            try {
+                const chunkText = chunk.text();
+                fullResponseText += chunkText;
+                // Append text directly. Basic markdown like **bold** might render okay.
+                // Code blocks will look messy until the end.
+                // Replace newlines in the chunk with <br> for immediate display
+                botMessageParagraph.innerHTML += chunkText.replace(/\n/g, '<br>');
+                // Scroll down as text is added
+                chatMessagesContainer.scrollTo({ top: chatMessagesContainer.scrollHeight, behavior: 'smooth' });
+            } catch (error) {
+                 // Handle potential errors from chunk.text() if a chunk is malformed
+                 console.error("Error processing stream chunk:", error);
+                 // Optionally display an error in the message bubble
+                 botMessageParagraph.innerHTML += `<br><span style="color: red;">[Error processing part of response]</span>`;
+            }
+        }
+
+        console.log("Stream finished.");
+
+        // Final processing after stream completion (if not blocked)
+        if (!fullResponseText.startsWith("[Response blocked")) {
+             // Re-process the full text for proper code block handling and highlighting
+             botMessageParagraph.innerHTML = ''; // Clear incrementally added content
+             hasCodeInResponse = processAndAppendText(fullResponseText, botMessageParagraph);
+
+             // Add timestamp now that message is complete
+             if (botMessageBubble) {
+                 const timestampSpan = document.createElement('span');
+                 timestampSpan.classList.add('timestamp');
+                 timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                 botMessageBubble.appendChild(timestampSpan);
+             }
+
+             // Highlight code if present
+             if (hasCodeInResponse && window.Prism && botMessageBubble) {
+                 setTimeout(() => Prism.highlightAllUnder(botMessageBubble), 0);
+             }
+        }
+
+        // Save the complete response to history
+        addMessageToCurrentChatHistory('model', fullResponseText);
+
+        if (usedReasonModeForThisMessage) {
+            incrementReasonUsage(); // Updates UI via updateReasonButtonState
+        }
+
+    } catch (error) {
+        console.error("Streaming API Error:", error);
+        // Remove any partial message or indicator on error
+        if (botMessageElement && botMessageElement.parentNode) {
+             botMessageElement.parentNode.removeChild(botMessageElement);
+        } else {
+             // If the error happened before the bubble was created, remove indicators
+             removeReasonThinkingIndicator();
+             // removeTypingIndicator(); // Not used anymore
+        }
+
+        let errMsg = "Sorry, I encountered an error processing your request.";
+        if (error?.message) { errMsg += ` Details: ${error.message}`; }
+        if (error?.message?.includes('API key not valid')) {
+             errMsg = "API Key Error: The provided API key is not valid. Please check the key in the script.";
+        } else if (error?.message?.includes('quota')) {
+             errMsg = "Quota Error: You may have exceeded your API usage quota. Please check your Google AI Studio account.";
+        } else if (error?.message?.includes('Chat session is not available')) {
+             errMsg = "Chat session error. Please try starting a new chat or reloading.";
+        } else if (error?.message?.includes('400')) { // Catch generic bad requests
+             errMsg += " (Check input format/size or prompt structure)";
+        }
+        displayMessage(errMsg, 'bot', true); // Display error in a new message
+        addMessageToCurrentChatHistory('model', `[Error generating response: ${error.message || 'Unknown'}]`);
+    } finally {
+        // Always deactivate Reason mode button visually after send attempt
+        deactivateReasonMode();
+
+        // Re-enable input and buttons
+        if (messageInput) messageInput.disabled = false;
+        if (sendButton) sendButton.disabled = false;
+        if (initialSendButton) initialSendButton.disabled = false; // Re-enable initial button too
+        if (imageUploadButton) imageUploadButton.disabled = false; // Re-enable image upload
+        updateReasonButtonState(); // Ensure reason button state is correct
+        if (messageInput) messageInput.focus();
+    }
 }
-}
-// Display user message *after* potential init clears the screen
-displayMessage(messageText, 'user');
-addMessageToCurrentChatHistory('user', messageText); // Save user message (sets title)
 
-} else {
-// --- Message for Existing Chat ---
-if (isRateLimited()) return; // Check rate limit
-messageTimestamps.push(Date.now()); // Record timestamp
-
-displayMessage(messageText, 'user');
-addMessageToCurrentChatHistory('user', messageText); // Save user message
-}
-// --- End of handling user message ---
-
-
-// --- Send to AI ---
-if (!chatIdForMessage || !chats[chatIdForMessage] || !currentChatSession) {
-console.error("sendMessageInternal: Invalid state before sending to AI.", { chatIdForMessage, chatExists: !!chats[chatIdForMessage], sessionExists: !!currentChatSession });
-displayMessage("Cannot send message. AI session is not ready.", 'bot', true);
-return;
-}
-
-// Disable input, show loading state
-if (isInitialMessage) { initialMessageInput.value = ''; } else { messageInput.value = ''; }
-messageInput.disabled = true;
-sendButton.disabled = true;
-sendButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
-const typingIndicator = showTypingIndicator();
-
-try {
-console.log("Sending message to AI model...");
-const result = await currentChatSession.sendMessage(messageText);
-console.log("AI response received.");
-removeTypingIndicator();
-
-const response = result.response;
-const responseText = response.text();
-
-// Check for safety blocks or empty response
-if (response.promptFeedback?.blockReason) {
-console.warn(`AI response blocked. Reason: ${response.promptFeedback.blockReason}`);
-displayMessage(`My response was blocked due to safety guidelines (${response.promptFeedback.blockReason}). Please rephrase or try a different topic.`, 'bot', true);
-// Optionally save blocked status
-// addMessageToCurrentChatHistory('model', `[Blocked: ${response.promptFeedback.blockReason}]`);
-} else {
-// Display and save the bot response (even if empty)
-displayMessage(responseText, 'bot');
-addMessageToCurrentChatHistory('model', responseText);
-}
-
-} catch (error) {
-console.error("sendMessage API Error:", error);
-removeTypingIndicator();
-let errMsg = "Sorry, I encountered an error processing your request.";
-if (error?.message) { errMsg += ` Details: ${error.message}`; }
-displayMessage(errMsg, 'bot', true);
-// Optionally save error status
-// addMessageToCurrentChatHistory('model', `[Error: ${error.message || 'Unknown'}]`);
-} finally {
-// Re-enable input
-messageInput.disabled = false;
-sendButton.disabled = false;
-sendButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
-messageInput.focus();
-}
-}
 
 /** Wrapper for sending from the main chat input. */
 function sendMessage() {
-if (!messageInput || isInitializing) return;
-sendMessageInternal(messageInput.value.trim(), false);
+    // Prevent sending if initializing or if a reason indicator is showing
+    if (isInitializing || currentReasonIndicatorElement) return;
+    // Get text and check if image is selected
+    const messageText = messageInput.value.trim();
+    const imageSelected = !!selectedImageData;
+
+    // Proceed only if there's text OR an image
+    if (messageText || imageSelected) {
+        messageInput.value = ''; // Clear text input immediately
+        sendMessageInternal(messageText, false);
+    }
 }
 
 /** Wrapper for sending from the initial welcome screen input. */
 async function handleInitialSendMessage() {
-if (!initialMessageInput || !initialSendButton || isInitializing) return;
-const messageText = initialMessageInput.value.trim();
-if (!messageText) return;
+     // Prevent sending if initializing or if a reason indicator is showing
+    if (isInitializing || currentReasonIndicatorElement) return;
+    const messageText = initialMessageInput.value.trim();
+    initialMessageInput.value = ''; // Clear input immediately
+    // Initial send doesn't support images currently, only text
+    if (!messageText) return;
 
-// Create chat state first (as it's always a new chat)
-const newChatId = generateChatId();
-const selectedModel = loadSelectedModelPreference(); // Use global preference
-const selectedPersonality = (selectedModel === EXPERIMENTAL_MODEL_NAME) ? DEFAULT_PERSONALITY : undefined;
-chats[newChatId] = { history: [], model: selectedModel, title: "New Chat", personality: selectedPersonality };
-currentChatId = newChatId;
-console.log(`Created new chat from initial view: ${currentChatId}`);
-saveCurrentChatId(); saveAllChats(); renderChatList(); updateActiveChatListItem();
+    // Switch UI first
+    switchToChatView();
 
-// Switch UI and Initialize AI
-switchToChatView();
-await initializeAICurrentChat(); // Wait for AI initialization
-
-if (!currentChatSession) {
-console.error("handleInitialSendMessage: AI session failed to initialize.");
-displayMessage("Failed to start the AI session. Check config/API Key.", 'bot', true);
-messageInput.disabled = true; sendButton.disabled = true; // Keep disabled
-sendButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
-return; // Stop processing
-}
-
-// Now send the message using the internal function
-await sendMessageInternal(messageText, true);
+    // Let sendMessageInternal handle initialization and sending
+    await sendMessageInternal(messageText, true);
 }
 
 
@@ -1120,48 +1777,56 @@ await sendMessageInternal(messageText, true);
 * @param {string} chatId - The ID of the chat to select.
 */
 function handleSelectChat(chatId) {
-if (chatId === currentChatId || isInitializing) return; // Do nothing if already selected or AI is busy
+    // Prevent switching if initializing or if reason indicator is showing
+    if (chatId === currentChatId || isInitializing || currentReasonIndicatorElement) return;
 
-console.log(`Selecting chat: ${chatId}`);
-currentChatId = chatId;
-saveCurrentChatId(); // Persist the selection
-updateActiveChatListItem(); // Update sidebar UI
-switchToChatView(); // Ensure chat view is visible
-initializeAICurrentChat(); // Initialize AI for the selected chat
+    console.log(`Selecting chat: ${chatId}`);
+    currentChatId = chatId;
+    saveCurrentChatId(); // Persist the selection
+    updateActiveChatListItem(); // Update sidebar UI
+    switchToChatView(); // Ensure chat view is visible
+    // Deactivate reason mode immediately when switching chats
+    deactivateReasonMode();
+    initializeAICurrentChat(); // Initialize AI for the selected chat (also clears image)
 }
 
 /** Handles clicking the "New Chat" button. */
 function handleNewChat() {
-console.log("New chat requested via button");
-if (isInitializing) return; // Don't interrupt AI initialization
+    console.log("New chat requested via button");
+     // Prevent if initializing or if reason indicator is showing
+    if (isInitializing || currentReasonIndicatorElement) return;
 
-currentChatId = null; // Clear active chat ID
-saveCurrentChatId();
-currentChatSession = null; // Clear AI session
+    currentChatId = null; // Clear active chat ID
+    saveCurrentChatId();
+    currentChatSession = null; // Clear AI session
 
-switchToChatView(); // Show the chat interface
-chatMessagesContainer.innerHTML = ''; // Clear any previous messages
-updateActiveChatListItem(); // Deactivate item in sidebar
+    switchToChatView(); // Show the chat interface
+    chatMessagesContainer.innerHTML = ''; // Clear any previous messages
+    updateActiveChatListItem(); // Deactivate item in sidebar
 
-// Reset input fields and buttons
-messageInput.value = '';
-messageInput.disabled = false;
-messageInput.placeholder = "Message Graxybot..."; // Reset placeholder
-sendButton.disabled = false;
-sendButton.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    // Reset input fields and buttons
+    messageInput.value = '';
+    messageInput.disabled = false;
+    messageInput.placeholder = "Message Graxybot..."; // Reset placeholder
+    sendButton.disabled = false;
+    // sendButton.innerHTML = '<i class="fas fa-arrow-up"></i>'; // Reset button
 
-// Set model selector to the global preference
-const preferredModel = loadSelectedModelPreference();
-modelSelector.value = preferredModel;
+    // Set model selector to the global preference
+    const preferredModel = loadSelectedModelPreference();
+    modelSelector.value = preferredModel;
 
-// Show/hide and set personality based on the preferred model
-const showPersonality = preferredModel === EXPERIMENTAL_MODEL_NAME;
-togglePersonalitySelector(showPersonality);
-if (showPersonality) {
-personalitySelector.value = DEFAULT_PERSONALITY; // Reset to default for new chat
-}
+    // Show/hide and set personality based on the preferred model
+    const showPersonality = preferredModel === EXPERIMENTAL_MODEL_NAME;
+    togglePersonalitySelector(showPersonality);
+    if (showPersonality) {
+        personalitySelector.value = DEFAULT_PERSONALITY; // Reset to default for new chat
+    }
 
-messageInput.focus(); // Focus the input field
+    // Deactivate reason mode and clear image for new chats
+    deactivateReasonMode();
+    removeSelectedImage();
+
+    messageInput.focus(); // Focus the input field
 }
 
 /**
@@ -1169,198 +1834,298 @@ messageInput.focus(); // Focus the input field
 * @param {string} chatIdToDelete - The ID of the chat to delete.
 */
 function handleDeleteChat(chatIdToDelete) {
-if (!chats[chatIdToDelete] || isInitializing) return; // Can't delete non-existent chat or while AI is busy
+     // Prevent if initializing or if reason indicator is showing
+    if (!chats[chatIdToDelete] || isInitializing || currentReasonIndicatorElement) return;
 
-// Confirmation dialog
-const chatTitle = chats[chatIdToDelete].title || `Chat ${chatIdToDelete.substring(chatIdToDelete.length - 5)}`;
-if (!confirm(`Are you sure you want to delete the chat "${chatTitle}"? This cannot be undone.`)) {
-return; // User cancelled
-}
+    // Confirmation dialog
+    const chatTitle = chats[chatIdToDelete].title || `Chat ${chatIdToDelete.substring(chatIdToDelete.length - 5)}`;
+    if (!confirm(`Are you sure you want to delete the chat "${chatTitle}"? This cannot be undone.`)) {
+        return; // User cancelled
+    }
 
-console.log(`Deleting chat: ${chatIdToDelete}`);
-const wasActive = (currentChatId === chatIdToDelete);
-delete chats[chatIdToDelete]; // Remove from memory
-saveAllChats(); // Update localStorage
+    console.log(`Deleting chat: ${chatIdToDelete}`);
+    const wasActive = (currentChatId === chatIdToDelete);
 
-// If the deleted chat was the active one, switch to a "new chat" state
-if (wasActive) {
-console.log("Deleted chat was active, switching to new chat state.");
-handleNewChat(); // Go to the new chat screen/state
-}
+    // If deleting the active chat, remove any thinking indicator first
+    if (wasActive) {
+        removeReasonThinkingIndicator();
+    }
 
-renderChatList(); // Refresh the sidebar list (which also updates active state if needed)
+    delete chats[chatIdToDelete]; // Remove from memory
+    saveAllChats(); // Update localStorage
+
+    // If the deleted chat was the active one, switch to a "new chat" state
+    if (wasActive) {
+        console.log("Deleted chat was active, switching to new chat state.");
+        handleNewChat(); // Go to the new chat screen/state
+    }
+
+    renderChatList(); // Refresh the sidebar list (which also updates active state if needed)
 }
 
 /** Handles changes to the Model Selector dropdown. */
 function handleModelChange(event) {
-const selectedModel = event.target.value;
-console.log(`Model selected via UI: ${selectedModel}`);
-saveSelectedModelPreference(selectedModel); // Save global preference
+      // Prevent changes if initializing or if reason indicator is showing
+     if (isInitializing || currentReasonIndicatorElement) return;
+    const selectedModel = event.target.value;
+    console.log(`Model selected via UI: ${selectedModel}`);
+    saveSelectedModelPreference(selectedModel); // Save global preference
 
-const showPersonality = selectedModel === EXPERIMENTAL_MODEL_NAME;
-togglePersonalitySelector(showPersonality); // Show/hide personality selector
+    const showPersonality = selectedModel === EXPERIMENTAL_MODEL_NAME;
+    togglePersonalitySelector(showPersonality); // Show/hide personality selector
 
-// If a chat is currently active, update its model and re-initialize
-if (currentChatId && chats[currentChatId]) {
-console.log(`Updating model for current chat ${currentChatId} to ${selectedModel}`);
-chats[currentChatId].model = selectedModel;
-// If switching TO experimental, set default personality.
-// If switching FROM experimental, remove personality.
-if (showPersonality) {
-// Use current personality value if available, else default
-chats[currentChatId].personality = personalitySelector.value || DEFAULT_PERSONALITY;
-} else {
-delete chats[currentChatId].personality; // Clean up personality if model doesn't support it
-}
-saveAllChats();
-initializeAICurrentChat(); // Re-initialize with new model/personality settings
-} else if (!currentChatId && chatView && !chatView.classList.contains('hidden')) {
-// If on a "new chat" screen (no currentChatId but chat view visible)
-// just update visibility and reset personality selector if needed.
-// Personality will be set when first message is sent.
-if (showPersonality) personalitySelector.value = DEFAULT_PERSONALITY;
-}
-// No action needed if on initial view, visibility is handled by togglePersonalitySelector
+    // If a chat is currently active, update its model and re-initialize
+    if (currentChatId && chats[currentChatId]) {
+        console.log(`Updating model for current chat ${currentChatId} to ${selectedModel}`);
+        chats[currentChatId].model = selectedModel;
+        // If switching TO experimental, set default personality.
+        // If switching FROM experimental, remove personality.
+        if (showPersonality) {
+            // Use current personality value if available, else default
+            chats[currentChatId].personality = personalitySelector.value || DEFAULT_PERSONALITY;
+        } else {
+            delete chats[currentChatId].personality; // Clean up personality if model doesn't support it
+        }
+        saveAllChats();
+        deactivateReasonMode(); // Deactivate reason mode when changing base model
+        initializeAICurrentChat(); // Re-initialize with new model/personality settings
+    } else if (!currentChatId && chatView && !chatView.classList.contains('hidden')) {
+        // If on a "new chat" screen (no currentChatId but chat view visible)
+        // just update visibility and reset personality selector if needed.
+        // Personality will be set when first message is sent.
+        if (showPersonality) personalitySelector.value = DEFAULT_PERSONALITY;
+        deactivateReasonMode(); // Also ensure reason mode is off here
+    }
+    // No action needed if on initial view, visibility is handled by togglePersonalitySelector
 }
 
 /** Handles changes to the Personality Selector dropdown. */
 function handlePersonalityChange(event) {
-const selectedPersonality = event.target.value;
-console.log(`Personality selected: ${selectedPersonality}`);
+      // Prevent changes if initializing or if reason indicator is showing
+     if (isInitializing || currentReasonIndicatorElement) return;
+    const selectedPersonality = event.target.value;
+    console.log(`Personality selected: ${selectedPersonality}`);
 
-// If a chat is active AND uses the experimental model, update its personality and re-initialize
-if (currentChatId && chats[currentChatId] && chats[currentChatId].model === EXPERIMENTAL_MODEL_NAME) {
-console.log(`Updating personality for current chat ${currentChatId} to ${selectedPersonality}`);
-chats[currentChatId].personality = selectedPersonality;
-saveAllChats();
-initializeAICurrentChat(); // Re-initialize with the new personality prompt
+    // If a chat is active AND uses the experimental model, update its personality and re-initialize
+    if (currentChatId && chats[currentChatId] && chats[currentChatId].model === EXPERIMENTAL_MODEL_NAME) {
+        console.log(`Updating personality for current chat ${currentChatId} to ${selectedPersonality}`);
+        chats[currentChatId].personality = selectedPersonality;
+        saveAllChats();
+        deactivateReasonMode(); // Deactivate reason mode when changing personality
+        initializeAICurrentChat(); // Re-initialize with the new personality prompt
+    }
+    // No action needed if no chat is active or the active chat doesn't use the experimental model
 }
-// No action needed if no chat is active or the active chat doesn't use the experimental model
+
+/** Handles clicks on the Reason button. */
+function handleReasonButtonClick() {
+    // Prevent toggle if initializing or if reason indicator is showing
+    if (isInitializing || currentReasonIndicatorElement) return;
+     if (reasonButton.disabled && !isReasonModeActive) return; // Prevent activating if disabled (0 uses)
+
+    if (isReasonModeActive) {
+        // Deactivate
+        deactivateReasonMode();
+        console.log("Reason mode deactivated by click.");
+    } else {
+        // Try to activate
+        const remainingUses = MAX_REASON_USES_PER_DAY - getReasonUsage();
+        if (remainingUses > 0) {
+            isReasonModeActive = true;
+            reasonButton.classList.add('active');
+            reasonButton.disabled = false; // Ensure it's enabled when active
+            updateReasonButtonState(); // Refresh usage display and tooltip
+            console.log("Reason mode activated.");
+        } else {
+            console.warn("Attempted to activate Reason mode with 0 uses remaining.");
+        }
+    }
 }
 
 
 // --- Initialization Sequence ---
 document.addEventListener('DOMContentLoaded', () => {
-console.log("DOM Loaded. Initializing Graxybot UI...");
+    console.log("DOM Loaded. Initializing Graxybot UI...");
 
-// Get references to all required DOM elements
-chatMessagesContainer = document.getElementById('chat-messages');
-messageInput = document.getElementById('message-input');
-sendButton = document.getElementById('send-button');
-rateLimitMessageDiv = document.getElementById('rate-limit-message');
-modelSelector = document.getElementById('model-selector');
-initialView = document.getElementById('initial-view');
-chatView = document.getElementById('chat-view');
-initialMessageInput = document.getElementById('initial-message-input');
-initialSendButton = document.getElementById('initial-send-button');
-sidebar = document.querySelector('.sidebar');
-newChatBtn = document.getElementById('new-chat-btn');
-chatListUl = document.getElementById('chat-list');
-personalitySelectorContainer = document.getElementById('personality-selector-container');
-personalitySelector = document.getElementById('personality-selector');
+    // Get references to all required DOM elements
+    chatMessagesContainer = document.getElementById('chat-messages');
+    messageInput = document.getElementById('message-input');
+    sendButton = document.getElementById('send-button');
+    rateLimitMessageDiv = document.getElementById('rate-limit-message');
+    modelSelector = document.getElementById('model-selector');
+    initialView = document.getElementById('initial-view');
+    chatView = document.getElementById('chat-view');
+    initialMessageInput = document.getElementById('initial-message-input');
+    initialSendButton = document.getElementById('initial-send-button');
+    sidebar = document.querySelector('.sidebar');
+    newChatBtn = document.getElementById('new-chat-btn');
+    chatListUl = document.getElementById('chat-list');
+    personalitySelectorContainer = document.getElementById('personality-selector-container');
+    personalitySelector = document.getElementById('personality-selector');
+    reasonButton = document.getElementById('reason-button');
+    reasonUsageDisplay = document.getElementById('reason-usage-display');
+    imageUploadButton = document.getElementById('image-upload-button');
+    imageUploadInput = document.getElementById('image-upload-input');
+    imagePreviewArea = document.getElementById('image-preview-area');
+    imagePreview = document.getElementById('image-preview');
+    removeImageButton = document.getElementById('remove-image-button');
 
-// Validate that all essential elements were found
-const essentialElements = { chatMessagesContainer, messageInput, sendButton, rateLimitMessageDiv, modelSelector, initialView, chatView, initialMessageInput, initialSendButton, sidebar, newChatBtn, chatListUl, personalitySelectorContainer, personalitySelector };
-let missingElement = false;
-for (const key in essentialElements) {
-if (!essentialElements[key]) {
-console.error(`Fatal Error: UI element not found: ${key}`);
-missingElement = true;
-}
-}
-if (missingElement) {
-document.body.innerHTML = "<p style='color: red; padding: 20px; font-family: sans-serif;'>Error: Chat interface failed to load completely. Essential elements are missing. Check the console for details.</p>";
-return; // Stop initialization
-}
-console.log("All essential DOM elements found.");
+    // Validate that all essential elements were found
+    const essentialElements = { chatMessagesContainer, messageInput, sendButton, rateLimitMessageDiv, modelSelector, initialView, chatView, initialMessageInput, initialSendButton, sidebar, newChatBtn, chatListUl, personalitySelectorContainer, personalitySelector, reasonButton, reasonUsageDisplay, imageUploadButton, imageUploadInput, imagePreviewArea, imagePreview, removeImageButton };
+    let missingElement = false;
+    for (const key in essentialElements) {
+        if (!essentialElements[key]) {
+            console.error(`Fatal Error: UI element not found: ${key}`);
+            missingElement = true;
+        }
+    }
+    if (missingElement) {
+        document.body.innerHTML = "<p style='color: red; padding: 20px; font-family: sans-serif;'>Error: Chat interface failed to load completely. Essential elements are missing. Check the console for details.</p>";
+        return; // Stop initialization
+    }
+    console.log("All essential DOM elements found.");
 
-// Load data from localStorage
-chats = loadAllChats();
-currentChatId = loadCurrentChatId(); // Get ID, but don't assume chat exists yet
-const preferredModel = loadSelectedModelPreference(); // Load user's preferred model
+    // Load data from localStorage
+    chats = loadAllChats();
+    currentChatId = loadCurrentChatId(); // Get ID, but don't assume chat exists yet
+    const preferredModel = loadSelectedModelPreference(); // Load user's preferred model
 
-// Set the model selector's initial value
-modelSelector.value = preferredModel;
+    // Set the model selector's initial value
+    modelSelector.value = preferredModel;
 
-// Render the chat list in the sidebar
-renderChatList();
+    // Initialize Reason button state and usage display
+    updateReasonButtonState();
+    reasonButton.style.display = 'none'; // Initially hidden
+    reasonUsageDisplay.style.display = 'none'; // Initially hidden
 
-// Check for API Key and handle initial state
-if (!API_KEY || API_KEY === "YOUR_API_KEY") {
-console.warn("API Key is missing or not configured in the script.");
-const warningMsg = "Welcome! Please configure your API Key in the script (`API_KEY` variable) to enable the chat.";
-// Display warning and disable functionality
-if(initialView && !initialView.classList.contains('hidden')) {
-initialMessageInput.placeholder = "API Key needed in script!";
-} else if (chatMessagesContainer) {
-displayMessage(warningMsg, 'bot', true);
-}
-// Disable inputs and controls
-messageInput.disabled = true; sendButton.disabled = true;
-initialMessageInput.disabled = true; initialSendButton.disabled = true;
-modelSelector.disabled = true; personalitySelector.disabled = true;
-newChatBtn.disabled = true;
-// Show initial view if no valid chat is loaded
-if (!currentChatId || !chats[currentChatId]) {
-switchToInitialView();
-} else {
-// If a valid chat exists, show it but indicate the API key issue
-switchToChatView();
-// Attempt init - it will fail and display the API key error message
-initializeAICurrentChat();
-}
-} else {
-// API Key found, proceed with normal initialization
-console.log("API Key found. Proceeding with initialization.");
-if (currentChatId && chats[currentChatId]) {
-// If a valid chat ID was loaded and the chat exists, restore it
-console.log(`Restoring active chat: ${currentChatId}`);
-switchToChatView();
-initializeAICurrentChat(); // Initialize AI for the restored chat
-} else {
-// No valid active chat found, show the initial welcome screen
-console.log("No active chat found or chat data missing. Showing initial view.");
-switchToInitialView(); // This also sets initial selector states
-initialMessageInput.focus();
-}
-}
+    // Render the chat list in the sidebar
+    renderChatList();
 
-// --- Attach Event Listeners ---
-console.log("Attaching event listeners...");
+    // Check for API Key and handle initial state
+    if (!API_KEY || API_KEY === "YOUR_API_KEY" || (API_KEY.startsWith("AIzaSyB") && API_KEY.length < 30)) { // Basic check for placeholder/invalid key
+        console.warn("API Key is missing or not configured in the script.");
+        const warningMsg = "Welcome! Please configure your API Key in the script (`API_KEY` variable) to enable the chat.";
+        // Display warning and disable functionality
+        if(initialView && !initialView.classList.contains('hidden')) {
+             if(initialMessageInput) initialMessageInput.placeholder = "API Key needed in script!";
+        } else if (chatMessagesContainer) {
+             displayMessage(warningMsg, 'bot', true);
+        }
+        // Disable inputs and controls
+        if(messageInput) messageInput.disabled = true;
+        if(sendButton) sendButton.disabled = true;
+        if(initialMessageInput) initialMessageInput.disabled = true;
+        if(initialSendButton) initialSendButton.disabled = true;
+        if(modelSelector) modelSelector.disabled = true;
+        if(personalitySelector) personalitySelector.disabled = true;
+        if(newChatBtn) newChatBtn.disabled = true;
+        if(reasonButton) reasonButton.disabled = true; // Disable reason button
+        if(imageUploadButton) imageUploadButton.disabled = true; // Disable image upload
 
-// Send button in chat view
-sendButton.addEventListener('click', sendMessage);
-// Enter key in chat input (ignore shift+enter for newlines)
-messageInput.addEventListener('keypress', (event) => {
-if (event.key === 'Enter' && !event.shiftKey && !sendButton?.disabled) {
-event.preventDefault(); // Prevent default newline insertion
-sendMessage();
-}
-});
+        // Show initial view if no valid chat is loaded
+        if (!currentChatId || !chats[currentChatId]) {
+            switchToInitialView();
+        } else {
+            // If a valid chat exists, show it but indicate the API key issue
+            switchToChatView();
+            // Attempt init - it will fail and display the API key error message
+            initializeAICurrentChat();
+        }
+    } else {
+        // API Key found, proceed with normal initialization
+        console.log("API Key found. Proceeding with initialization.");
+        if (currentChatId && chats[currentChatId]) {
+            // If a valid chat ID was loaded and the chat exists, restore it
+            console.log(`Restoring active chat: ${currentChatId}`);
+            switchToChatView();
+            initializeAICurrentChat(); // Initialize AI for the restored chat
+        } else {
+            // No valid active chat found, show the initial welcome screen
+            console.log("No active chat found or chat data missing. Showing initial view.");
+            switchToInitialView(); // This also sets initial selector states
+            if(initialMessageInput) initialMessageInput.focus();
+        }
+    }
 
-// Send button on initial screen
-initialSendButton.addEventListener('click', handleInitialSendMessage);
-// Enter key in initial input
-initialMessageInput.addEventListener('keypress', (event) => {
-if (event.key === 'Enter' && !event.shiftKey && !initialSendButton?.disabled) {
-event.preventDefault();
-handleInitialSendMessage();
-}
-});
+    // --- Attach Event Listeners ---
+    console.log("Attaching event listeners...");
 
-// Model selector change
-modelSelector.addEventListener('change', handleModelChange);
+    // Send button in chat view
+    sendButton.addEventListener('click', sendMessage);
+    // Enter key in chat input (ignore shift+enter for newlines)
+    messageInput.addEventListener('keypress', (event) => {
+        // Prevent send if initializing or if reason indicator is showing
+        if (event.key === 'Enter' && !event.shiftKey && !sendButton?.disabled && !currentReasonIndicatorElement) {
+            event.preventDefault(); // Prevent default newline insertion
+            sendMessage();
+        }
+    });
 
-// Personality selector change
-personalitySelector.addEventListener('change', handlePersonalityChange);
+    // Send button on initial screen
+    initialSendButton.addEventListener('click', handleInitialSendMessage);
+    // Enter key in initial input
+    initialMessageInput.addEventListener('keypress', (event) => {
+         // Prevent send if initializing or if reason indicator is showing
+        if (event.key === 'Enter' && !event.shiftKey && !initialSendButton?.disabled && !currentReasonIndicatorElement) {
+            event.preventDefault();
+            handleInitialSendMessage();
+        }
+    });
 
-// New chat button
-newChatBtn.addEventListener('click', handleNewChat);
+    // Model selector change
+    modelSelector.addEventListener('change', handleModelChange);
 
-console.log("Event listeners attached. Initialization complete.");
+    // Personality selector change
+    personalitySelector.addEventListener('change', handlePersonalityChange);
+
+    // New chat button
+    newChatBtn.addEventListener('click', handleNewChat);
+
+    // Reason button click
+    reasonButton.addEventListener('click', handleReasonButtonClick);
+
+    // Image Upload Button click -> trigger file input
+    imageUploadButton.addEventListener('click', () => {
+         if (!imageUploadButton.disabled) { // Check if disabled
+              imageUploadInput.click();
+         }
+    });
+
+    // File Input change (image selected)
+    imageUploadInput.addEventListener('change', handleImageSelection);
+
+    // Remove Image Button click
+    removeImageButton.addEventListener('click', removeSelectedImage);
+
+
+    console.log("Event listeners attached. Initialization complete.");
 });
 
 </script>
 
 </body>
 </html>
+```
+
+**Summary of Changes:**
+
+1.  **API Call:** Switched from `generateContent()` to `generateContentStream()` in `sendMessageInternal`.
+2.  **Streaming Logic:**
+    * Added a `for await...of` loop to process the stream chunks.
+    * Created an empty bot message bubble *before* the loop starts.
+    * Appended `chunk.text()` to the message bubble's paragraph element inside the loop.
+    * Added logic to check for `promptFeedback` (safety blocking) within the stream loop.
+    * Removed the standard `showTypingIndicator()` call as the streaming provides feedback.
+3.  **UI Updates:**
+    * The bot's response now appears incrementally in the chat window.
+    * Scrolling is handled within the loop to keep the latest text visible.
+4.  **Finalization:**
+    * After the stream ends, the complete response text is collected.
+    * A new helper function `processAndAppendText` is used to re-render the final text, correctly handling code blocks and newlines that might have been split across chunks.
+    * The timestamp is added to the bot message only *after* the stream is complete.
+    * Prism.js highlighting is called *after* the stream is complete and the final text is processed.
+    * The full response text is saved to the chat history.
+5.  **`displayMessage`:** Minor adjustments to facilitate streaming updates by adding a `data-stream-target` attribute to the paragraph element.
+6.  **History/Session:** Removed the use of `startChat()` for initialization as `generateContentStream` works directly with the model instance and history provided in the call. `currentChatSession` is no longer used.
+
+Now, when Graxybot responds, you should see the text appearing gradually, making the interaction feel more immedia
