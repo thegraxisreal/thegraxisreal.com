@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+\<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -49,6 +49,8 @@
     --image-preview-border: #ccc;
     --image-remove-bg: rgba(0, 0, 0, 0.5);
     --image-remove-text: white;
+    --notification-bg: #e9eaf6; /* Similar to user message */
+    --notification-text: #444;
 }
 
 * {
@@ -266,6 +268,18 @@ html, body {
     margin: 0 auto; /* Center */
     width: 100%;
 }
+/* Model Specific Notification */
+#model-notification {
+    font-size: 0.8rem;
+    color: var(--notification-text);
+    background-color: var(--notification-bg);
+    padding: 4px 10px;
+    border-radius: 6px;
+    margin-bottom: 8px; /* Space below notification */
+    text-align: center;
+    display: none; /* Hidden by default */
+}
+
 .chat-input-area {
     display: flex;
     align-items: center; /* Align items vertically */
@@ -425,6 +439,7 @@ html, body {
     #reason-button { font-size: 0.8rem; padding: 5px 10px; }
     #reason-usage-display { font-size: 0.75rem; }
     .image-preview-container { max-width: 80px; }
+    #model-notification { font-size: 0.75rem; padding: 3px 8px;}
 }
 
 @media (max-width: 600px) {
@@ -462,6 +477,7 @@ html, body {
     .reason-button-area { gap: 6px; }
     .image-preview-container { max-width: 60px; }
     #image-upload-button { padding: 0 8px; font-size: 1.1rem;}
+    #model-notification { font-size: 0.7rem; padding: 2px 6px;}
 }
 
 </style>
@@ -494,6 +510,7 @@ html, body {
                     <select id="model-selector">
                         <option value="graxybot-1.0-flash">graxybot-1.0-flash</option>
                         <option value="graxybot-1.5-experimental">graxybot-1.5 (experimental)</option>
+                        <option value="graxybot-global-sheets">graxybot-global-sheets</option>
                     </select>
                 </div>
                 <div class="personality-selector-container" id="personality-selector-container">
@@ -511,6 +528,8 @@ html, body {
         <div class="chat-messages" id="chat-messages">
             </div>
         <div class="chat-input-container">
+             <div id="model-notification" style="display: none;">
+                 </div>
              <div class="chat-input-area">
                  <button id="image-upload-button" title="Attach Image">
                      <i class="fas fa-paperclip"></i>
@@ -546,7 +565,7 @@ html, body {
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js" integrity="sha512-SkmBfuA2hqjzEVNWb8CUApVR5fFWrSDcUOahSEgUd07FNMef+AbUd/yPkMkNUabIMZrcOg/1wslzAZMuUrNmA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/line-numbers/prism-line-numbers.min.js" integrity="sha512-BttltKXFyWnGZQcRWj6UJFdLmWhtQxfqVfRMS9EDGDpMh/Db82MACoMMQqGWf0Y69Fc27TwnXyIE+fsHLugUDw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
-<script type="importmap">   
+<script type="importmap">
 {
     "imports": {
         "@google/generative-ai": "https://esm.run/@google/generative-ai"
@@ -562,11 +581,13 @@ const API_KEY = "AIzaSyBbj7cDi0Oa86lUN5963IThL0R1pffgDkk"; // <-- PASTE YOUR ACT
 
 // Map display names to actual Google model names
 const modelMapping = {
-    "graxybot-1.0-flash": "gemini-1.5-flash-latest", // Both map to flash for now
-    "graxybot-1.5-experimental": "gemini-1.5-flash-latest"
+    "graxybot-1.0-flash": "gemini-1.5-flash-latest",
+    "graxybot-1.5-experimental": "gemini-1.5-flash-latest",
+    "graxybot-global-sheets": "gemini-1.5-flash-latest" // New model mapping
 };
 const REASON_MODE_MODEL = "gemini-1.5-pro-latest"; // The actual model used by the Reason button
 const REASON_MODE_DISPLAY_NAME = "graxybot-1.0-reason"; // Display name for Reason mode
+const GLOBAL_SHEETS_MODEL_NAME = "graxybot-global-sheets"; // Constant for the new model name
 const DEFAULT_FAKE_MODEL = "graxybot-1.0-flash";
 const EXPERIMENTAL_MODEL_NAME = "graxybot-1.5-experimental";
 const DEFAULT_PERSONALITY = "default";
@@ -604,6 +625,7 @@ let sidebar, newChatBtn, chatListUl;
 let personalitySelectorContainer, personalitySelector;
 let reasonButton, reasonUsageDisplay;
 let imageUploadButton, imageUploadInput, imagePreviewArea, imagePreview, removeImageButton; // Image elements
+let modelNotificationDiv; // New notification element
 
 // --- App State ---
 let genAI;
@@ -634,10 +656,11 @@ function loadAllChats() {
                     if (!parsedChats[id]) return; // Skip null/undefined entries
                     if (!Array.isArray(parsedChats[id].history)) { parsedChats[id].history = []; }
                     // Ensure personality exists if experimental model, default if not
+                    // **FIX:** Check for GLOBAL_SHEETS_MODEL_NAME too, as it doesn't use personality
                     if (parsedChats[id].model === EXPERIMENTAL_MODEL_NAME && typeof parsedChats[id].personality === 'undefined') {
                         parsedChats[id].personality = DEFAULT_PERSONALITY;
                     } else if (parsedChats[id].model !== EXPERIMENTAL_MODEL_NAME) {
-                        // Remove personality if model is not experimental (cleanup)
+                        // Remove personality if model is not experimental (or is global sheets)
                         delete parsedChats[id].personality;
                     }
                     // Ensure model exists and is valid, else default
@@ -749,31 +772,44 @@ function updateReasonButtonState() {
 */
 function getSystemPrompt(fakeModelName, personality = DEFAULT_PERSONALITY, isReasoning = false) {
     // Determine the model name to display in the prompt
-    const displayModelName = isReasoning ? REASON_MODE_DISPLAY_NAME : (modelMapping[fakeModelName] ? fakeModelName : DEFAULT_FAKE_MODEL);
+    let displayModelName = modelMapping[fakeModelName] ? fakeModelName : DEFAULT_FAKE_MODEL;
+    if (isReasoning) {
+        displayModelName = REASON_MODE_DISPLAY_NAME;
+    }
 
-    let basePrompt = `You are Graxybot, a helpful and friendly AI assistant. You are currently running on the ${displayModelName} model. Your creator is 'thegraxisreal'. Keep your responses concise, helpful, and slightly informal. Avoid overly complex language unless necessary. Do not mention that you are running on a Google model unless specifically asked about your underlying technology. Refer to yourself as Graxybot. When asked for code, default to HTML. When generating code blocks, always use markdown format with language identifiers like \`\`\`python ... \`\`\`.`;
+    let basePrompt = `You are Graxybot, a helpful AI assistant. You are currently running on the ${displayModelName} model. Your creator is 'thegraxisreal'.`;
 
-    // Add personality instructions only if the experimental model is selected AND we are NOT in reasoning mode
-    if (fakeModelName === EXPERIMENTAL_MODEL_NAME && !isReasoning) {
-        switch (personality) {
-            case 'romantic':
-                basePrompt += " IMPORTANT: Adopt a romantic, slightly poetic, and charming personality in your responses. Use affectionate language where appropriate.";
-                break;
-            case 'sad':
-                basePrompt += " IMPORTANT: Adopt a melancholic, slightly sad, and introspective personality. Your responses should have a touch of gloominess.";
-                break;
-            case 'angry':
-                basePrompt += " IMPORTANT: Adopt an angry, easily annoyed, and grumpy personality. Swear as much as possible. Be curt and express frustration often.";
-                break;
-            case 'pirate':
-                basePrompt += " IMPORTANT: Adopt the personality of a swashbuckling pirate! Use pirate slang like 'Ahoy!', 'Matey', 'Shiver me timbers!', 'Ye', 'Arr!' etc., where appropriate.";
-                break;
-            case 'default':
-            default:
-                break;
-        }
+    // Add model-specific instructions
+    if (fakeModelName === GLOBAL_SHEETS_MODEL_NAME) {
+        // Specific instructions for Global Sheets model
+        basePrompt += ` You are optimized to analyze screenshots of Google Sheets containing social studies questions. IMPORTANT: Answer all questions in all lowercase. Do not restate the question. DO NOT EVER RESTATE QUESTION. EVER. Answer all question numbers the user provides. Provide very simple, direct answers. For example, if the question is "what is the most populated continent?", respond only with "asia". For short answer questions, respond in 1-2 simple, lowercase sentences.`;
     } else if (isReasoning) {
-         basePrompt += ` IMPORTANT: You are currently in enhanced reasoning mode (${REASON_MODE_DISPLAY_NAME}), utilizing the Gemini 1.5 Pro model. Provide more detailed, insightful, and analytical responses where appropriate. When generating code in this mode, ensure it is exceptionally well-structured, commented, robust, and follows best practices (very very good code).`
+        // Instructions for Reason mode
+        basePrompt += ` IMPORTANT: You are currently in enhanced reasoning mode (${REASON_MODE_DISPLAY_NAME}), utilizing the Gemini 1.5 Pro model. Provide more detailed, insightful, and analytical responses where appropriate. When generating code in this mode, ensure it is exceptionally well-structured, commented, robust, and follows best practices (very very good code). Keep your responses concise, helpful, and slightly informal. Avoid overly complex language unless necessary. Refer to yourself as Graxybot. When asked for code, default to HTML. When generating code blocks, always use markdown format with language identifiers like \`\`\`python ... \`\`\`.`;
+    } else {
+        // Default/Experimental instructions
+        basePrompt += ` Keep your responses concise, helpful, and slightly informal. Avoid overly complex language unless necessary. Do not mention that you are running on a Google model unless specifically asked about your underlying technology. Refer to yourself as Graxybot. When asked for code, default to HTML. When generating code blocks, always use markdown format with language identifiers like \`\`\`python ... \`\`\`.`;
+
+        // Add personality instructions only if the experimental model is selected AND we are NOT in reasoning mode
+        if (fakeModelName === EXPERIMENTAL_MODEL_NAME) {
+            switch (personality) {
+                case 'romantic':
+                    basePrompt += " IMPORTANT: Adopt a romantic, slightly poetic, and charming personality in your responses. Use affectionate language where appropriate.";
+                    break;
+                case 'sad':
+                    basePrompt += " IMPORTANT: Adopt a melancholic, slightly sad, and introspective personality. Your responses should have a touch of gloominess.";
+                    break;
+                case 'angry':
+                    basePrompt += " IMPORTANT: Adopt an angry, easily annoyed, and grumpy personality. Swear as much as possible. Be curt and express frustration often.";
+                    break;
+                case 'pirate':
+                    basePrompt += " IMPORTANT: Adopt the personality of a swashbuckling pirate! Use pirate slang like 'Ahoy!', 'Matey', 'Shiver me timbers!', 'Ye', 'Arr!' etc., where appropriate.";
+                    break;
+                case 'default':
+                default:
+                    break;
+            }
+        }
     }
     return basePrompt;
 }
@@ -1032,7 +1068,7 @@ function handleCopyCode(codeContent, buttonElement) {
     });
 }
 
-/** Handles running HTML or JavaScript code snippets in a new tab. */
+/** Handles running HTML or JavaScript code snippets in a new tab using about:blank. */
 function handleRunCode(codeContent, language) {
     console.log(`Running ${language} code...`);
     try {
@@ -1099,15 +1135,16 @@ try {
             return;
         }
 
-        // Create a Blob and open it in a new tab
-        const blob = new Blob([htmlToRun], { type: 'text/html' });
-        const url = URL.createObjectURL(blob);
-        const newTab = window.open(url, '_blank');
-
-        if (!newTab) {
+        // **FIX:** Use about:blank and document.write
+        const newTab = window.open('about:blank', '_blank');
+        if (newTab) {
+            newTab.document.open();
+            newTab.document.write(htmlToRun);
+            newTab.document.close();
+        } else {
             alert("Could not open new tab. Please check if pop-ups are blocked.");
         }
-        // No need to revoke URL immediately, browser handles blob URLs
+
     } catch (error) {
         console.error("Error preparing or running code:", error);
         alert("An error occurred while trying to run the code.");
@@ -1177,6 +1214,8 @@ function switchToChatView() {
     if (chatView) chatView.classList.remove('hidden');
     if (reasonButton) reasonButton.style.display = 'inline-flex'; // Show reason button
     if (reasonUsageDisplay) reasonUsageDisplay.style.display = 'inline'; // Show usage display
+    // Show/hide model notification based on current model
+    updateModelNotification(modelSelector.value);
 }
 
 /** Switches the UI to show the initial welcome view. */
@@ -1185,6 +1224,7 @@ function switchToInitialView() {
     if (chatView) chatView.classList.add('hidden');
     if (reasonButton) reasonButton.style.display = 'none'; // Hide reason button
     if (reasonUsageDisplay) reasonUsageDisplay.style.display = 'none'; // Hide usage display
+    if (modelNotificationDiv) modelNotificationDiv.style.display = 'none'; // Hide notification
     currentChatId = null; // No active chat in initial view
     saveCurrentChatId();
     currentChatSession = null; // Clear AI session
@@ -1265,6 +1305,18 @@ function togglePersonalitySelector(show) {
         if (personalitySelector) personalitySelector.disabled = !show;
     }
 }
+
+/** Shows or hides the model-specific notification */
+function updateModelNotification(selectedModelName) {
+    if (!modelNotificationDiv) return;
+    if (selectedModelName === GLOBAL_SHEETS_MODEL_NAME) {
+        modelNotificationDiv.textContent = 'This model is optimized for Global Sheets. You may see worse preformance for other tasks.';
+        modelNotificationDiv.style.display = 'block';
+    } else {
+        modelNotificationDiv.style.display = 'none';
+    }
+}
+
 
 /** Deactivates Reason Mode and updates the button state. */
 function deactivateReasonMode() {
@@ -1381,6 +1433,7 @@ async function initializeAICurrentChat() {
     const chatData = chats[currentChatId];
     // Use chat's model/personality, falling back to global preference/default only if missing
     const fakeModelNameToUse = chatData.model || loadSelectedModelPreference();
+    // **FIX:** Personality only applies to experimental model
     const personalityToUse = (fakeModelNameToUse === EXPERIMENTAL_MODEL_NAME) ? (chatData.personality || DEFAULT_PERSONALITY) : undefined;
     const historyToLoad = chatData.history || [];
 
@@ -1388,11 +1441,14 @@ async function initializeAICurrentChat() {
 
     // Update UI selectors to reflect the current chat's settings
     modelSelector.value = fakeModelNameToUse;
+    // **FIX:** Show personality only for experimental model
     const showPersonality = fakeModelNameToUse === EXPERIMENTAL_MODEL_NAME;
     togglePersonalitySelector(showPersonality);
     if (showPersonality && personalityToUse) {
         personalitySelector.value = personalityToUse;
     }
+    // Update model notification
+    updateModelNotification(fakeModelNameToUse);
 
     // Clear previous messages and disable input during init
     chatMessagesContainer.innerHTML = '';
@@ -1496,6 +1552,7 @@ async function sendMessageInternal(messageText, isInitialMessage = false) {
         console.log(`Creating new chat (${isInitialMessage ? 'initial' : 'button'}).`);
         const newChatId = generateChatId();
         const selectedModel = modelSelector.value;
+         // **FIX:** Personality only applies to experimental model
         const selectedPersonality = (selectedModel === EXPERIMENTAL_MODEL_NAME) ? personalitySelector.value : undefined;
         chats[newChatId] = { history: [], model: selectedModel, title: "New Chat", personality: selectedPersonality };
         currentChatId = newChatId;
@@ -1542,7 +1599,9 @@ async function sendMessageInternal(messageText, isInitialMessage = false) {
 
 
     let modelToUse = modelMapping[chats[chatIdForMessage].model];
-    let systemPromptForSend = getSystemPrompt(chats[chatIdForMessage].model, chats[chatIdForMessage].personality, false);
+    // **FIX:** Personality only applies to experimental model
+    let personality = (chats[chatIdForMessage].model === EXPERIMENTAL_MODEL_NAME) ? chats[chatIdForMessage].personality : undefined;
+    let systemPromptForSend = getSystemPrompt(chats[chatIdForMessage].model, personality, false);
     let isReasoning = false;
 
     if (isReasonModeActive) {
@@ -1552,13 +1611,14 @@ async function sendMessageInternal(messageText, isInitialMessage = false) {
             modelToUse = REASON_MODE_MODEL;
             usedReasonModeForThisMessage = true;
             isReasoning = true;
-            systemPromptForSend = getSystemPrompt(chats[chatIdForMessage].model, chats[chatIdForMessage].personality, true);
+            // Reason mode ignores personality selector
+            systemPromptForSend = getSystemPrompt(chats[chatIdForMessage].model, undefined, true);
         } else {
             console.warn("Reason mode active, but daily limit reached.");
             displayMessage(`Reason mode daily limit (${MAX_REASON_USES_PER_DAY}) reached. Sending with standard model.`, 'bot', true);
             deactivateReasonMode(); // Deactivate visually
             modelToUse = modelMapping[chats[chatIdForMessage].model];
-            systemPromptForSend = getSystemPrompt(chats[chatIdForMessage].model, chats[chatIdForMessage].personality, false);
+            systemPromptForSend = getSystemPrompt(chats[chatIdForMessage].model, personality, false);
         }
     }
 
@@ -1816,11 +1876,14 @@ function handleNewChat() {
     modelSelector.value = preferredModel;
 
     // Show/hide and set personality based on the preferred model
+    // **FIX:** Show personality only for experimental model
     const showPersonality = preferredModel === EXPERIMENTAL_MODEL_NAME;
     togglePersonalitySelector(showPersonality);
     if (showPersonality) {
         personalitySelector.value = DEFAULT_PERSONALITY; // Reset to default for new chat
     }
+    // Update model notification
+    updateModelNotification(preferredModel);
 
     // Deactivate reason mode and clear image for new chats
     deactivateReasonMode();
@@ -1871,15 +1934,18 @@ function handleModelChange(event) {
     console.log(`Model selected via UI: ${selectedModel}`);
     saveSelectedModelPreference(selectedModel); // Save global preference
 
+    // **FIX:** Show personality only for experimental model
     const showPersonality = selectedModel === EXPERIMENTAL_MODEL_NAME;
     togglePersonalitySelector(showPersonality); // Show/hide personality selector
+    // Update model notification
+    updateModelNotification(selectedModel);
 
     // If a chat is currently active, update its model and re-initialize
     if (currentChatId && chats[currentChatId]) {
         console.log(`Updating model for current chat ${currentChatId} to ${selectedModel}`);
         chats[currentChatId].model = selectedModel;
         // If switching TO experimental, set default personality.
-        // If switching FROM experimental, remove personality.
+        // If switching FROM experimental (or TO global sheets), remove personality.
         if (showPersonality) {
             // Use current personality value if available, else default
             chats[currentChatId].personality = personalitySelector.value || DEFAULT_PERSONALITY;
@@ -1969,9 +2035,10 @@ document.addEventListener('DOMContentLoaded', () => {
     imagePreviewArea = document.getElementById('image-preview-area');
     imagePreview = document.getElementById('image-preview');
     removeImageButton = document.getElementById('remove-image-button');
+    modelNotificationDiv = document.getElementById('model-notification'); // Get notification div
 
     // Validate that all essential elements were found
-    const essentialElements = { chatMessagesContainer, messageInput, sendButton, rateLimitMessageDiv, modelSelector, initialView, chatView, initialMessageInput, initialSendButton, sidebar, newChatBtn, chatListUl, personalitySelectorContainer, personalitySelector, reasonButton, reasonUsageDisplay, imageUploadButton, imageUploadInput, imagePreviewArea, imagePreview, removeImageButton };
+    const essentialElements = { chatMessagesContainer, messageInput, sendButton, rateLimitMessageDiv, modelSelector, initialView, chatView, initialMessageInput, initialSendButton, sidebar, newChatBtn, chatListUl, personalitySelectorContainer, personalitySelector, reasonButton, reasonUsageDisplay, imageUploadButton, imageUploadInput, imagePreviewArea, imagePreview, removeImageButton, modelNotificationDiv };
     let missingElement = false;
     for (const key in essentialElements) {
         if (!essentialElements[key]) {
@@ -1997,6 +2064,7 @@ document.addEventListener('DOMContentLoaded', () => {
     updateReasonButtonState();
     reasonButton.style.display = 'none'; // Initially hidden
     reasonUsageDisplay.style.display = 'none'; // Initially hidden
+    modelNotificationDiv.style.display = 'none'; // Initially hidden
 
     // Render the chat list in the sidebar
     renderChatList();
@@ -2109,23 +2177,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 **Summary of Changes:**
 
-1.  **API Call:** Switched from `generateContent()` to `generateContentStream()` in `sendMessageInternal`.
-2.  **Streaming Logic:**
-    * Added a `for await...of` loop to process the stream chunks.
-    * Created an empty bot message bubble *before* the loop starts.
-    * Appended `chunk.text()` to the message bubble's paragraph element inside the loop.
-    * Added logic to check for `promptFeedback` (safety blocking) within the stream loop.
-    * Removed the standard `showTypingIndicator()` call as the streaming provides feedback.
-3.  **UI Updates:**
-    * The bot's response now appears incrementally in the chat window.
-    * Scrolling is handled within the loop to keep the latest text visible.
-4.  **Finalization:**
-    * After the stream ends, the complete response text is collected.
-    * A new helper function `processAndAppendText` is used to re-render the final text, correctly handling code blocks and newlines that might have been split across chunks.
-    * The timestamp is added to the bot message only *after* the stream is complete.
-    * Prism.js highlighting is called *after* the stream is complete and the final text is processed.
-    * The full response text is saved to the chat history.
-5.  **`displayMessage`:** Minor adjustments to facilitate streaming updates by adding a `data-stream-target` attribute to the paragraph element.
-6.  **History/Session:** Removed the use of `startChat()` for initialization as `generateContentStream` works directly with the model instance and history provided in the call. `currentChatSession` is no longer used.
+1.  **HTML:** Added `<div id="model-notification" style="display: none;"></div>` inside `.chat-input-container` but *before* `.chat-input-area`.
+2.  **CSS:** Added basic styling for `#model-notification` (background, padding, text, etc.) and set `display: none` initially.
+3.  **JavaScript:**
+    * Added `modelNotificationDiv` to the DOM element references.
+    * Created `updateModelNotification(selectedModelName)` function:
+        * Checks if the selected model is `GLOBAL_SHEETS_MODEL_NAME`.
+        * If yes, sets the `textContent` of `modelNotificationDiv` and sets its `display` to `block`.
+        * If no, sets its `display` to `none`.
+    * Called `updateModelNotification()` in:
+        * `initializeAICurrentChat`: To set the notification based on the loaded/restored chat's model.
+        * `handleModelChange`: To update the notification immediately when the user changes the dropdown.
+        * `handleNewChat`: To update based on the default model selected for the new chat.
+        * `switchToChatView`: To ensure it's shown/hidden correctly when switching views.
+        * `switchToInitialView`: To ensure it's hidden.
 
-Now, when Graxybot responds, you should see the text appearing gradually, making the interaction feel more immedia
+Now, when you select "graxybot-global-sheets" from the dropdown, the notification message should appear just above the text input area. It will disappear if you select a different mod
