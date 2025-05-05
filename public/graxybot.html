@@ -55,27 +55,6 @@
 }
 
 
-
-<!-- Popup container -->
-<div id="popupOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; display: flex; justify-content: center; align-items: center;">
-  <div style="background: #6B46C1; color: white; padding: 25px; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); position: relative; font-family: var(--title-font);">
-    <h2 style="margin-top: 0; font-size: 24px; color: #F3E8FF; font-family: var(--title-font);">Major Graxybot Update Expected Tomorrow!</h2>
-    <p style="font-size: 16px; color: #E9D8FD;">Exciting new features coming with the update:</p>
-    <ul style="list-style-type: disc; padding-left: 25px; margin-bottom: 25px; font-size: 16px; color: #E9D8FD;">
-      <li>New Graxybot Max Subscription with extended usage limits.</li>
-      <li>Access to Graxybot-1.5-Pro, a Deep Reasoning model with performance comparable to Claude 3.5 Sonnet.</li>
-      <li>Voice mode rolling out in the coming weeks.</li>
-    </ul>
-    <button onclick="hidePopup()" style="padding: 10px 20px; background: #9F7AEA; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: var(--transition); font-family: var(--title-font); --hover-bg: #B794F4;">Close</button>
-  </div>
-</div>
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: 'Poppins', sans-serif;
-}
-
 html, body {
     height: 100%;
     overflow: hidden;
@@ -2184,25 +2163,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     console.log("Event listeners attached. Initialization complete.");
 });
-
-    function showPopup() {
-    var popup = document.getElementById('popupOverlay');
-    if (popup) {
-      popup.style.display = 'flex';
-    } else {
-      console.error('Popup element not found');
-    }
-  }
-  function hidePopup() {
-    var popup = document.getElementById('popupOverlay');
-    if (popup) {
-      popup.style.display = 'none';
-    }
-  }
-  // Ensure popup shows on page load, avoiding conflicts with other window.onload
-  document.addEventListener('DOMContentLoaded', function() {
-    showPopup();
-  });
 
 </script>
 
