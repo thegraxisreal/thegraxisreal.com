@@ -54,97 +54,36 @@
     --notification-text: #444;
 }
 
+<!-- Popup container -->
+<div id="popupOverlay" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 999; display: flex; justify-content: center; align-items: center;">
+  <div style="background: #6B46C1; color: white; padding: 25px; border-radius: 10px; max-width: 500px; width: 90%; box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); position: relative;">
+    <h2 style="margin-top: 0; font-size: 24px; color: #F3E8FF;">Major Graxybot Update Expected Tomorrow!</h2>
+    <p style="font-size: 16px; color: #E9D8FD;">Exciting new features coming with the update:</p>
+    <ul style="list-style-type: disc; padding-left: 25px; margin-bottom: 25px; font-size: 16px; color: #E9D8FD;">
+      <li>New Graxybot Max Subscription with extended usage limits.</li>
+      <li>Access to Graxybot-1.5-Pro, a Deep Reasoning model with performance comparable to Claude 3.5 Sonnet.</li>
+      <li>Voice mode rolling out in the coming weeks.</li>
+    </ul>
+    <button onclick="hidePopup()" style="padding: 10px 20px; background: #9F7AEA; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; transition: background 0.3s;">Close</button>
+  </div>
+</div>
 
-<style>
-  /* Load Poppins font */
-  @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
-
-  /* Popup styles */
-  #popupOverlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    z-index: 10000;
-    display: none;
-    justify-content: center;
-    align-items: center;
-  }
-  #popupOverlay .popup-content {
-    background: #6B46C1;
-    color: white;
-    padding: 25px;
-    border-radius: 10px;
-    max-width: 500px;
-    width: 90%;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    position: relative;
-    font-family: var(--title-font, 'Poppins', sans-serif);
-  }
-  #popupOverlay h2 {
-    margin-top: 0;
-    font-size: 24px;
-    color: #F3E8FF;
-    font-family: var(--title-font, 'Poppins', sans-serif);
-  }
-  #popupOverlay p {
-    font-size: 16px;
-    color: #E9D8FD;
-  }
-  #popupOverlay ul {
-    list-style-type: disc;
-    padding-left: 25px;
-    margin-bottom: 25px;
-    font-size: 16px;
-    color: #E9D8FD;
-  }
-  #popupOverlay button {
-    padding: 10px 20px;
-    background: #9F7AEA;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    font-family: var(--title-font, 'Poppins', sans-serif);
-    transition: var(--transition, all 0.2s ease);
-  }
-  #popupOverlay button:hover {
-    background: #B794F4;
-  }
-</style>
-
+<!-- JavaScript to show the popup on page load -->
 <script>
- 
-
-  // Show popup
-  function showPopup() {
-    const popup = document.getElementById('popupOverlay');
-    if (popup) {
-      popup.style.display = 'flex';
-      console.log('Popup displayed');
-    } else {
-      console.error('Popup element not found');
-    }
-  }
-
-  // Hide popup
+  window.onload = function() {
+    document.getElementById('popupOverlay').style.display = 'flex';
+  };
   function hidePopup() {
-    const popup = document.getElementById('popupOverlay');
-    if (popup) {
-      popup.style.display = 'none';
-      console.log('Popup hidden');
-    }
+    document.getElementById('popupOverlay').style.display = 'none';
   }
-
-  // Initialize popup after DOM is ready
-  document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, creating popup');
-    createPopup();
-    setTimeout(showPopup, 100); // Slight delay to ensure DOM is ready
-  });
+</script>
+    
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
+}
 
 html, body {
     height: 100%;
@@ -2257,28 +2196,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 </script>
 
-<script>
-     console.log('Popup script loaded');
-  // Create and append popup HTML
-  function createPopup() {
-    const popupHtml = `
-      <div id="popupOverlay">
-        <div class="popup-content">
-          <h2>Major Graxybot Update Expected Tomorrow!</h2>
-          <p>Exciting new features coming with the update:</p>
-          <ul>
-            <li>New Graxybot Max Subscription with extended usage limits.</li>
-            <li>Access to Graxybot-1.5-Pro, a Deep Reasoning model with performance comparable to Claude 3.5 Sonnet.</li>
-            <li>Voice mode rolling out in the coming weeks.</li>
-          </ul>
-          <button onclick="hidePopup()">Close</button>
-        </div>
-      </div>
-    `;
-    document.body.insertAdjacentHTML('beforeend', popupHtml);
-    console.log('Popup HTML created');
-  }
-</script>
 </body>
 </html>
 ```
