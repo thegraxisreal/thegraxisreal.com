@@ -2121,7 +2121,7 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
                         const timestampSpan = document.createElement('span');
                         timestampSpan.classList.add('timestamp');
                         timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                        bubbleDiv.appendChild(timestampSpan); // Append timestamp to bubble
+                        botMessageBubble.appendChild(timestampSpan); // Append timestamp to bubble
 
                          // REMOVED: Thought Timer logic
                     }
