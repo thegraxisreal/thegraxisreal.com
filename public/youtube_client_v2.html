@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>thegraxisreal Videos</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #5e60ce;
+            --primary-light: #6930c3;
+            --secondary: #48bfe3;
+            --dark: #1e1e2c;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --transition: all 0.3s ease;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            padding-top: 80px; /* Space for fixed header */
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 15px 0;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        .logo {
+            font-weight: 800;
+            font-size: 24px;
+            color: var(--primary);
+            text-decoration: none;
+        }
+        .search-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            align-items: center;
+        }
+        .search-container input[type="text"] {
+            flex-grow: 1;
+            padding: 12px 15px;
+            border: 1px solid #ccc;
+            border-radius: 25px;
+            font-size: 1rem;
+            outline: none;
+            transition: var(--transition);
+        }
+        .search-container input[type="text"]:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 96, 206, 0.2);
+        }
+        .search-container button {
+            padding: 12px 25px;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: 0 5px 10px rgba(94, 96, 206, 0.2);
+        }
+        .search-container button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(94, 96, 206, 0.3);
+        }
+        .video-player-container {
+            margin-bottom: 30px;
+            position: relative;
+            padding-bottom: 56.25%; /* 16:9 aspect ratio */
+            height: 0;
+            overflow: hidden;
+            background-color: #000;
+            border-radius: 10px;
+        }
+        .video-player-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+        .search-results-container { /* This class is still used for the grid layout */
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        .video-item {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .video-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        .video-item img {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 16 / 9;
+            object-fit: cover;
+        }
+        .video-item-content {
+            padding: 15px;
+        }
+        .video-item-content h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--dark);
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-height: 2.4em; /* Ensure space for two lines */
+        }
+        .video-item-content p {
+            font-size: 0.9rem;
+            color: var(--gray);
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            body { padding-top: 70px; }
+            .search-container {
+                flex-direction: column;
+            }
+            .search-container input[type="text"],
+            .search-container button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="#" class="logo">thegraxisreal Videos</a>
+        </nav>
+    </header>
+
+    <div class="container">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search for YouTube videos...">
+            <button id="searchButton">Search</button>
+        </div>
+
+        <div class="video-player-container" id="videoPlayerContainer">
+            <iframe id="videoPlayer" src="" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+        </div>
+        
+        <h2 id="resultsTitle" style="margin-bottom: 20px; font-weight: 600; color: var(--dark);">Trending Videos</h2>
+        <div id="videoResultsDisplay" class="search-results-container">
+            <!-- Videos (trending or search results) will be populated here -->
+        </div>
+    </div>
+
+    <script>
+        const API_KEY = 'AIzaSyChHU701dMLcnHcTLucX3R-W4Y_OvFacN8'; // User's API Key
+        const searchInput = document.getElementById('searchInput');
+        const searchButton = document.getElementById('searchButton');
+        const videoResultsDisplay = document.getElementById('videoResultsDisplay');
+        const resultsTitle = document.getElementById('resultsTitle');
+        const videoPlayer = document.getElementById('videoPlayer');
+        const videoPlayerContainer = document.getElementById('videoPlayerContainer');
+
+        searchButton.addEventListener('click', searchVideos);
+        searchInput.addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                searchVideos();
+            }
+        });
+
+        async function fetchTrendingVideos() {
+            resultsTitle.textContent = 'Trending Videos';
+            // videoResultsDisplay.innerHTML = '<p>Loading trending videos...</p>'; // Optional loading message
+            const url = `https://www.googleapis.com/youtube/v3/videos?part=snippet,contentDetails,statistics&chart=mostPopular&regionCode=US&maxResults=12&key=${API_KEY}`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('YouTube API Error (Trending):', errorData);
+                    alert(`Error fetching trending videos: ${errorData.error.message}. Please check your API key and quota.`);
+                    videoResultsDisplay.innerHTML = '<p>Could not load trending videos. Check console for details.</p>';
+                    return;
+                }
+                const data = await response.json();
+                displayResults(data.items, false); // isSearchResult = false
+            } catch (error) {
+                console.error('Error fetching trending videos:', error);
+                alert('An error occurred while fetching trending videos. Please check the console for details.');
+                videoResultsDisplay.innerHTML = '<p>Could not load trending videos. Check console for details.</p>';
+            }
+        }
+
+        async function searchVideos() {
+            const query = searchInput.value.trim();
+            if (!query) {
+                alert('Please enter a search term.');
+                return;
+            }
+            resultsTitle.textContent = `Search Results for "${query}"`;
+            // videoResultsDisplay.innerHTML = `<p>Searching for "${query}"...</p>`; // Optional loading message
+            const url = `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&key=${API_KEY}&maxResults=12&type=video`;
+
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('YouTube API Error (Search):', errorData);
+                    alert(`Error fetching search results: ${errorData.error.message}. Please check your API key and quota.`);
+                    videoResultsDisplay.innerHTML = '<p>Could not load search results. Check console for details.</p>';
+                    return;
+                }
+                const data = await response.json();
+                displayResults(data.items, true); // isSearchResult = true
+            } catch (error) {
+                console.error('Error fetching search results:', error);
+                alert('An error occurred while searching for videos. Please check the console for details.');
+                videoResultsDisplay.innerHTML = '<p>Could not load search results. Check console for details.</p>';
+            }
+        }
+
+        function displayResults(videos, isSearchResult = true) {
+            videoResultsDisplay.innerHTML = ''; // Clear previous results
+            if (!videos || videos.length === 0) {
+                videoResultsDisplay.innerHTML = '<p>No videos found.</p>';
+                return;
+            }
+
+            videos.forEach(video => {
+                const videoId = isSearchResult ? video.id.videoId : video.id;
+                const title = video.snippet.title;
+                const description = video.snippet.description;
+                const thumbnailUrl = video.snippet.thumbnails.medium.url;
+
+                const videoItem = document.createElement('div');
+                videoItem.classList.add('video-item');
+                videoItem.innerHTML = `
+                    <img src="${thumbnailUrl}" alt="${title}">
+                    <div class="video-item-content">
+                        <h3>${title}</h3>
+                        <p>${description || 'No description available.'}</p>
+                    </div>
+                `;
+                videoItem.addEventListener('click', () => playVideo(videoId));
+                videoResultsDisplay.appendChild(videoItem);
+            });
+        }
+
+        function playVideo(videoId) {
+            videoPlayer.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+            videoPlayerContainer.style.display = 'block'; // Ensure player is visible
+            videoPlayerContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Initially hide the video player until a video is selected
+        videoPlayerContainer.style.display = 'none';
+
+        // Fetch trending videos when the page loads
+        document.addEventListener('DOMContentLoaded', fetchTrendingVideos);
+
+    </script>
+</body>
+</html>
+
