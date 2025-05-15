@@ -1,0 +1,1337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>thegraxisreal</title>
+    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5e60ce;
+            --primary-light: #6930c3;
+            --secondary: #48bfe3;
+            --dark: #1e1e2c;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #2ecc71;
+            --warning: #f39c12; /* Added warning color for 'New' badge */
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            line-height: 1.6;
+            overflow-x: hidden; /* Prevent horizontal scroll */
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Header and Navigation */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0; /* Adjusted padding */
+            transition: var(--transition);
+        }
+
+        .logo {
+            font-weight: 800;
+            font-size: 24px;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            font-size: 28px;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center; /* Align items vertically */
+            gap: 30px; /* Adjusted gap */
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--dark);
+            font-weight: 500;
+            position: relative;
+            transition: var(--transition);
+            padding: 5px 0; /* Add padding for better click area */
+        }
+
+        .nav-links a:after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 2px;
+            bottom: -5px;
+            left: 0;
+            background: var(--gradient);
+            transition: var(--transition);
+        }
+
+        .nav-links a:hover {
+            color: var(--primary);
+        }
+
+        .nav-links a:hover:after {
+            width: 100%;
+        }
+
+        /* New Graxybot Button Style */
+        .btn-new {
+            background: var(--gradient);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-left: 15px;
+            transition: var(--transition);
+            box-shadow: 0 5px 10px rgba(94, 96, 206, 0.2);
+            text-decoration: none; /* Ensure no underline */
+            display: inline-flex; /* Use flex for icon alignment */
+            align-items: center; /* Center icon and text */
+            gap: 5px; /* Space between icon and text */
+        }
+
+        .btn-new .new-badge {
+            background-color: var(--warning);
+            color: var(--dark);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            margin-left: 5px;
+            text-transform: uppercase;
+        }
+
+        .btn-new:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 15px rgba(94, 96, 206, 0.3);
+            color: white; /* Ensure text remains white on hover */
+        }
+        .btn-new:hover:after {
+            width: 0; /* Prevent underline on hover for this button */
+        }
+
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 24px;
+            color: var(--dark);
+            z-index: 1001; /* Ensure it's above nav links on mobile */
+        }
+
+        /* Hero Section */
+        .hero {
+            padding-top: 150px; /* Space for fixed header */
+            padding-bottom: 100px;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-bg {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 800px;
+            height: 800px;
+            background: var(--gradient);
+            opacity: 0.05;
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+            z-index: -1;
+        }
+
+        .hero-content {
+            display: flex;
+            flex-direction: column;
+            max-width: 600px;
+            animation: fadeInUp 1s ease forwards;
+        }
+
+        .hero-greeting {
+            font-size: 1.2rem;
+            color: var(--primary);
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: inline-block;
+            padding: 5px 15px;
+            background: rgba(94, 96, 206, 0.1);
+            border-radius: 20px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            line-height: 1.2;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .hero h1 span {
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--gray);
+            margin-bottom: 30px;
+        }
+
+        .hero p {
+            margin-bottom: 20px; /* Adjusted margin */
+            font-size: 1.1rem;
+        }
+
+        /* Added paragraph for Graxybot announcement */
+        .hero .announcement {
+            margin-bottom: 40px;
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--primary-light);
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px 30px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 1rem;
+            gap: 10px;
+            border: 2px solid transparent; /* Base border */
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 10px 20px rgba(94, 96, 206, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 25px rgba(94, 96, 206, 0.4);
+            color: white; /* Ensure text remains white */
+        }
+
+        .btn-outline {
+            border: 2px solid var(--primary);
+            color: var(--primary);
+            background: transparent;
+        }
+
+        .btn-outline:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+        }
+
+        .social-links {
+            display: flex;
+            gap: 20px;
+            margin-top: 40px;
+        }
+
+        .social-links a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            background: white;
+            color: var(--dark);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+            font-size: 1.2rem;
+            text-decoration: none;
+        }
+
+        .social-links a:hover {
+            transform: translateY(-5px);
+            color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Projects Section */
+        .projects {
+            padding: 100px 0;
+            background-color: #f8f9fa; /* Use light background */
+        }
+
+        .section-title {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .section-title h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 15px;
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title h2:after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 4px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .section-title p {
+            max-width: 700px;
+            margin: 0 auto;
+            color: var(--gray);
+        }
+
+        .projects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .project-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            height: 100%; /* Ensure cards have same height */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .project-img {
+            width: 100%;
+            height: 200px;
+            background-color: #e9ecef; /* Placeholder background */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-size: 3rem;
+        }
+
+        .project-content {
+            padding: 25px;
+            flex-grow: 1; /* Allow content to fill space */
+            display: flex;
+            flex-direction: column;
+        }
+
+        .project-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .project-content p {
+            margin-bottom: 20px;
+            color: var(--gray);
+            flex-grow: 1; /* Push tags to bottom */
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: rgba(94, 96, 206, 0.1);
+            color: var(--primary);
+            font-size: 0.85rem;
+            margin-right: 10px;
+            margin-bottom: 10px; /* Space between tags if they wrap */
+        }
+
+        .view-all {
+            text-align: center;
+            margin-top: 30px;
+            display: flex; /* Use flexbox for button alignment */
+            justify-content: center; /* Center buttons */
+            gap: 15px; /* Space between buttons */
+            flex-wrap: wrap; /* Allow buttons to wrap */
+        }
+
+        /* Blog Section */
+        .blog {
+            padding: 100px 0;
+        }
+
+        .blog-post {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            margin-bottom: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .blog-post:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .blog-img {
+            width: 100%;
+            height: 250px;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--gray);
+            font-size: 3rem;
+        }
+
+        .blog-content {
+            padding: 30px;
+        }
+
+        .blog-date {
+            font-size: 0.9rem;
+            color: var(--gray);
+            margin-bottom: 10px;
+        }
+
+        .blog-title {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: var(--dark);
+        }
+
+        .blog-excerpt {
+            margin-bottom: 20px;
+            color: var(--gray);
+        }
+
+        .read-more {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 500;
+            gap: 5px;
+            transition: var(--transition);
+        }
+
+        .read-more:hover {
+            gap: 10px;
+        }
+
+        /* Skills Section */
+        .skills {
+            padding: 100px 0;
+            background-color: #f8f9fa; /* Light background */
+        }
+
+        .skills-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 30px;
+        }
+
+        .skill-card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+        }
+
+        .skill-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .skill-icon {
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            color: var(--primary);
+        }
+
+        .skill-name {
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+
+        /* Contact Section */
+        .contact {
+            padding: 100px 0;
+        }
+
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            align-items: start; /* Align items to the top */
+        }
+
+        .contact-info h3 {
+            font-size: 2rem;
+            margin-bottom: 30px;
+        }
+
+        .contact-info p {
+            margin-bottom: 30px;
+            color: var(--gray);
+        }
+
+        .contact-method {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            min-width: 50px; /* Prevent shrinking */
+            border-radius: 50%;
+            background: rgba(94, 96, 206, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-right: 15px;
+        }
+        .contact-method div p {
+            margin-bottom: 0; /* Remove bottom margin for contact details */
+            color: var(--dark); /* Make email/location darker */
+        }
+        .contact-method div h4 {
+             margin-bottom: 5px; /* Space between title and detail */
+        }
+
+
+        .contact-form {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: var(--transition);
+            background-color: var(--light); /* Light background for inputs */
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(94, 96, 206, 0.2); /* Focus ring */
+        }
+
+        textarea.form-control {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        #successMessage {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: rgba(46, 204, 113, 0.1);
+            border: 1px solid rgba(46, 204, 113, 0.3); /* Subtle border */
+            border-radius: 8px;
+            text-align: center;
+            color: var(--success);
+            animation: fadeIn 0.5s ease; /* Fade in animation */
+        }
+        #successMessage i {
+             font-size: 24px; margin-bottom: 10px; display: block;
+        }
+         #successMessage p {
+             font-weight: 500; margin: 0; color: #27ae60; /* Darker success text */
+         }
+
+        /* Footer */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 60px 0 30px;
+        }
+
+        .footer-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 50px;
+            margin-bottom: 50px;
+        }
+
+        .footer-col h4 {
+            font-size: 1.2rem;
+            margin-bottom: 20px;
+            position: relative;
+            padding-bottom: 10px;
+            color: white; /* Ensure footer headings are white */
+        }
+
+        .footer-col h4:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 40px;
+            height: 2px;
+            background: var(--primary);
+        }
+
+        .footer-col p {
+            margin-bottom: 20px;
+            color: #aaa; /* Lighter text for descriptions */
+        }
+        .footer-col .social-links a { /* Style footer social links */
+             background: rgba(255, 255, 255, 0.1);
+             color: #aaa;
+        }
+        .footer-col .social-links a:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        .footer-links {
+            list-style: none;
+            padding: 0; /* Remove default padding */
+        }
+
+        .footer-links li {
+            margin-bottom: 15px;
+        }
+
+        .footer-links a {
+            color: #aaa;
+            text-decoration: none;
+            transition: var(--transition);
+        }
+
+        .footer-links a:hover {
+            color: var(--primary);
+            padding-left: 5px;
+        }
+
+        .footer-bottom {
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+            color: #aaa;
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .hero h1 {
+                font-size: 3.5rem;
+            }
+
+            .contact-grid {
+                grid-template-columns: 1fr; /* Stack contact sections */
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr 1fr; /* Two columns for footer */
+                gap: 40px;
+            }
+            .nav-links {
+                gap: 20px; /* Reduce gap between nav items */
+            }
+             .btn-new {
+                margin-left: 10px; /* Adjust margin */
+            }
+        }
+
+        @media (max-width: 768px) {
+             /* Adjust padding for smaller screens */
+            .container {
+                padding: 0 15px;
+            }
+            header {
+                 padding: 0; /* Remove padding for sticky header logic */
+            }
+            nav {
+                padding: 15px 0; /* Consistent padding */
+            }
+
+            .hero {
+                padding-top: 120px; /* Adjust for header */
+                text-align: center; /* Center hero text */
+            }
+
+            .hero-content {
+                 max-width: 100%; /* Allow full width */
+                 align-items: center; /* Center content */
+            }
+
+            .hero h1 {
+                font-size: 2.8rem;
+            }
+            .hero h2 {
+                font-size: 1.3rem;
+            }
+
+            .hero-buttons {
+                justify-content: center; /* Center buttons */
+            }
+            .social-links {
+                justify-content: center; /* Center social links */
+            }
+
+            .mobile-menu-btn {
+                display: block; /* Show hamburger menu */
+            }
+
+            .nav-links {
+                position: absolute;
+                top: 100%; /* Position below header */
+                left: 0;
+                width: 100%;
+                background: white;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px 0;
+                gap: 20px;
+                box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+                /* Hide/show logic */
+                max-height: 0;
+                opacity: 0;
+                overflow: hidden;
+                visibility: hidden;
+                transition: max-height 0.4s ease-out, opacity 0.4s ease-out, visibility 0.4s ease-out;
+            }
+
+            .nav-links.active {
+                max-height: 500px; /* Allow enough height */
+                opacity: 1;
+                visibility: visible;
+            }
+            /* Move new button inside mobile menu */
+             .nav-links .btn-new {
+                margin-left: 0;
+                margin-top: 10px; /* Add space above */
+                width: calc(100% - 40px); /* Make button wider */
+                justify-content: center;
+            }
+
+            .footer-grid {
+                grid-template-columns: 1fr; /* Stack footer columns */
+                gap: 30px;
+                 text-align: center; /* Center footer text */
+            }
+             .footer-col h4:after {
+                left: 50%; /* Center underline */
+                transform: translateX(-50%);
+            }
+            .footer-col .social-links {
+                justify-content: center; /* Center footer social links */
+            }
+             .view-all {
+                flex-direction: column; /* Stack buttons vertically */
+                align-items: center; /* Center stack */
+            }
+            .view-all .btn {
+                width: 80%; /* Make buttons wider */
+                max-width: 300px; /* Max width */
+            }
+        }
+
+        @media (max-width: 576px) {
+            .hero h1 {
+                font-size: 2.3rem;
+            }
+
+            .hero h2 {
+                font-size: 1.2rem;
+            }
+
+            .projects-grid {
+                grid-template-columns: 1fr; /* Single column for projects */
+            }
+
+            .hero-buttons {
+                flex-direction: column; /* Stack hero buttons */
+                align-items: center; /* Center stack */
+                width: 100%;
+            }
+
+            .btn {
+                width: 80%; /* Make buttons take more width */
+                max-width: 300px; /* Add max width */
+            }
+
+            .section-title h2 {
+                font-size: 2rem;
+            }
+            .contact-form {
+                padding: 30px; /* Reduce padding */
+            }
+             .footer-grid {
+                gap: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div style="text-align: center; padding-top: 80px; padding-bottom: 20px;"><h2>New Videos page</h2></div>
+    <header>
+        <div class="container">
+            <nav>
+                <a href="#" class="logo">
+                    <span class="logo-icon"><i class="fas fa-code"></i></span>
+                    TheGraxIsReal
+                </a>
+                <button class="mobile-menu-btn" aria-label="Toggle menu" aria-expanded="false">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <div class="nav-links">
+                    <a href="#home">Home</a>
+                    <a href="#projects">Projects</a>
+                    <a href="#blog">Blog</a>
+                    <a href="#skills">Skills</a>
+                    <a href="#contact">Contact</a>
+                    <a href="games.html">Games</a>
+                    <a href="youtube_client_v2.html" class="btn-new"><i class="fas fa-video"></i> thegraxisreal Videos</a>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <section id="home" class="hero">
+        <div class="hero-bg"></div> <div class="container">
+            <div class="hero-content">
+                <span class="hero-greeting">Hello, World! 👋</span>
+                <h1>I'm <span>thegraxisreal</span>,</h1>
+                <h2>Just making random stuff</h2>
+                <p>I'm 14, and I like to build random stuff, and promote my twitter.</p>
+                <p class="announcement"> Talk to my AI model, Graxybot! </p>
+
+                <div class="hero-buttons">
+                    <a href="#projects" class="btn btn-primary">
+                        <i class="fas fa-laptop-code"></i> View My Work
+                    </a>
+                    <a href="#contact" class="btn btn-outline">
+                        <i class="fas fa-paper-plane"></i> Get In Touch
+                    </a>
+                </div>
+
+                <div class="social-links">
+                    <a href="https://twitter.com/thegraxisreal" title="Twitter" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-twitter"></i>
+                    </a>
+                    <a href="#" title="GitHub" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-github"></i>
+                    </a>
+                    <a href="#" title="LinkedIn" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-linkedin-in"></i>
+                    </a>
+                    <a href="#" title="Instagram" target="_blank" rel="noopener noreferrer">
+                        <i class="fab fa-instagram"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="projects" class="projects">
+        <div class="container">
+            <div class="section-title">
+                <h2>My Projects</h2>
+                <p>Check out what I've been working on lately. Mostly just HTML side projects, including my new AI Chatbot!</p>
+            </div>
+
+            <div class="projects-grid">
+                <a href="bloggg.html" style="text-decoration: none; color: inherit;">
+                    <div class="project-card">
+                        <div class="project-img" style="background: var(--gradient); color: white;">
+                            <i class="fas fa-globe-americas"></i>
+                        </div>
+                        <div class="project-content">
+                            <h3>Mock.Com</h3>
+                            <p>My Mock Apps and websites project.</p>
+                            <div>
+                                <span class="tag">HTML</span>
+                                <span class="tag">CSS</span>
+                                <span class="tag">JavaScript</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="games.html" style="text-decoration: none; color: inherit;">
+                    <div class="project-card">
+                        <div class="project-img" style="background: linear-gradient(135deg, #6930c3 0%, #5e60ce 100%); color: white;">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="project-content">
+                            <h3>Games</h3>
+                            <p>Some random and fun games built with web technologies.</p>
+                            <div>
+                                <span class="tag">HTML</span>
+                                <span class="tag">CSS</span>
+                                <span class="tag">JavaScript</span>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="graxybot.html" style="text-decoration: none; color: inherit;">
+                    <div class="project-card">
+                        <div class="project-img" style="background: linear-gradient(135deg, #48bfe3 0%, #5e60ce 100%); color: white;">
+                            <i class="fas fa-robot"></i> </div>
+                        <div class="project-content">
+                            <h3>Graxybot AI</h3> <p>My custom-built AI chatbot featuring Flash and Pro models.</p> <div>
+                                <span class="tag">HTML</span>
+                                <span class="tag">CSS</span>
+                                <span class="tag">JavaScript</span>
+                                <span class="tag">AI</span> </div>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="view-all">
+                <a href="bloggg.html" class="btn btn-primary">View Mock.Com</a>
+                <a href="games.html" class="btn btn-outline">
+                    <i class="fas fa-gamepad"></i> Play Games
+                </a>
+                <a href="graxybot.html" class="btn btn-outline">
+                    <i class="fas fa-robot"></i> Try Graxybot
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <section id="skills" class="skills">
+        <div class="container">
+            <div class="section-title">
+                <h2>My Skills</h2>
+                <p>Here are some of the technologies and tools I'm proficient with.</p>
+            </div>
+
+            <div class="skills-grid">
+                <div class="skill-card">
+                    <div class="skill-icon"><i class="fab fa-html5"></i></div>
+                    <div class="skill-name">HTML5</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><i class="fab fa-css3-alt"></i></div>
+                    <div class="skill-name">CSS3</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><i class="fab fa-js"></i></div>
+                    <div class="skill-name">JavaScript</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><i class="fab fa-swift"></i></div>
+                    <div class="skill-name">Swift</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><i class="fas fa-mobile-alt"></i></div>
+                    <div class="skill-name">iOS Development</div>
+                </div>
+                 <div class="skill-card">
+                    <div class="skill-icon"><i class="fas fa-brain"></i></div>
+                    <div class="skill-name">AI / Chatbots</div>
+                </div>
+                <div class="skill-card">
+                    <div class="skill-icon"><i class="fas fa-laptop-code"></i></div>
+                    <div class="skill-name">Responsive Design</div>
+                </div>
+                 <div class="skill-card">
+                    <div class="skill-icon"><i class="fab fa-git-alt"></i></div>
+                    <div class="skill-name">Git & GitHub</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="blog" class="blog">
+        <div class="container">
+            <div class="section-title">
+                <h2>Latest Updates</h2>
+                <p>Stay tuned for updates about my journey in software development, new projects, and tech insights.</p>
+            </div>
+
+            <div class="blog-post">
+                 <div class="blog-img" style="background: linear-gradient(135deg, #6930c3 0%, #5e60ce 100%); color: white;">
+                    <div style="text-align: center;">
+                        <i class="fas fa-pen-fancy" style="font-size: 3.5rem; margin-bottom: 15px;"></i>
+                        <div style="background-color: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 0.9rem; font-weight: 600;">
+                            Coming Soon
+                        </div>
+                    </div>
+                </div>
+                <div class="blog-content">
+                    <div class="blog-date">April 30, 2025</div> <h3 class="blog-title">Why I haven't written a blog post yet</h3> <p class="blog-excerpt">Been busy coding Graxybot! Blog posts coming soon, maybe...</p> <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+            </div>
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="container">
+            <div class="section-title">
+                <h2>Get In Touch</h2>
+                <p>Have a question, want to talk about Graxybot, or work together? Feel free to contact me!</p>
+            </div>
+
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h3>Let's connect</h3>
+                    <p>I'm always open to discussing new projects, creative ideas or opportunities to be part of your vision.</p>
+
+                    <div class="contact-method">
+                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                        <div>
+                            <h4>Email</h4>
+                            <p>thegraxisreal@gmail.com</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-method">
+                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div>
+                            <h4>Location</h4>
+                            <p>Somewhere on Earth</p>
+                        </div>
+                    </div>
+
+                    <div class="social-links">
+                         <a href="https://twitter.com/thegraxisreal" title="Twitter" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" title="GitHub" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" title="LinkedIn" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" title="Instagram" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="contact-form">
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name" class="form-label">Name</label>
+                            <input type="text" id="name" name="name" class="form-control" placeholder="Your Name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" id="email" name="email" class="form-control" placeholder="Your Email" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message" class="form-label">Message</label>
+                            <textarea id="message" name="message" class="form-control" placeholder="Your Message" required></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                            <i class="fas fa-paper-plane"></i> Send Message
+                        </button>
+
+                        <div id="successMessage">
+                            <i class="fas fa-check-circle"></i>
+                            <p>Message sent successfully! Thanks for reaching out.</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-col">
+                    <h4>About Me</h4>
+                    <p>I'm a 14-year-old developer passionate about creating cool digital experiences, from websites to AI chatbots. Specializing in HTML, CSS, JS, and Swift.</p>
+                    <div class="social-links">
+                         <a href="https://twitter.com/thegraxisreal" title="Twitter" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-twitter"></i>
+                        </a>
+                        <a href="#" title="GitHub" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="#" title="LinkedIn" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="#" title="Instagram" target="_blank" rel="noopener noreferrer">
+                            <i class="fab fa-instagram"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Quick Links</h4>
+                    <ul class="footer-links">
+                        <li><a href="#home">Home</a></li>
+                        <li><a href="#projects">Projects</a></li>
+                        <li><a href="#blog">Blog</a></li>
+                        <li><a href="#skills">Skills</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                        <li><a href="games.html">Games</a></li>
+                        <li><a href="graxybot.html">Graxybot</a></li> </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Focus Areas</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Web Development</a></li>
+                        <li><a href="#">iOS Development</a></li>
+                        <li><a href="#">AI Chatbots</a></li>
+                        <li><a href="#">UI/UX Design</a></li>
+                    </ul>
+                </div>
+
+                <div class="footer-col">
+                    <h4>Resources</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">Learning Path</a></li>
+                        <li><a href="#">Coding Tips</a></li>
+                        <li><a href="#">Tutorials</a></li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="footer-bottom">
+                <p>&copy; 2025 TheGraxIsReal. All rights reserved.</p> </div>
+        </div>
+    </footer>
+
+    <script>
+        // Mobile Menu Toggle Functionality
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const navLinks = document.querySelector('.nav-links');
+        const body = document.body; // Get body element
+
+        mobileMenuBtn.addEventListener('click', () => {
+            const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
+            mobileMenuBtn.setAttribute('aria-expanded', !isExpanded); // Toggle aria-expanded
+            navLinks.classList.toggle('active'); // Toggle visibility class
+            mobileMenuBtn.querySelector('i').classList.toggle('fa-bars'); // Toggle icon bars
+            mobileMenuBtn.querySelector('i').classList.toggle('fa-times'); // Toggle icon close (x)
+            body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : ''; // Prevent body scroll when menu open
+        });
+
+        // Close mobile menu when clicking on a navigation link
+        document.querySelectorAll('.nav-links a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (navLinks.classList.contains('active')) {
+                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                    navLinks.classList.remove('active');
+                    mobileMenuBtn.querySelector('i').classList.add('fa-bars');
+                    mobileMenuBtn.querySelector('i').classList.remove('fa-times');
+                    body.style.overflow = ''; // Re-enable body scroll
+                }
+            });
+        });
+
+        // Sticky Header Appearance on Scroll
+        const header = document.querySelector('header');
+        let lastScrollY = window.scrollY; // Store last scroll position
+
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                header.style.backgroundColor = 'rgba(255, 255, 255, 0.98)'; // Slightly less transparent when scrolled
+                header.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)'; // Stronger shadow
+                // Optional: Hide header on scroll down, show on scroll up
+                // if (window.scrollY > lastScrollY) {
+                //     // Scrolling Down
+                //     header.style.top = '-100px'; // Adjust based on header height
+                // } else {
+                //     // Scrolling Up
+                //     header.style.top = '0';
+                // }
+            } else {
+                header.style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; // Initial background
+                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)'; // Initial shadow
+                // header.style.top = '0'; // Ensure header is visible at top
+            }
+             lastScrollY = window.scrollY; // Update last scroll position
+        });
+
+        // Contact Form Submission Handler (Simulated)
+        const contactForm = document.getElementById('contactForm');
+        const successMessage = document.getElementById('successMessage');
+        const submitBtn = document.getElementById('submitBtn');
+
+        contactForm.addEventListener('submit', function(e) {
+            e.preventDefault(); // Prevent default form submission
+
+            // Basic client-side validation (optional, enhance as needed)
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            if (!name || !email || !message) {
+                 alert('Please fill in all fields.'); // Simple feedback
+                 return;
+            }
+
+            // Disable button and show loading state
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+
+            // --- Simulate backend submission ---
+            // Replace this setTimeout with your actual fetch/AJAX call
+            // to send the form data to a server or service (like Formspree, Netlify Forms, etc.)
+            setTimeout(() => {
+                // --- On Successful Submission ---
+                successMessage.style.display = 'block'; // Show success message
+                contactForm.reset(); // Clear the form
+
+                // Reset button state after a delay
+                submitBtn.innerHTML = '<i class="fas fa-check"></i> Sent!';
+                setTimeout(() => {
+                    submitBtn.disabled = false; // Re-enable button
+                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+                    successMessage.style.display = 'none'; // Hide success message
+                }, 4000); // Hide message and reset button text after 4 seconds
+
+                // --- On Error (Example) ---
+                // Uncomment this block to simulate an error
+                /*
+                console.error("Form submission failed!");
+                alert("Sorry, something went wrong. Please try again later.");
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
+                */
+
+            }, 1500); // Simulate network delay (1.5 seconds)
+        });
+
+        // Smooth Scrolling for Anchor Links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                // Only prevent default if it's a link *within* the page
+                if (this.hash !== "") {
+                     e.preventDefault();
+
+                    const hash = this.hash;
+                    const targetElement = document.querySelector(hash);
+
+                    if(targetElement) {
+                        const headerOffset = document.querySelector('header').offsetHeight; // Get header height
+                        const elementPosition = targetElement.getBoundingClientRect().top;
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 20; // Adjust offset (-20 for extra space)
+
+                        window.scrollTo({
+                            top: offsetPosition,
+                            behavior: "smooth"
+                        });
+
+                         // Optionally update URL hash without jumping
+                         // history.pushState(null, null, hash);
+                    }
+                }
+            });
+        });
+
+    </script>
+</body>
+</html>
