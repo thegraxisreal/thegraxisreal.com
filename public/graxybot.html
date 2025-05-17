@@ -64,9 +64,6 @@
     --mic-button-color: var(--text-secondary);
     --mic-button-hover-color: var(--primary);
     --mic-button-active-color: #e74c3c; /* Red when listening */
-    --image-gen-button-color: var(--text-secondary); /* New: Image Gen Button Color */
-    --image-gen-button-hover-color: var(--max-color); /* New: Image Gen Button Hover Color */
-    --image-gen-button-active-color: var(--max-color); /* New: Image Gen Button Active Color */
 }
 
 * {
@@ -239,12 +236,6 @@ html, body {
     font-weight: 600;
     color: var(--unhinged-color);
 }
-/* Style for the Image Generation model option */
-#model-selector option[value="graxybot-image-gen"] {
-     font-weight: 600;
-     color: var(--image-gen-button-active-color); /* Use image gen color */
-}
-
 .model-selector-container::after { /* Dropdown arrow */
     content: '\f078'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; top: 50%; right: 0px;
     transform: translateY(-50%); font-size: 0.65rem; color: var(--text-secondary); pointer-events: none; z-index: 0; transition: color var(--transition);
@@ -303,14 +294,12 @@ html, body {
 .message p { margin: 0 0 5px 0; }
 .message p:last-child { margin-bottom: 0; }
 .message .timestamp { font-size: 0.75rem; color: var(--text-secondary); margin-top: 8px; text-align: right; }
-.message .sent-image,
-.message .generated-image { /* Added .generated-image */
+.message .sent-image {
     max-width: 200px;
     max-height: 200px;
     border-radius: 8px;
     margin-top: 8px;
     display: block;
-    cursor: pointer; /* Make generated images clickable */
 }
 /* Speaker button on bot messages */
 .speak-button {
@@ -380,8 +369,7 @@ html, body {
 
 /* Thinking Indicator Styles */
 .local-thinking-indicator .message, /* Added for local model */
-.reason-thinking-indicator .message,
-.image-gen-thinking-indicator .message { /* New: Image Gen Indicator */
+.reason-thinking-indicator .message {
     padding: 15px 18px;
     display: flex;
     align-items: center;
@@ -391,8 +379,7 @@ html, body {
     box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 .local-thinking-indicator span, /* Added for local model */
-.reason-thinking-indicator span,
-.image-gen-thinking-indicator span { /* New: Image Gen Indicator */
+.reason-thinking-indicator span {
     display: inline-block;
     width: 8px;
     height: 8px;
@@ -401,14 +388,11 @@ html, body {
     animation: typing 1s infinite ease-in-out;
 }
 .local-thinking-indicator span:nth-child(1), /* Added for local model */
-.reason-thinking-indicator span:nth-child(1),
-.image-gen-thinking-indicator span:nth-child(1) { animation-delay: 0s; } /* New: Image Gen Indicator */
+.reason-thinking-indicator span:nth-child(1) { animation-delay: 0s; }
 .local-thinking-indicator span:nth-child(2), /* Added for local model */
-.reason-thinking-indicator span:nth-child(2),
-.image-gen-thinking-indicator span:nth-child(2) { animation-delay: 0.1s; } /* New: Image Gen Indicator */
+.reason-thinking-indicator span:nth-child(2) { animation-delay: 0.1s; }
 .local-thinking-indicator span:nth-child(3), /* Added for local model */
-.reason-thinking-indicator span:nth-child(3),
-.image-gen-thinking-indicator span:nth-child(3) { animation-delay: 0.2s; } /* New: Image Gen Indicator */
+.reason-thinking-indicator span:nth-child(3) { animation-delay: 0.2s; }
 
 /* Specific style for reason thinking icon */
 .reason-thinking-indicator .message-icon {
@@ -421,10 +405,6 @@ html, body {
 /* Style for Unhinged thinking icon */
 .unhinged-thinking-indicator .message-icon {
      background-color: var(--unhinged-color); /* Use Unhinged color */
-}
-/* New: Style for Image Gen thinking icon */
-.image-gen-thinking-indicator .message-icon {
-     background-color: var(--image-gen-button-active-color); /* Use Image Gen active color */
 }
 
 
@@ -535,9 +515,6 @@ html, body {
     display: none; /* Hide the actual file input */
 }
 
-/* Removed: Image Generation Button styles */
-
-
 /* Image Preview Area */
 .image-preview-container {
     margin-top: 10px;
@@ -556,8 +533,8 @@ html, body {
     position: absolute;
     top: -5px;
     right: -5px;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
+    background-color: var(--image-remove-bg);
+    color: var(--image-remove-text);
     border: none;
     border-radius: 50%;
     width: 20px;
@@ -880,8 +857,7 @@ html, body {
     .chat-input-container { padding: 10px 15px; max-width: 95%; }
     .chat-input-area { padding: 5px 5px 5px 12px; }
     #message-input { font-size: 0.95rem; }
-    .btn, #mic-button { width: 38px; height: 38px; } /* Adjust button size */
-    /* Removed image-generate-button responsive style */
+    .btn, #mic-button { width: 38px; height: 38px; } /* Adjust mic button size */
     #initial-send-button { width: 38px; height: 38px; }
     #reason-button { font-size: 0.8rem; padding: 5px 10px; }
     #reason-usage-display { font-size: 0.75rem; }
@@ -891,11 +867,9 @@ html, body {
     .popup-content p, .popup-content ul { font-size: 15px; }
     .modal-content { padding: 20px; max-width: 95%; }
     .modal-content h2 { font-size: 1.5rem; }
-    .modal-content h3 { font-size: 1.1rem; }
-    .modal-content p, .modal-content ul li { font-size: 0.9rem; }
-    .modal-upgrade-btn { font-size: 0.95rem; padding: 10px 15px; }
+    .modal-content .comparison-grid { grid-template-columns: 1fr; } /* Stack columns */
     .welcome-title { font-size: 2.2rem; }
-    .suggested-prompts-grid { grid-template-columns: 1fr; } /* Stack columns */
+    .suggested-prompts-grid { grid-template-columns: 1fr; } /* Stack prompts */
 }
 
 @media (max-width: 600px) {
@@ -922,8 +896,7 @@ html, body {
     .chat-input-container { padding: 8px 10px; }
     .chat-input-area { padding: 3px 3px 3px 10px; }
     #message-input { padding: 8px 0; }
-    .btn, #mic-button { width: 36px; height: 36px; } /* Adjust button size */
-    /* Removed image-generate-button responsive style */
+    .btn, #mic-button { width: 36px; height: 36px; } /* Adjust mic button size */
     #initial-send-button { width: 36px; height: 36px; }
     #reason-button { font-size: 0.75rem; padding: 4px 8px; }
     #reason-usage-display { font-size: 0.7rem; }
@@ -940,7 +913,7 @@ html, body {
     .modal-content p, .modal-content ul li { font-size: 0.9rem; }
     .modal-upgrade-btn { font-size: 0.95rem; padding: 10px 15px; }
     .welcome-title { font-size: 2rem; }
-    .suggested-prompts-grid { grid-template-columns: 1fr; } /* Stack columns */
+    .prompt-button { font-size: 0.85rem; padding: 10px; }
 }
 
 </style>
@@ -962,7 +935,7 @@ html, body {
             <li>Reason Mode: Enhance responses with Gemini 1.5 Pro (limited daily uses).</li>
             <li>Image Upload: Send images along with your text prompts.</li>
             <li><strong>Coming Soon:</strong> Voice mode rollout.</li>
-            <li><strong>New:</strong> Local Image Generation (Requires local Stable Diffusion setup)!</li> </ul>
+        </ul>
         <button id="closePopupButton">Close</button>
         </div>
 </div>
@@ -983,7 +956,7 @@ html, body {
                     <li><i class="fas fa-times"></i> Graxybot Unhinged Access</li>
                     <li><i class="fas fa-check"></i> Standard Usage Limits (15/5min)</li>
                     <li><i class="fas fa-times"></i> Priority Voice Mode Access</li>
-                    <li><i class="fas fa-times"></i> Local Image Generation</li> </ul>
+                </ul>
             </div>
             <div class="plan-column max">
                 <h4>Max</h4>
@@ -994,7 +967,7 @@ html, body {
                     <li><i class="fas fa-check"></i> **Graxybot Unhinged Access** (Local)</li>
                     <li><i class="fas fa-check"></i> **Higher Usage Limits** (14/min simulated)</li>
                     <li><i class="fas fa-check"></i> **Priority Voice Mode Access** (Coming Soon)</li>
-                    <li><i class="fas fa-check"></i> **Local Image Generation** (Requires local setup)</li> </ul>
+                </ul>
             </div>
         </div>
 
@@ -1034,8 +1007,7 @@ html, body {
                             <option value="graxybot-1.5-experimental">graxybot-1.5 (experimental)</option>
                             <option value="graxybot-global-sheets">graxybot-global-sheets</option>
                             <option value="graxybot-2.0-pro">graxybot-2.0-pro (Max)</option>
-                            <option value="graxybot-unhinged">Graxybot Unhinged</option>
-                            <option value="graxybot-image-gen">Image Generation (Max)</option> </select>
+                            <option value="graxybot-unhinged">Graxybot Unhinged</option> </select>
                     </div>
                     <div class="personality-selector-container" id="personality-selector-container">
                         <select id="personality-selector">
@@ -1103,8 +1075,7 @@ html, body {
 
     // --- Configuration ---
     const API_KEY = "AIzaSyBbj7cDi0Oa86lUN5963IThL0R1pffgDkk"; // <-- PASTE YOUR ACTUAL GOOGLE AI API KEY HERE
-    const LOCAL_CHAT_MODEL_URL = "https://scotland-admit-atm-policies.trycloudflare.com"; // <-- YOUR LOCAL QWEN-3 SERVER URL
-    const LOCAL_IMAGE_GEN_URL = "https://competition-mechanical-trademarks-guys.trycloudflare.com"; // <-- YOUR LOCAL STABLE DIFFUSION SERVER URL
+    const LOCAL_MODEL_URL = "https://scotland-admit-atm-policies.trycloudflare.com"; // <-- YOUR LOCAL SERVER URL
 
     // --- Model Definitions ---
     const modelMapping = { // For Google AI models
@@ -1114,7 +1085,6 @@ html, body {
     };
     const GRAXYBOT_MAX_MODEL_NAME = "graxybot-2.0-pro"; // Display name for your qwen model
     const GRAXYBOT_UNHINGED_MODEL_NAME = "graxybot-unhinged"; // Display name for llama2-uncensored
-    const GRAXYBOT_IMAGE_GEN_NAME = "graxybot-image-gen"; // New: Display name for image generation
     const REASON_MODE_MODEL = "gemini-1.5-pro-latest";
     const REASON_MODE_DISPLAY_NAME = "graxybot-1.0-reason";
     const GLOBAL_SHEETS_MODEL_NAME = "graxybot-global-sheets";
@@ -1153,7 +1123,6 @@ html, body {
     let personalitySelectorContainer, personalitySelector;
     let reasonButton, reasonUsageDisplay;
     let imageUploadButton, imageUploadInput, imagePreviewArea, imagePreview, removeImageButton;
-    // Removed: let imageGenerateButton; // New: Image Generate Button
     let modelNotificationDiv;
     let popupOverlay, closePopupButton;
     let upgradeLink, maxUpgradeModal, modalCloseBtn, startTrialBtn; // Max related UI
@@ -1197,8 +1166,8 @@ html, body {
                         } else if (parsedChats[id].model !== EXPERIMENTAL_MODEL_NAME) {
                             delete parsedChats[id].personality;
                         }
-                        // Check if model exists in mapping OR is one of the local models OR image gen model
-                        const isKnownLocalModel = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME, GRAXYBOT_IMAGE_GEN_NAME].includes(parsedChats[id].model);
+                        // Check if model exists in mapping OR is one of the local models
+                        const isKnownLocalModel = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME].includes(parsedChats[id].model);
                         if (!parsedChats[id].model || (!modelMapping[parsedChats[id].model] && !isKnownLocalModel)) {
                              parsedChats[id].model = DEFAULT_FAKE_MODEL;
                         }
@@ -1229,8 +1198,8 @@ html, body {
 
     function loadSelectedModelPreference() {
         const savedModel = localStorage.getItem(MODEL_STORAGE_KEY);
-        // Allow Max, Unhinged, and Image Gen models as preferences too
-        const knownLocalModels = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME, GRAXYBOT_IMAGE_GEN_NAME];
+        // Allow Max and Unhinged models as preferences too
+        const knownLocalModels = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME];
         if (savedModel && (modelMapping[savedModel] || knownLocalModels.includes(savedModel))) {
             return savedModel;
         }
@@ -1238,7 +1207,7 @@ html, body {
     }
 
     function saveSelectedModelPreference(fakeModelName) {
-        const knownLocalModels = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME, GRAXYBOT_IMAGE_GEN_NAME];
+        const knownLocalModels = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME];
         if (modelMapping[fakeModelName] || knownLocalModels.includes(fakeModelName)) {
             localStorage.setItem(MODEL_STORAGE_KEY, fakeModelName);
         }
@@ -1261,7 +1230,6 @@ html, body {
         if (upgradeLink) {
             upgradeLink.style.display = isMaxUser ? 'none' : 'inline-block';
         }
-        // No longer need to enable/disable image generate button here
     }
 
     // --- Reason Mode Usage ---
@@ -1317,7 +1285,7 @@ html, body {
      */
     function getSystemPrompt(fakeModelName, personality = DEFAULT_PERSONALITY, isReasoning = false) {
         // Return empty string if it's a known local model, as they don't use system prompts this way
-        if ([GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME, GRAXYBOT_IMAGE_GEN_NAME].includes(fakeModelName)) {
+        if ([GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME].includes(fakeModelName)) {
             return "";
         }
 
@@ -1360,11 +1328,6 @@ html, body {
         else if (Array.isArray(content)) { messageData = { role, parts: content }; }
         else { console.warn("Attempted to save message with invalid content format:", content); return; }
         if (role === 'user' && imagePreview) { messageData.imagePreview = imagePreview; }
-         // Check if the message is a generated image response
-        if (role === 'model' && content.length === 1 && content[0].type === 'image') {
-             messageData.generatedImage = content[0].url; // Save the data URL
-        }
-
         chats[currentChatId].history.push(messageData);
         const userMessages = chats[currentChatId].history.filter(m => m.role === 'user');
         if (userMessages.length === 1 && role === 'user') {
@@ -1389,17 +1352,11 @@ html, body {
         if (type === 'reason') {
             indicatorClass = 'reason-thinking-indicator';
             senderType = 'reason-thinking'; // Use specific sender for styling
-            indicatorText = 'Reasoning...';
         } else if (type === 'local') { // Covers both Max and Unhinged now
             indicatorClass = 'local-thinking-indicator';
             indicatorText = 'Thinking (Local)...';
             senderType = 'bot'; // Use standard bot sender for local
-        } else if (type === 'image-gen') { // New: Image Generation Indicator
-             indicatorClass = 'image-gen-thinking-indicator';
-             indicatorText = 'Generating Image...';
-             senderType = 'bot'; // Use standard bot sender for image gen
-        }
-        else {
+        } else {
             console.warn("Unknown thinking indicator type:", type);
             return; // Don't show indicator for unknown types
         }
@@ -1433,7 +1390,7 @@ html, body {
             }
         }
         // Cleanup orphaned indicators
-        const indicators = chatMessagesContainer?.querySelectorAll('.reason-thinking-indicator, .local-thinking-indicator, .image-gen-thinking-indicator'); // Look for all indicator classes
+        const indicators = chatMessagesContainer?.querySelectorAll('.reason-thinking-indicator, .local-thinking-indicator'); // Look for both classes
         indicators?.forEach(el => {
             try {
                 el.parentNode?.removeChild(el);
@@ -1444,7 +1401,7 @@ html, body {
     }
 
 
-    function displayMessage(content, sender, isError = false, imagePreview = null, generatedImage = null) { // Added generatedImage parameter
+    function displayMessage(content, sender, isError = false, imagePreview = null) {
         if (!chatMessagesContainer) { console.error("Chat message container not found in displayMessage"); return null; };
         const wrapper = document.createElement('div');
         wrapper.classList.add('message-content-wrapper');
@@ -1452,7 +1409,7 @@ html, body {
 
         // Add base class based on sender
         if (sender === 'user') wrapper.classList.add('user-message');
-        else if (sender === 'bot' || sender === 'reason-thinking' || sender === 'local-thinking' || sender === 'image-gen-thinking') { // Added image-gen-thinking
+        else if (sender === 'bot' || sender === 'reason-thinking' || sender === 'local-thinking') {
             // Treat all bot/indicator types as 'bot-message' for layout purposes
             wrapper.classList.add('bot-message');
         }
@@ -1477,9 +1434,6 @@ html, body {
             } else if (sender === 'local-thinking') {
                  // CSS class .local-thinking-indicator .message-icon handles background
                  img.onerror = () => iconDiv.innerHTML = '<i class="fas fa-server"></i>'; // Local fallback
-            } else if (sender === 'image-gen-thinking') { // New: Image Gen fallback icon
-                 // CSS class .image-gen-thinking-indicator .message-icon handles background
-                 img.onerror = () => iconDiv.innerHTML = '<i class="fas fa-image"></i>'; // Image Gen fallback
             }
             iconDiv.appendChild(img);
         }
@@ -1489,7 +1443,7 @@ html, body {
         bubbleDiv.classList.add('message-bubble');
 
         // --- Handle Content ---
-        if (sender === 'reason-thinking' || sender === 'local-thinking' || sender === 'image-gen-thinking') { // Added image-gen-thinking
+        if (sender === 'reason-thinking' || sender === 'local-thinking') {
             // Display animated dots for indicators
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
@@ -1508,37 +1462,18 @@ html, body {
                 textContent = content;
             }
 
-            // Handle generated image display
-            if (generatedImage) {
-                 const imgElement = document.createElement('img');
-                 imgElement.src = generatedImage;
-                 imgElement.alt = "Generated image";
-                 imgElement.classList.add('generated-image');
-                 // Add click handler to view full image
-                 imgElement.onclick = () => window.open(generatedImage, '_blank');
-                 messageDiv.appendChild(imgElement); // Add image before text
-                 // Clear default text content if only an image is expected
-                 if (!textContent || textContent.trim() === "") {
-                     paragraph.remove(); // Remove the empty paragraph if only image is present
-                     paragraph = null; // Ensure paragraph is null after removal
-                 }
-            }
-
-            // Append text content if it exists and paragraph is still valid
             if (textContent && paragraph) {
                 processAndAppendText(textContent, paragraph);
-            } else if (!imagePreview && !generatedImage && sender !== 'bot' && paragraph) {
+            } else if (!imagePreview && sender !== 'bot' && paragraph) {
                  paragraph.textContent = "[Empty Message]";
             }
-
 
             if (sender === 'user' && imagePreview) {
                 const imgElement = document.createElement('img');
                 imgElement.src = imagePreview;
                 imgElement.alt = "Sent image preview";
                 imgElement.classList.add('sent-image');
-                 // Insert image before text if both exist, otherwise just append
-                if (paragraph && paragraph.parentNode === messageDiv && paragraph.hasChildNodes()) {
+                if (paragraph && paragraph.hasChildNodes()) {
                     messageDiv.insertBefore(imgElement, paragraph);
                 } else {
                     messageDiv.appendChild(imgElement);
@@ -1555,28 +1490,20 @@ html, body {
             }
             // Timestamp and speaker button for bot added after response complete
             else if (sender === 'bot' && !isError) {
-                 // Add speaker button after processing (only if there's text content)
-                 if (textContent) { // Only add speaker if there's text
-                     const speakBtn = document.createElement('button');
-                     speakBtn.className = 'speak-button';
-                     speakBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
-                     speakBtn.title = 'Read aloud';
-                     speakBtn.onclick = (event) => {
-                        event.stopPropagation();
-                        // Find the text content within this specific message bubble
-                        const textToSpeak = Array.from(bubbleDiv.querySelectorAll('p, code')) // Select relevant elements
-                                                .map(el => el.textContent)
-                                                .join('\n'); // Join paragraphs/code
-                        speakText(textToSpeak);
-                     };
-                     messageDiv.appendChild(speakBtn); // Append to the message div itself
-                 }
-
-                 // Add timestamp
-                 const timestampSpan = document.createElement('span');
-                 timestampSpan.classList.add('timestamp');
-                 timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                 bubbleDiv.appendChild(timestampSpan);
+                 // Add speaker button after processing
+                 const speakBtn = document.createElement('button');
+                 speakBtn.className = 'speak-button';
+                 speakBtn.innerHTML = '<i class="fas fa-volume-up"></i>';
+                 speakBtn.title = 'Read aloud';
+                 speakBtn.onclick = (event) => {
+                    event.stopPropagation();
+                    // Find the text content within this specific message bubble
+                    const textToSpeak = Array.from(bubbleDiv.querySelectorAll('p, code')) // Select relevant elements
+                                            .map(el => el.textContent)
+                                            .join('\n'); // Join paragraphs/code
+                    speakText(textToSpeak);
+                 };
+                 messageDiv.appendChild(speakBtn); // Append to the message div itself
             }
         }
 
@@ -1588,8 +1515,8 @@ html, body {
             chatMessagesContainer.scrollTo({ top: chatMessagesContainer.scrollHeight, behavior: 'smooth' });
         });
 
-        // Speak the message if it's from the bot, not an error, and has text content
-        if (sender === 'bot' && !isError && textContent) {
+        // Speak the message if it's from the bot and not an error
+        if (sender === 'bot' && !isError) {
              const textToSpeak = Array.from(bubbleDiv.querySelectorAll('p, code'))
                                      .map(el => el.textContent)
                                      .join('\n');
@@ -1866,27 +1793,16 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         if (showPersonality && personalityToUse) { personalitySelector.value = personalityToUse; }
         updateModelNotification(fakeModelNameToUse);
 
-        // Update placeholder text based on selected model
-        if (messageInput) {
-             if (fakeModelNameToUse === GRAXYBOT_IMAGE_GEN_NAME) {
-                 messageInput.placeholder = "Enter prompt for image generation...";
-             } else {
-                 messageInput.placeholder = "Message Graxybot...";
-             }
-        }
-
-
         // Disable inputs while loading
         if(messageInput) messageInput.disabled = true;
         if(sendButton) sendButton.disabled = true;
-        // Removed: if(imageGenerateButton) imageGenerateButton.disabled = true; // Disable image gen button
         deactivateReasonMode();
         removeSelectedImage();
         currentChatSession = null;
 
         try {
             // Check API Key only if NOT using a known local model
-            const knownLocalModels = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME, GRAXYBOT_IMAGE_GEN_NAME];
+            const knownLocalModels = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME];
             if (!knownLocalModels.includes(fakeModelNameToUse)) {
                 if (!API_KEY || API_KEY === "YOUR_GOOGLE_AI_API_KEY" || (API_KEY.startsWith("AIzaSyB") && API_KEY.length < 30)) {
                     throw new Error("Google AI API Key is missing, invalid, or a placeholder in the script.");
@@ -1912,12 +1828,7 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
             // Display history OR welcome message
             if (historyToLoad.length > 0) {
                 historyToLoad.forEach(message => {
-                    // Check if the message is a generated image
-                    if (message.generatedImage) {
-                        displayMessage('', 'bot', false, null, message.generatedImage); // Display image only
-                    } else {
-                        displayMessage(message.parts, message.role, false, message.imagePreview || null);
-                    }
+                    displayMessage(message.parts, message.role, false, message.imagePreview || null);
                 });
             } else {
                  // If history is empty, show the welcome message
@@ -1929,8 +1840,6 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
 
             if(messageInput) messageInput.disabled = false;
             if(sendButton) sendButton.disabled = false;
-            if(initialSendButton) initialSendButton.disabled = false;
-            // Removed: if (imageGenerateButton) imageGenerateButton.disabled = !isMaxUser; // Enable/disable based on Max status
             if(messageInput) messageInput.focus();
             updateReasonButtonState();
             updateMaxUI(); // Update Max UI elements
@@ -1946,7 +1855,6 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
             displayMessage(`AI Initialization Error: ${error.message}. Please check the API Key and console for details.`, 'bot', true);
             if(sendButton) sendButton.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
             if (reasonButton) reasonButton.disabled = true;
-            // Removed: if (imageGenerateButton) imageGenerateButton.disabled = true; // Disable image gen button on error
             // Keep inputs disabled on error
             if(messageInput) messageInput.disabled = true;
             if(sendButton) sendButton.disabled = true;
@@ -1958,25 +1866,12 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
 
     /**
      * Main function to handle sending messages. Branches between Google AI and local model.
-     * Added isImageGenerationRequest parameter.
      */
-    async function sendMessageInternal(messageText, isInitialMessage = false) { // Removed isImageGenerationRequest parameter
-        // Determine if this is an image generation request based on the selected model
-        const isImageGenerationRequest = currentChatId && chats[currentChatId]?.model === GRAXYBOT_IMAGE_GEN_NAME;
-
-
-        // Prevent sending if empty message (unless it's an image upload) or thinking indicator is active
-        if ((!messageText && !selectedImageData && !isImageGenerationRequest) || currentThinkingIndicatorElement) {
-             console.log("Send prevented: Empty message/no image/no image gen request or thinking indicator active.");
-             return;
-        }
-         // Prevent image generation if input is empty
-        if (isImageGenerationRequest && !messageText) {
-            alert("Please enter a text prompt for image generation.");
-            if (messageInput) messageInput.focus();
+    async function sendMessageInternal(messageText, isInitialMessage = false) {
+        if ((!messageText && !selectedImageData) || currentThinkingIndicatorElement) {
+            console.log("Send prevented: Empty message or thinking indicator active.");
             return;
         }
-
 
         let chatIdForMessage = currentChatId;
         let usedReasonModeForThisMessage = false;
@@ -2007,30 +1902,16 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
             // if (!isInitialMessage) { await initializeAICurrentChat(); } // This clears the container
             const userContentParts = [];
             if (messageText) userContentParts.push({ text: messageText });
-            // Display user message for image generation request
-            if (isImageGenerationRequest) {
-                 displayMessage([{ text: `Generate image: "${messageText}"` }], 'user');
-                 addMessageToCurrentChatHistory('user', [{ text: `Generate image: "${messageText}"` }]);
-            } else {
-                 displayMessage(userContentParts.length > 0 ? userContentParts : [{text:"[Image Sent]"}], 'user', false, imagePreviewForDisplay);
-                 addMessageToCurrentChatHistory('user', userContentParts.length > 0 ? userContentParts : [{text: "[Image Sent]"}], imagePreviewForDisplay);
-            }
-
+            displayMessage(userContentParts.length > 0 ? userContentParts : [{text:"[Image Sent]"}], 'user', false, imagePreviewForDisplay);
+            addMessageToCurrentChatHistory('user', userContentParts.length > 0 ? userContentParts : [{text: "[Image Sent]"}], imagePreviewForDisplay);
         } else {
             // --- Sending Message to Existing Chat ---
             if (isRateLimited()) return;
             messageTimestamps.push(Date.now());
             const userContentParts = [];
             if (messageText) userContentParts.push({ text: messageText });
-
-            // Display user message for image generation request
-            if (isImageGenerationRequest) {
-                 displayMessage([{ text: `Generate image: "${messageText}"` }], 'user');
-                 addMessageToCurrentChatHistory('user', [{ text: `Generate image: "${messageText}"` }]);
-            } else {
-                 displayMessage(userContentParts.length > 0 ? userContentParts : [{text:"[Image Sent]"}], 'user', false, imagePreviewForDisplay);
-                 addMessageToCurrentChatHistory('user', userContentParts.length > 0 ? userContentParts : [{text: "[Image Sent]"}], imagePreviewForDisplay);
-            }
+            displayMessage(userContentParts.length > 0 ? userContentParts : [{text:"[Image Sent]"}], 'user', false, imagePreviewForDisplay);
+            addMessageToCurrentChatHistory('user', userContentParts.length > 0 ? userContentParts : [{text: "[Image Sent]"}], imagePreviewForDisplay);
         }
 
         removeSelectedImage(); // Clear image state after displaying/saving
@@ -2048,128 +1929,13 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         if (initialSendButton) initialSendButton.disabled = true;
         if (reasonButton) reasonButton.disabled = true;
         if (imageUploadButton) imageUploadButton.disabled = true;
-        // Removed: if (imageGenerateButton) imageGenerateButton.disabled = true; // Disable image gen button
         if (micButton) micButton.disabled = true; // Disable mic button
 
         // ======================================================
-        // BRANCH: Handle Image Generation Request
+        // BRANCH: Check if using a Local Model (Max or Unhinged)
         // ======================================================
-        if (isImageGenerationRequest) {
-             console.log(`Image generation requested with prompt: "${messageText}"`);
-
-             // Check Max subscription for image generation
-            if (!isMaxUser) {
-                console.log("User is not subscribed to Max, image generation requires Max.");
-                displayMessage(`Image generation requires a Graxybot Max subscription. Click 'Upgrade to Max' above to learn more.`, 'bot', true);
-                addMessageToCurrentChatHistory('model', [{ text: `[Blocked: Max subscription required for Image Generation]` }]);
-                 // Re-enable inputs
-                if (messageInput) messageInput.disabled = false;
-                if (sendButton) sendButton.disabled = false;
-                if (initialSendButton) initialSendButton.disabled = false;
-                if (imageUploadButton) imageUploadButton.disabled = false;
-                // Removed: if (imageGenerateButton) imageGenerateButton.disabled = !isMaxUser; // Enable/disable based on Max status
-                if (micButton) micButton.disabled = false; // Re-enable mic button
-                updateReasonButtonState(); // Update reason button state
-                updateMaxUI(); // Ensure upgrade link is shown
-                if (messageInput && !messageInput.disabled) messageInput.focus();
-                return; // Stop processing
-            }
-
-
-             showThinkingIndicator('image-gen'); // Show image generation thinking indicator
-             // Removed: Add 'generating' class to the button
-
-             let botMessageElement = null; // Define here for access in finally block
-
-             try {
-                console.log(`Calling local server for image generation: ${LOCAL_IMAGE_GEN_URL}/sdapi/v1/txt2img`); // Use the standard txt2img endpoint
-
-                // Prepare the request body for the standard Stable Diffusion API
-                const requestBody = {
-                    // The prompt for the image generation
-                    prompt: messageText,
-                    // Add other parameters you might want to control (optional)
-                    steps: 20, // Example: number of sampling steps
-                    width: 512, // Example: image width
-                    height: 512, // Example: image height
-                    // negative_prompt: "ugly, deformed, bad anatomy" // Example: negative prompt
-                };
-
-                const response = await fetch(`${LOCAL_IMAGE_GEN_URL}/sdapi/v1/txt2img`, { // Use the standard txt2img endpoint
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
-                });
-
-                removeThinkingIndicator(); // Remove indicator once fetch starts responding
-
-                if (!response.ok) {
-                    // Attempt to read error message from response body if available
-                    let errorDetail = response.statusText;
-                     try {
-                         const errorData = await response.json();
-                         if (errorData && errorData.detail) {
-                             errorDetail = typeof errorData.detail === 'string' ? errorData.detail : JSON.stringify(errorData.detail);
-                         } else if (errorData && errorData.error) {
-                             errorDetail = errorData.error;
-                         }
-                     } catch (e) {
-                         console.warn("Could not parse error response body:", e);
-                     }
-                    throw new Error(`Local server image generation request failed with status ${response.status}: ${errorDetail}`);
-                }
-
-                const data = await response.json();
-
-                // Assuming the standard API returns a JSON object with an 'images' array of base64 strings
-                if (data && Array.isArray(data.images) && data.images.length > 0) {
-                    const generatedImageBase64 = data.images[0]; // Get the first image
-                    const generatedImageUrl = `data:image/png;base64,${generatedImageBase64}`; // Create a data URL
-                    console.log("Received generated image data.");
-
-                    // Display the generated image
-                    // Pass the generatedImage URL to displayMessage
-                    botMessageElement = displayMessage('', 'bot', false, null, generatedImageUrl);
-
-                    // Add the generated image to chat history
-                    // Store it as a part with type 'image' or a dedicated field 'generatedImage'
-                    addMessageToCurrentChatHistory('model', [{ type: 'image', url: generatedImageUrl }], null, generatedImageUrl);
-
-                } else if (data && data.detail) {
-                     // Handle API-specific errors returned in the response body
-                    throw new Error(`Stable Diffusion API Error: ${typeof data.detail === 'string' ? data.detail : JSON.stringify(data.detail)}`);
-                }
-                else {
-                    throw new Error("Invalid response format received from local server for image generation. Expected 'images' array.");
-                }
-
-             } catch (error) {
-                 console.error("Error calling local model for image generation:", error);
-                 removeThinkingIndicator(); // Ensure indicator is removed on error
-                 displayMessage(`Sorry, could not generate the image using the local model. Error: ${error.message}`, 'bot', true);
-                 addMessageToCurrentChatHistory('model', [{ text: `[Error generating image: ${error.message}]` }]);
-             } finally {
-                 // --- Cleanup after image generation call ---
-                 removeThinkingIndicator(); // Ensure removed finally
-                 deactivateReasonMode();
-                 // Removed: Remove 'generating' class from the button
-
-                 if (messageInput) messageInput.disabled = false;
-                 if (sendButton) sendButton.disabled = false;
-                 if (initialSendButton) initialSendButton.disabled = false;
-                 if (imageUploadButton) imageUploadButton.disabled = false;
-                 // Removed: if (imageGenerateButton) imageGenerateButton.disabled = !isMaxUser; // Enable/disable based on Max status
-                 if (micButton) micButton.disabled = false; // Re-enable mic button
-                 updateReasonButtonState();
-                 updateMaxUI();
-                 if (messageInput && !messageInput.disabled) messageInput.focus();
-             }
-
-        // ======================================================
-        // BRANCH: Using Local Chat Models (Max or Unhinged)
-        // ======================================================
-        } else if (knownLocalModels.includes(selectedModelName)) {
-            console.log(`Local chat model selected: ${selectedModelName}.`);
+        if (knownLocalModels.includes(selectedModelName)) {
+            console.log(`Local model selected: ${selectedModelName}.`);
 
             // Subscription check ONLY for the Max Pro model
             if (selectedModelName === GRAXYBOT_MAX_MODEL_NAME && !isMaxUser) {
@@ -2181,15 +1947,13 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
                 if (sendButton) sendButton.disabled = false;
                 if (initialSendButton) initialSendButton.disabled = false;
                 if (imageUploadButton) imageUploadButton.disabled = false;
-                // Removed: if (imageGenerateButton) imageGenerateButton.disabled = !isMaxUser; // Enable/disable based on Max status
                 if (micButton) micButton.disabled = false; // Re-enable mic button
                 updateReasonButtonState(); // Update reason button state
                 updateMaxUI(); // Ensure upgrade link is shown
-                if (messageInput && !messageInput.disabled) messageInput.focus();
                 return; // Stop processing
             }
 
-            console.log(`Calling local chat model: ${selectedModelName}...`);
+            console.log(`Calling local model: ${selectedModelName}...`);
             // Determine indicator type based on model
             const indicatorType = selectedModelName === GRAXYBOT_MAX_MODEL_NAME ? 'local' : 'unhinged';
             showThinkingIndicator(indicatorType); // Show appropriate local thinking indicator
@@ -2197,24 +1961,13 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
 
             try {
                 // Add instruction to the prompt for the local model
-                // Include image data if available
-                const requestBody = {
-                    message: messageText || "Describe the image.",
-                    model: selectedModelName,
-                    requestType: 'chat' // Indicate chat request
-                };
+                const promptForLocal = `User query: ${messageText || "Describe the image."}\n\n(Provide only the final response without explaining your reasoning.)`;
 
-                if (imageToSend && imageMimeType) {
-                    requestBody.image = {
-                        data: imageToSend,
-                        mime_type: imageMimeType
-                    };
-                }
-
-                const response = await fetch(`${LOCAL_CHAT_MODEL_URL}/chat`, { // Use the dedicated chat model URL
+                const response = await fetch(`${LOCAL_MODEL_URL}/chat`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(requestBody)
+                    // Send the selected model name to the backend
+                    body: JSON.stringify({ message: promptForLocal, model: selectedModelName })
                 });
 
                 removeThinkingIndicator(); // Remove indicator once fetch starts responding
@@ -2266,13 +2019,140 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
                 if (sendButton) sendButton.disabled = false;
                 if (initialSendButton) initialSendButton.disabled = false;
                 if (imageUploadButton) imageUploadButton.disabled = false;
-                // Removed: if (imageGenerateButton) imageGenerateButton.disabled = !isMaxUser; // Enable/disable based on Max status
                 if (micButton) micButton.disabled = false; // Re-enable mic button
                 updateReasonButtonState();
                 updateMaxUI();
                 if (messageInput && !messageInput.disabled) messageInput.focus();
             }
 
+        // ======================================================
+        // BRANCH: Using Google AI Models
+        // ======================================================
+        } else {
+            let modelToUseGoogle = modelMapping[selectedModelName];
+            let personality = (selectedModelName === EXPERIMENTAL_MODEL_NAME) ? currentChat.personality : undefined;
+            // Use system prompt with instruction to hide thinking
+            let systemPromptForSendGoogle = getSystemPrompt(selectedModelName, personality, false);
+            let isReasoningGoogle = false;
+
+            // Check Reason Mode for Google AI
+            if (isReasonModeActive) {
+                const currentUsage = getReasonUsage();
+                if (currentUsage < MAX_REASON_USES_PER_DAY) {
+                    console.log("Reason mode active for Google AI call.");
+                    modelToUseGoogle = REASON_MODE_MODEL;
+                    usedReasonModeForThisMessage = true;
+                    isReasoningGoogle = true;
+                    // Update system prompt for Reason mode (still includes hide thinking instruction)
+                    systemPromptForSendGoogle = getSystemPrompt(selectedModelName, undefined, true);
+                } else {
+                     console.warn("Reason mode active, but daily limit reached. Sending with standard Google model.");
+                    displayMessage(`Reason mode daily limit (${MAX_REASON_USES_PER_DAY}) reached. Using standard model instead.`, 'bot', true);
+                    deactivateReasonMode();
+                }
+            }
+
+            // Handle Reason Mode Delay for Google AI
+            if (usedReasonModeForThisMessage) {
+                // startTime = Date.now(); // Start timer for reason mode delay + API call
+                showThinkingIndicator('reason'); // Show reason thinking indicator
+                const delay = Math.random() * (MAX_REASON_DELAY_MS - MIN_REASON_DELAY_MS) + MIN_REASON_DELAY_MS;
+                console.log(`Reason mode (Google AI): Simulating thinking for ${Math.round(delay / 1000)}s...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+                if (!currentThinkingIndicatorElement) { /* ... abort logic ... */ return; }
+                console.log("Reason mode (Google AI): Thinking complete.");
+                // Keep indicator until API call finishes
+            } else {
+                 // startTime = Date.now(); // Start timer just before API call
+            }
+
+            // Construct Content Parts for Google AI
+            const contentPartsGoogle = [];
+            if (messageText) contentPartsGoogle.push({ text: messageText });
+            if (imageToSend && imageMimeType) {
+                contentPartsGoogle.push({ inline_data: { mime_type: imageMimeType, data: imageToSend } });
+            } else if (!messageText && imageToSend) {
+                contentPartsGoogle.push({ text: "Describe this image." });
+            }
+
+            // --- Send to Google AI (Streaming) ---
+            let botMessageElement = null, botMessageBubble = null, botMessageParagraph = null;
+            let fullResponseText = "", hasCodeInResponse = false;
+
+            try {
+                if (!genAI) { throw new Error("Google AI Client not initialized."); }
+                const modelInstance = genAI.getGenerativeModel({ model: modelToUseGoogle, safetySettings });
+                console.log(`Sending content stream request to Google AI model: ${modelToUseGoogle}`);
+
+                const mainHistory = currentChat?.history || [];
+                const historyForAPI = mainHistory.slice(-10).filter(msg => msg.role === 'user' || msg.role === 'model').map(msg => ({ role: msg.role, parts: msg.parts }));
+
+                const streamResult = await modelInstance.generateContentStream({
+                    contents: [...historyForAPI, { role: "user", parts: contentPartsGoogle }],
+                    systemInstruction: { role: "system", parts: [{ text: systemPromptForSendGoogle }] }
+                });
+
+                // Remove thinking indicator *before* creating the message bubble
+                removeThinkingIndicator();
+
+                botMessageElement = displayMessage('', 'bot');
+                if (botMessageElement) {
+                    botMessageBubble = botMessageElement.querySelector('.message-bubble');
+                    botMessageParagraph = botMessageBubble?.querySelector('p[data-stream-target="true"]');
+                }
+                if (!botMessageParagraph) { throw new Error("Could not find target paragraph for streaming."); }
+
+                for await (const chunk of streamResult.stream) {
+                    const blockReason = chunk.promptFeedback?.blockReason;
+                    if (blockReason) { /* ... handle block ... */ fullResponseText = `[Response blocked: ${blockReason}]`; break; }
+                    try {
+                        const chunkText = chunk.text();
+                        fullResponseText += chunkText;
+                        botMessageParagraph.innerHTML += chunkText.replace(/\n/g, '<br>');
+                        chatMessagesContainer.scrollTo({ top: chatMessagesContainer.scrollHeight, behavior: 'smooth' });
+                    } catch (error) { /* ... handle chunk error ... */ }
+                }
+                // const endTime = Date.now(); // End timer after stream finishes
+                console.log("Google AI Streaming finished.");
+
+                if (!fullResponseText.startsWith("[Response blocked")) {
+                    hasCodeInResponse = processAndAppendText(fullResponseText, botMessageParagraph);
+                    if (botMessageBubble) { /* ... add timestamp ... */
+                        const timestampSpan = document.createElement('span');
+                        timestampSpan.classList.add('timestamp');
+                        timestampSpan.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                        botMessageBubble.appendChild(timestampSpan); // Append timestamp to bubble
+
+                         // REMOVED: Thought Timer logic
+                    }
+                    if (hasCodeInResponse && window.Prism && botMessageBubble) {
+                        setTimeout(() => Prism.highlightAllUnder(botMessageBubble), 0);
+                    }
+                }
+                addMessageToCurrentChatHistory('model', [{ text: fullResponseText }]);
+                if (usedReasonModeForThisMessage) { incrementReasonUsage(); }
+
+            } catch (error) {
+                console.error("Google AI Streaming API Error:", error);
+                removeThinkingIndicator(); // Ensure indicator removed on error
+                if (botMessageElement && botMessageElement.parentNode) { botMessageElement.parentNode.removeChild(botMessageElement); }
+                let errMsg = `Sorry, error contacting Google AI: ${error.message}`;
+                /* ... more specific error messages ... */
+                displayMessage(errMsg, 'bot', true);
+                addMessageToCurrentChatHistory('model', [{ text: `[Error generating response: ${error.message || 'Unknown'}]` }]);
+            } finally {
+                // --- Cleanup after Google AI call ---
+                removeThinkingIndicator(); // Ensure removed finally
+                deactivateReasonMode();
+                if (messageInput) messageInput.disabled = false;
+                if (sendButton) sendButton.disabled = false;
+                if (initialSendButton) initialSendButton.disabled = false;
+                if (imageUploadButton) imageUploadButton.disabled = false;
+                if (micButton) micButton.disabled = false; // Re-enable mic button
+                updateReasonButtonState();
+                updateMaxUI();
+                if (messageInput && !messageInput.disabled) messageInput.focus();
+            }
         } // End of Google AI branch
     } // End of sendMessageInternal
 
@@ -2281,29 +2161,8 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         if (isInitializing || currentThinkingIndicatorElement) return;
         const messageText = messageInput.value.trim();
         const imageSelected = !!selectedImageData;
-
-        // Check if Image Generation model is selected
-        const selectedModel = modelSelector.value;
-        const isImageGenModelSelected = selectedModel === GRAXYBOT_IMAGE_GEN_NAME;
-
-        if (isImageGenModelSelected) {
-             // If image gen model is selected, trigger image generation
-             if (!messageText) {
-                 alert("Please enter a text prompt for image generation.");
-                 if (messageInput) messageInput.focus();
-                 return;
-             }
-             // Clear input field after getting the prompt
-             messageInput.value = '';
-             // Call internal send function, indicating it's an image generation request
-             sendMessageInternal(messageText, false); // isImageGenerationRequest is determined inside
-        } else if (messageText || imageSelected) {
-             // Otherwise, send as a regular message (text or image upload)
-             messageInput.value = '';
-             sendMessageInternal(messageText, false); // isImageGenerationRequest is determined inside
-        }
+        if (messageText || imageSelected) { messageInput.value = ''; sendMessageInternal(messageText, false); }
     }
-
 
     async function handleInitialSendMessage() { /* ... (no changes) ... */
          if (isInitializing || currentThinkingIndicatorElement) return;
@@ -2311,8 +2170,7 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         initialMessageInput.value = '';
         if (!messageText) return;
         switchToChatView();
-        // For initial message from the welcome screen, it's always a regular chat message
-        await sendMessageInternal(messageText, true); // isImageGenerationRequest is determined inside
+        await sendMessageInternal(messageText, true);
     }
 
 
@@ -2365,12 +2223,6 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
             "Explain quantum computing in simple terms.",
             "Write a short story about a robot who dreams.",
             "Give me some ideas for a healthy dinner.",
-            // Add some image generation prompts as suggestions if Max user
-            ...(isMaxUser ? [
-                "Generate an image of a cat wearing a tiny hat.",
-                "Create a futuristic city landscape.",
-                "Draw a whimsical forest scene with glowing mushrooms."
-            ] : [])
         ];
 
         suggestions.forEach(text => {
@@ -2382,7 +2234,7 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
                     messageInput.value = text;
                     messageInput.focus();
                     // Optional: Automatically send the message when a suggestion is clicked
-                    // sendMessage(); // Use sendMessage to respect model selection
+                    // sendMessage();
                 }
             };
             promptsGrid.appendChild(btn);
@@ -2415,8 +2267,6 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
             messageInput.placeholder = "Message Graxybot...";
         }
         if(sendButton) sendButton.disabled = false;
-        // Removed: if(imageGenerateButton) imageGenerateButton.disabled = !isMaxUser; // Enable/disable based on Max status
-
 
         // Set model selector to the global preference
         const preferredModel = loadSelectedModelPreference();
@@ -2460,19 +2310,6 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         const showPersonality = selectedModel === EXPERIMENTAL_MODEL_NAME;
         togglePersonalitySelector(showPersonality);
         updateModelNotification(selectedModel);
-
-        // Check if the selected model is the image generation model
-        const isImageGenModel = selectedModel === GRAXYBOT_IMAGE_GEN_NAME;
-
-        // Update placeholder text based on selected model
-        if (messageInput) {
-             if (isImageGenModel) {
-                 messageInput.placeholder = "Enter prompt for image generation...";
-             } else {
-                 messageInput.placeholder = "Message Graxybot...";
-             }
-        }
-
 
         if (currentChatId && chats[currentChatId]) {
             console.log(`Updating model for current chat ${currentChatId} to ${selectedModel}`);
@@ -2537,15 +2374,10 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         updateMaxUI(); // Update UI (hide upgrade link)
         hideMaxModal(); // Close the modal
         // Optionally, display a confirmation message
-        displayMessage("Welcome to Graxybot Max! You now have access to all features, including local image generation (requires local setup).", 'bot');
+        displayMessage("Welcome to Graxybot Max! You now have access to all features.", 'bot');
         // Add history entry only if a chat is active
         if(currentChatId) {
             addMessageToCurrentChatHistory('model', [{ text: "[User upgraded to Max (Trial)]" }]);
-        }
-         // Re-render welcome message to show image gen prompts if on that screen
-        const welcomeContainer = chatMessagesContainer?.querySelector('.new-chat-welcome-container');
-        if (welcomeContainer) {
-             displayNewChatWelcome(chatMessagesContainer);
         }
     }
 
@@ -2716,7 +2548,6 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         imagePreviewArea = document.getElementById('image-preview-area');
         imagePreview = document.getElementById('image-preview');
         removeImageButton = document.getElementById('remove-image-button');
-        // Removed: imageGenerateButton = document.getElementById('image-generate-button'); // Get the new button
         modelNotificationDiv = document.getElementById('model-notification');
         popupOverlay = document.getElementById('popupOverlay');
         closePopupButton = document.getElementById('closePopupButton');
@@ -2729,7 +2560,6 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         micButton = document.getElementById('mic-button'); // Get mic button
 
         // --- Validate Elements ---
-        // Removed imageGenerateButton from essential elements
         const essentialElements = { chatMessagesContainer, messageInput, sendButton, rateLimitMessageDiv, modelSelector, initialView, chatView, initialMessageInput, initialSendButton, sidebar, newChatBtn, chatListUl, personalitySelectorContainer, personalitySelector, reasonButton, reasonUsageDisplay, imageUploadButton, imageUploadInput, imagePreviewArea, imagePreview, removeImageButton, modelNotificationDiv, popupOverlay, closePopupButton, upgradeLink, maxUpgradeModal, modalCloseBtn, startTrialBtn, initialLoader, chatLoader, micButton };
         let missingElement = false;
         for (const key in essentialElements) {
@@ -2747,8 +2577,8 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         const preferredModel = loadSelectedModelPreference();
         if(modelSelector) modelSelector.value = preferredModel;
         updateReasonButtonState();
-        if(reasonButton) reasonButton.style.display = 'inline-flex'; // Ensure visible in chat view
-        if(reasonUsageDisplay) reasonUsageDisplay.style.display = 'inline'; // Ensure visible in chat view
+        if(reasonButton) reasonButton.style.display = 'none';
+        if(reasonUsageDisplay) reasonUsageDisplay.style.display = 'none';
         if(modelNotificationDiv) modelNotificationDiv.style.display = 'none';
         renderChatList();
         updateMaxUI(); // Update UI based on loaded Max status
@@ -2758,7 +2588,7 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
 
         // --- Check API Key & Determine Initial View ---
         // Check only needed if the preferred/loaded model is NOT a known local one
-        const knownLocalModels = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME, GRAXYBOT_IMAGE_GEN_NAME]; // Include Image Gen
+        const knownLocalModels = [GRAXYBOT_MAX_MODEL_NAME, GRAXYBOT_UNHINGED_MODEL_NAME];
         const initialModelRequiresKey = !knownLocalModels.includes(preferredModel) && (!currentChatId || !chats[currentChatId] || !knownLocalModels.includes(chats[currentChatId].model));
 
         if (initialModelRequiresKey && (!API_KEY || API_KEY === "YOUR_GOOGLE_AI_API_KEY" || (API_KEY.startsWith("AIzaSyB") && API_KEY.length < 30))) {
@@ -2772,7 +2602,6 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
                  // Disable non-Max/Unhinged options if key is missing? Or just let init fail? Let init fail.
              }
              if(reasonButton) reasonButton.disabled = true; // Reason uses Google Pro
-             // Removed: if(imageGenerateButton) imageGenerateButton.disabled = true; // Image gen requires Max, which is local
 
              if (!currentChatId || !chats[currentChatId]) { switchToInitialView(); }
              else { switchToChatView(); initializeAICurrentChat(); } // Init will show error if Google model selected
@@ -2807,7 +2636,6 @@ const outputElement=document.getElementById("output"),originalConsoleLog=console
         imageUploadButton?.addEventListener('click', () => { if (!imageUploadButton.disabled) { imageUploadInput?.click(); } });
         imageUploadInput?.addEventListener('change', handleImageSelection);
         removeImageButton?.addEventListener('click', removeSelectedImage);
-        // Removed: imageGenerateButton?.addEventListener('click', sendImageGenerationRequest); // New: Image Gen Button Listener
         closePopupButton?.addEventListener('click', hidePopup);
         popupOverlay?.addEventListener('click', (event) => { if (event.target === popupOverlay) { hidePopup(); } });
         micButton?.addEventListener('click', toggleListening); // Add listener for mic button
