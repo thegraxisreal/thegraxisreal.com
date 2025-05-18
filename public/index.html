@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>thegraxisreal</title>
-    <link rel="icon" type="image/png" href="logo.png"> 
+    <link rel="icon" type="image/png" href="logo.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -22,7 +22,7 @@
             --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             --transition: all 0.3s ease;
             /* For RGBA usage in CSS if needed directly */
-            --primary-rgb: 94, 96, 206; 
+            --primary-rgb: 94, 96, 206;
         }
 
         * {
@@ -37,8 +37,33 @@
             background-color: var(--light);
             color: var(--dark);
             line-height: 1.6;
-            overflow-x: hidden; 
+            overflow-x: hidden;
         }
+
+        /* New Announcement Banner Styling */
+        .top-announcement-banner {
+            background: var(--gradient);
+            color: white;
+            text-align: center;
+            padding: 12px 20px;
+            font-size: 1rem;
+            font-weight: 500;
+            position: relative; /* Changed from sticky to relative to be part of normal flow */
+            width: 100%;
+            z-index: 1001; /* Ensure it's above header if header becomes sticky later */
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .top-announcement-banner a {
+            color: white;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        .top-announcement-banner a:hover {
+            text-decoration: none;
+        }
+
 
         .container {
             max-width: 1200px;
@@ -47,8 +72,8 @@
         }
 
         header {
-            position: fixed;
-            top: 0;
+            position: sticky; /* Making header sticky below the new banner */
+            top: 0; /* Stick to top after banner scrolls away */
             left: 0;
             width: 100%;
             z-index: 1000;
@@ -87,7 +112,7 @@
         .nav-links {
             display: flex;
             align-items: center;
-            gap: 25px; 
+            gap: 25px;
         }
 
         .nav-links a {
@@ -129,7 +154,9 @@
         }
 
         .hero {
-            padding-top: 150px; 
+            /* Adjusted padding-top to account for the new banner height if header wasn't sticky */
+            /* If header is sticky, this might not need change or less change */
+            padding-top: 80px; /* Reduced from 150px, adjust as needed based on final header behavior */
             padding-bottom: 100px;
             min-height: 100vh;
             display: flex;
@@ -189,7 +216,7 @@
             color: var(--gray);
             margin-bottom: 20px; /* Adjusted margin */
         }
-        
+
         /* School Status Banner Styling */
         .school-status-banner {
             background-color: rgba(var(--primary-rgb), 0.1);
@@ -278,7 +305,7 @@
 
         .projects {
             padding: 100px 0;
-            background-color: #f8f9fa; 
+            background-color: #f8f9fa;
         }
 
         .section-title {
@@ -318,7 +345,7 @@
             gap: 30px;
         }
 
-        .project-card { 
+        .project-card {
             background: white;
             border-radius: 15px;
             overflow: hidden;
@@ -327,8 +354,8 @@
             height: 100%;
             display: flex;
             flex-direction: column;
-            text-decoration: none; 
-            color: inherit; 
+            text-decoration: none;
+            color: inherit;
         }
 
         .project-card:hover {
@@ -336,7 +363,7 @@
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .project-img { 
+        .project-img {
             width: 100%;
             height: 200px;
             background-color: #e9ecef;
@@ -347,7 +374,7 @@
             font-size: 3rem;
         }
 
-        .project-content { 
+        .project-content {
             padding: 25px;
             flex-grow: 1;
             display: flex;
@@ -385,7 +412,7 @@
 
         .footer-grid {
             display: grid;
-            grid-template-columns: 1fr 2fr; 
+            grid-template-columns: 1fr 2fr;
             gap: 50px;
             margin-bottom: 50px;
         }
@@ -407,14 +434,14 @@
             height: 2px;
             background: var(--primary);
         }
-      
+
         .footer-col .social-links a {
              background: rgba(255, 255, 255, 0.1);
              color: #aaa;
-             margin-top: 0; 
+             margin-top: 0;
         }
         .footer-col .social-links {
-            margin-top: 0; 
+            margin-top: 0;
         }
         .footer-col .social-links a:hover {
             background: var(--primary);
@@ -463,7 +490,7 @@
             .hero h1 { font-size: 3.5rem; }
             .nav-links { gap: 20px; }
             .footer-grid {
-                grid-template-columns: 1fr; 
+                grid-template-columns: 1fr;
                 gap: 40px;
                 text-align: center;
             }
@@ -476,10 +503,10 @@
 
         @media (max-width: 768px) {
             .container { padding: 0 15px; }
-            header { padding: 0; }
-            nav { padding: 15px 0; }
+            /* header { padding: 0; } Ensure header still has padding if needed */
+            nav { padding: 15px 0; } /* This padding is for inside the nav, within the container */
             .hero {
-                padding-top: 120px;
+                padding-top: 70px; /* Adjust if header + top banner are taller */
                 text-align: center;
             }
             .hero-content {
@@ -493,7 +520,7 @@
             .mobile-menu-btn { display: block; }
             .nav-links {
                 position: absolute;
-                top: 100%;
+                top: 100%; /* Position below the header */
                 left: 0;
                 width: 100%;
                 background: white;
@@ -509,10 +536,20 @@
                 transition: max-height 0.4s ease-out, opacity 0.4s ease-out, visibility 0.4s ease-out;
             }
             .nav-links.active {
-                max-height: 500px;
+                max-height: 500px; /* Ensure this is enough for all links */
                 opacity: 1;
                 visibility: visible;
             }
+            /* Adjust hero padding top if the top announcement banner is present */
+            body:has(.top-announcement-banner) .hero {
+                 /* Approx height of top banner + header */
+                 /* You might need to fine-tune this value */
+                 padding-top: calc(50px + 60px); /* Example: 50px for banner, 60px for header */
+            }
+             body:has(.top-announcement-banner) header {
+                top: 50px; /* Approx height of the top banner */
+            }
+
         }
 
         @media (max-width: 576px) {
@@ -530,10 +567,24 @@
             }
             .section-title h2 { font-size: 2rem; }
             .school-status-banner { font-size: 0.95rem; padding: 10px 15px;}
+            .top-announcement-banner { font-size: 0.9rem; padding: 10px 15px; }
+
+            /* Adjust hero padding top for small screens if the top announcement banner is present */
+            body:has(.top-announcement-banner) .hero {
+                 /* Approx height of top banner + header on small screens */
+                 padding-top: calc(45px + 55px); /* Example: 45px for banner, 55px for header */
+            }
+             body:has(.top-announcement-banner) header {
+                top: 45px; /* Approx height of the top banner on small screens */
+            }
         }
     </style>
 </head>
 <body>
+    <div class="top-announcement-banner">
+        Graxybot is now on <a href="https://graxybot.com" target="_blank" rel="noopener noreferrer">Graxybot.com</a>! 🎉
+    </div>
+
     <header>
         <div class="container">
             <nav>
@@ -547,7 +598,7 @@
                 <div class="nav-links">
                     <a href="#home">Home</a>
                     <a href="#projects">Projects</a>
-                    <a href="graxybot.html">Graxybot</a>
+                    <a href="https://graxybot.com" target="_blank" rel="noopener noreferrer">Graxybot</a>
                     <a href="youtube_client_v2.html">Videos</a>
                 </div>
             </nav>
@@ -588,7 +639,7 @@
                 <p>Here's a look at what I've been working on.</p>
             </div>
             <div class="projects-grid">
-                <a href="graxybot.html" class="project-card">
+                <a href="https://graxybot.com" class="project-card" target="_blank" rel="noopener noreferrer">
                     <div class="project-img" style="background: linear-gradient(135deg, #48bfe3 0%, #5e60ce 100%); color: white;">
                         <i class="fas fa-robot"></i>
                     </div>
@@ -623,7 +674,7 @@
                     </div>
                     <div class="project-content">
                         <h3>Latest Video Content</h3>
-                        <p>Watch my latest videos, tutorials, and updates on YouTube.</p>
+                        <p>Ad free youtube client</p>
                         <div>
                             <span class="tag">YouTube</span>
                             <span class="tag">Content Creation</span>
@@ -650,7 +701,7 @@
                     <ul class="footer-links">
                         <li><a href="#home">Home</a></li>
                         <li><a href="#projects">Projects</a></li>
-                        <li><a href="graxybot.html">Graxybot</a></li>
+                        <li><a href="https://graxybot.com" target="_blank" rel="noopener noreferrer">Graxybot</a></li>
                         <li><a href="youtube_client_v2.html">Videos</a></li>
                     </ul>
                 </div>
@@ -672,36 +723,83 @@
             navLinksContainer.classList.toggle('active');
             mobileMenuBtn.querySelector('i').classList.toggle('fa-bars');
             mobileMenuBtn.querySelector('i').classList.toggle('fa-times');
-            body.style.overflow = navLinksContainer.classList.contains('active') ? 'hidden' : '';
+            // Toggle body scroll based on menu state
+            if (navLinksContainer.classList.contains('active')) {
+                body.style.overflowY = 'hidden'; // Prevent scrolling when menu is open
+            } else {
+                body.style.overflowY = ''; // Allow scrolling when menu is closed
+            }
         });
+
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', () => {
-                if (navLinksContainer.classList.contains('active') && link.getAttribute('href').startsWith('#')) {
+                // Close menu if it's active and link is a hash link or any link
+                if (navLinksContainer.classList.contains('active')) {
                     mobileMenuBtn.setAttribute('aria-expanded', 'false');
                     navLinksContainer.classList.remove('active');
                     mobileMenuBtn.querySelector('i').classList.add('fa-bars');
                     mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                    body.style.overflow = '';
-                } else if (navLinksContainer.classList.contains('active')) {
-                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
-                    navLinksContainer.classList.remove('active');
-                    mobileMenuBtn.querySelector('i').classList.add('fa-bars');
-                    mobileMenuBtn.querySelector('i').classList.remove('fa-times');
+                    body.style.overflowY = ''; // Restore scrolling
                 }
             });
         });
 
-        // --- Sticky Header ---
+        // --- Sticky Header Logic (adjusted for top announcement banner) ---
         const header = document.querySelector('header');
-        window.addEventListener('scroll', () => {
-            if (window.scrollY > 100) {
+        const topBanner = document.querySelector('.top-announcement-banner');
+        let topBannerHeight = topBanner ? topBanner.offsetHeight : 0;
+
+        // Function to handle header stickiness
+        function handleHeaderStickiness() {
+            topBannerHeight = topBanner ? topBanner.offsetHeight : 0; // Recalculate in case of resize
+            if (window.scrollY > topBannerHeight) {
+                header.style.position = 'fixed';
+                header.style.top = '0';
                 header.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
                 header.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
             } else {
+                header.style.position = 'sticky'; // Revert to sticky relative to its normal position
+                header.style.top = '0'; // Stick to top of its container (after banner)
                 header.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
                 header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
             }
+        }
+        
+        // Adjust hero padding top based on header and banner height
+        function adjustHeroPadding() {
+            const headerHeight = header.offsetHeight;
+            const heroSection = document.getElementById('home');
+            if (heroSection) {
+                // If the header is fixed, the hero needs padding for both banner and header
+                // If header is sticky, it's more complex, but this is a general approach
+                if (header.style.position === 'fixed') {
+                     heroSection.style.paddingTop = `${headerHeight}px`;
+                } else {
+                    // When header is sticky and below banner, the banner takes up space
+                    // and the sticky header also needs to be accounted for.
+                    // The initial CSS for hero padding-top should handle the banner.
+                    // This might need refinement based on exact behavior.
+                    // For now, let's assume CSS handles the initial static banner.
+                    // The main concern is when header becomes fixed.
+                     heroSection.style.paddingTop = `80px`; // Default from CSS
+                }
+            }
+        }
+
+
+        window.addEventListener('scroll', () => {
+            handleHeaderStickiness();
+            adjustHeroPadding(); // Adjust padding on scroll as header state might change
         });
+        window.addEventListener('resize', () => {
+            handleHeaderStickiness(); // Re-check on resize
+            adjustHeroPadding();
+        });
+        
+        // Initial calls
+        handleHeaderStickiness();
+        adjustHeroPadding();
+
 
         // --- Smooth Scrolling ---
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -711,10 +809,22 @@
                     const hash = this.hash;
                     const targetElement = document.querySelector(hash);
                     if(targetElement) {
-                        const headerOffset = document.querySelector('header').offsetHeight;
-                        const elementPosition = targetElement.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 20; 
-                        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+                        let headerOffset = header.offsetHeight;
+                        // If the header is not fixed at the very top (e.g., still below banner),
+                        // and the banner is still visible, the offset calculation might need adjustment.
+                        // However, for simplicity, we use current header height.
+                        // If the target is #home, scroll to the very top (or just below banner if it's not sticky)
+                        let scrollPosition;
+                        if (hash === "#home") {
+                            scrollPosition = 0; // Scroll to the very top of the page
+                        } else {
+                            const elementPosition = targetElement.getBoundingClientRect().top;
+                            // If header is fixed, its height is the offset.
+                            // If header is sticky and currently below banner, its effective offset might be different.
+                            // This simplified version assumes headerOffset is correct for visible header.
+                            scrollPosition = elementPosition + window.pageYOffset - headerOffset - 20; // 20px extra spacing
+                        }
+                        window.scrollTo({ top: scrollPosition, behavior: "smooth" });
                     }
                 }
             });
@@ -722,8 +832,6 @@
 
         // --- School Period Status Logic ---
         const schoolStatusBanner = document.getElementById('school-status-banner');
-        // Schedule: Times are in 24-hour format.
-        // Derived from the image provided by the user.
         const schoolSchedule = [
             { name: "Period 1", type: "period", startH: 8, startM: 0, endH: 8, endM: 47 },
             { name: "Period 2", type: "period", startH: 8, startM: 51, endH: 9, endM: 32 },
@@ -762,13 +870,12 @@
                 statusText = "<i class='fas fa-couch'></i> Enjoy your weekend!";
             } else { // Weekday
                 const currentTime = now.getTime();
-                let inSchoolHours = false;
+                let inSchoolHoursActivity = false; // Renamed to avoid conflict with a potential global
 
-                // Check if before school starts
                 const firstPeriodStartTime = getTodayAtTime(schoolSchedule[0].startH, schoolSchedule[0].startM);
                 if (currentTime < firstPeriodStartTime.getTime()) {
                     statusText = `<i class='fas fa-sun'></i> School starts with ${schoolSchedule[0].name} at ${formatTime(firstPeriodStartTime)}.`;
-                    inSchoolHours = true; // Technically not "in" but handled
+                    inSchoolHoursActivity = true;
                 } else {
                     for (let i = 0; i < schoolSchedule.length; i++) {
                         const currentBlock = schoolSchedule[i];
@@ -778,8 +885,7 @@
                         const currentBlockEndTime = getTodayAtTime(currentBlock.endH, currentBlock.endM);
 
                         if (currentTime >= currentBlockStartTime.getTime() && currentTime < currentBlockEndTime.getTime()) {
-                            // Inside a period/block
-                            inSchoolHours = true;
+                            inSchoolHoursActivity = true;
                             const minutesLeftInBlock = Math.floor((currentBlockEndTime.getTime() - currentTime) / 60000);
                             
                             if (currentBlock.type === "period") {
@@ -792,20 +898,21 @@
                                 }
                                 if (nextNumberedPeriod) {
                                     const nextNumberedPeriodStartTime = getTodayAtTime(nextNumberedPeriod.startH, nextNumberedPeriod.startM);
-                                    const minutesUntilNextPeriod = Math.max(0, Math.floor((nextNumberedPeriodStartTime.getTime() - currentTime) / 60000));
-                                    statusText = `<i class='fas fa-chalkboard-teacher'></i> It is ${currentBlock.name}. ${minutesUntilNextPeriod} min left until ${nextNumberedPeriod.name}.`;
-                                } else { // Last numbered period of the day
+                                    // Calculate minutes until the start of the next numbered period, not just any block
+                                    const minutesUntilNextPeriod = Math.max(0, Math.floor((nextNumberedPeriodStartTime.getTime() - currentBlockEndTime.getTime()) / 60000) + minutesLeftInBlock);
+
+                                    statusText = `<i class='fas fa-chalkboard-teacher'></i> It is ${currentBlock.name}. ${minutesLeftInBlock} min left. Next is ${nextNumberedPeriod.name}.`;
+                                } else { 
                                     statusText = `<i class='fas fa-chalkboard-teacher'></i> It is ${currentBlock.name}. ${minutesLeftInBlock} min left in the school day.`;
                                 }
-                            } else { // FLEX or LUNCH
+                            } else { 
                                 statusText = `<i class='fas ${currentBlock.type === "lunch" ? "fa-utensils" : "fa-puzzle-piece"}'></i> Currently ${currentBlock.name}. Ends in ${minutesLeftInBlock} min.`;
                             }
                             break; 
                         } else if (nextBlock) {
-                            // Check for passing time
                             const nextBlockStartTime = getTodayAtTime(nextBlock.startH, nextBlock.startM);
                             if (currentTime >= currentBlockEndTime.getTime() && currentTime < nextBlockStartTime.getTime()) {
-                                inSchoolHours = true;
+                                inSchoolHoursActivity = true;
                                 const minutesToNextBlock = Math.max(0, Math.floor((nextBlockStartTime.getTime() - currentTime) / 60000));
                                 statusText = `<i class='fas fa-walking'></i> Passing. ${nextBlock.name} starts in ${minutesToNextBlock} min.`;
                                 break;
@@ -814,25 +921,23 @@
                     }
                 }
                 
-                // Check if after school ends
-                if (!inSchoolHours) { // If loop completed and not set, means after last period
+                if (!inSchoolHoursActivity) { 
                     const lastPeriodEndTime = getTodayAtTime(schoolSchedule[schoolSchedule.length - 1].endH, schoolSchedule[schoolSchedule.length - 1].endM);
                     if (currentTime >= lastPeriodEndTime.getTime()) {
                         statusText = "<i class='fas fa-school'></i> School's out! Enjoy your afternoon.";
                     } else {
-                        // This case should ideally be covered by "before school starts" or passing times
-                        // but as a fallback if current time is somehow between the absolute start and end of day but not in a block.
-                         statusText = "Checking schedule...";
+                         statusText = "Checking schedule..."; // Fallback
                     }
                 }
             }
-            schoolStatusBanner.innerHTML = statusText;
+            if (schoolStatusBanner) { // Ensure banner element exists
+                schoolStatusBanner.innerHTML = statusText;
+            }
         }
 
-        // Initial call and update every 30 seconds
         if (schoolStatusBanner) {
             updateSchoolStatus();
-            setInterval(updateSchoolStatus, 30000); // Update every 30 seconds
+            setInterval(updateSchoolStatus, 30000); 
         }
 
     </script>
