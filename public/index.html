@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>thegraxisreal</title>
-    <link rel="icon" type="image/png" href="/logo.png">
+    <link rel="icon" type="image/png" href="logo.png"> 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
@@ -18,9 +18,11 @@
             --light: #f8f9fa;
             --gray: #6c757d;
             --success: #2ecc71;
-            --warning: #f39c12; /* Added warning color for 'New' badge */
+            --warning: #f39c12;
             --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             --transition: all 0.3s ease;
+            /* For RGBA usage in CSS if needed directly */
+            --primary-rgb: 94, 96, 206; 
         }
 
         * {
@@ -35,7 +37,7 @@
             background-color: var(--light);
             color: var(--dark);
             line-height: 1.6;
-            overflow-x: hidden; /* Prevent horizontal scroll */
+            overflow-x: hidden; 
         }
 
         .container {
@@ -44,7 +46,6 @@
             padding: 0 20px;
         }
 
-        /* Header and Navigation */
         header {
             position: fixed;
             top: 0;
@@ -61,7 +62,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 15px 0; /* Adjusted padding */
+            padding: 15px 0;
             transition: var(--transition);
         }
 
@@ -85,8 +86,8 @@
 
         .nav-links {
             display: flex;
-            align-items: center; /* Align items vertically */
-            gap: 30px; /* Adjusted gap */
+            align-items: center;
+            gap: 25px; 
         }
 
         .nav-links a {
@@ -95,7 +96,7 @@
             font-weight: 500;
             position: relative;
             transition: var(--transition);
-            padding: 5px 0; /* Add padding for better click area */
+            padding: 5px 0;
         }
 
         .nav-links a:after {
@@ -117,44 +118,6 @@
             width: 100%;
         }
 
-        /* New Graxybot Button Style */
-        .btn-new {
-            background: var(--gradient);
-            color: white;
-            padding: 8px 18px;
-            border-radius: 20px;
-            font-size: 0.9rem;
-            font-weight: 600;
-            margin-left: 15px;
-            transition: var(--transition);
-            box-shadow: 0 5px 10px rgba(94, 96, 206, 0.2);
-            text-decoration: none; /* Ensure no underline */
-            display: inline-flex; /* Use flex for icon alignment */
-            align-items: center; /* Center icon and text */
-            gap: 5px; /* Space between icon and text */
-        }
-
-        .btn-new .new-badge {
-            background-color: var(--warning);
-            color: var(--dark);
-            font-size: 0.7rem;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 10px;
-            margin-left: 5px;
-            text-transform: uppercase;
-        }
-
-        .btn-new:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 15px rgba(94, 96, 206, 0.3);
-            color: white; /* Ensure text remains white on hover */
-        }
-        .btn-new:hover:after {
-            width: 0; /* Prevent underline on hover for this button */
-        }
-
-
         .mobile-menu-btn {
             display: none;
             background: none;
@@ -162,12 +125,11 @@
             cursor: pointer;
             font-size: 24px;
             color: var(--dark);
-            z-index: 1001; /* Ensure it's above nav links on mobile */
+            z-index: 1001;
         }
 
-        /* Hero Section */
         .hero {
-            padding-top: 150px; /* Space for fixed header */
+            padding-top: 150px; 
             padding-bottom: 100px;
             min-height: 100vh;
             display: flex;
@@ -203,7 +165,7 @@
             margin-bottom: 10px;
             display: inline-block;
             padding: 5px 15px;
-            background: rgba(94, 96, 206, 0.1);
+            background: rgba(var(--primary-rgb), 0.1);
             border-radius: 20px;
         }
 
@@ -225,17 +187,31 @@
             font-size: 1.5rem;
             font-weight: 500;
             color: var(--gray);
-            margin-bottom: 30px;
-        }
-
-        .hero p {
             margin-bottom: 20px; /* Adjusted margin */
-            font-size: 1.1rem;
+        }
+        
+        /* School Status Banner Styling */
+        .school-status-banner {
+            background-color: rgba(var(--primary-rgb), 0.1);
+            color: var(--primary);
+            padding: 12px 18px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.05rem; /* Slightly adjusted font size */
+            font-weight: 500;
+            margin-top: 15px; /* Space above the banner */
+            margin-bottom: 20px; /* Space below the banner */
+            border: 1px solid rgba(var(--primary-rgb), 0.2);
+            line-height: 1.5;
+        }
+        .school-status-banner i { /* For potential icon usage */
+            margin-right: 8px;
         }
 
-        /* Added paragraph for Graxybot announcement */
+
         .hero .announcement {
-            margin-bottom: 40px;
+            margin-top: 20px; /* Ensure space if school banner is short */
+            margin-bottom: 30px; /* Adjusted margin */
             font-size: 1.1rem;
             font-weight: 500;
             color: var(--primary-light);
@@ -252,36 +228,25 @@
             transition: var(--transition);
             font-size: 1rem;
             gap: 10px;
-            border: 2px solid transparent; /* Base border */
+            border: 2px solid transparent;
         }
 
         .btn-primary {
             background: var(--gradient);
             color: white;
-            box-shadow: 0 10px 20px rgba(94, 96, 206, 0.3);
+            box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.3);
         }
 
         .btn-primary:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 25px rgba(94, 96, 206, 0.4);
-            color: white; /* Ensure text remains white */
-        }
-
-        .btn-outline {
-            border: 2px solid var(--primary);
-            color: var(--primary);
-            background: transparent;
-        }
-
-        .btn-outline:hover {
-            background: var(--primary);
+            box-shadow: 0 15px 25px rgba(var(--primary-rgb), 0.4);
             color: white;
         }
 
         .hero-buttons {
             display: flex;
             gap: 20px;
-            flex-wrap: wrap; /* Allow buttons to wrap on smaller screens */
+            flex-wrap: wrap;
         }
 
         .social-links {
@@ -311,10 +276,9 @@
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
 
-        /* Projects Section */
         .projects {
             padding: 100px 0;
-            background-color: #f8f9fa; /* Use light background */
+            background-color: #f8f9fa; 
         }
 
         .section-title {
@@ -352,18 +316,19 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 30px;
-            margin-bottom: 50px;
         }
 
-        .project-card {
+        .project-card { 
             background: white;
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             transition: var(--transition);
-            height: 100%; /* Ensure cards have same height */
+            height: 100%;
             display: flex;
             flex-direction: column;
+            text-decoration: none; 
+            color: inherit; 
         }
 
         .project-card:hover {
@@ -371,10 +336,10 @@
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
         }
 
-        .project-img {
+        .project-img { 
             width: 100%;
             height: 200px;
-            background-color: #e9ecef; /* Placeholder background */
+            background-color: #e9ecef;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -382,9 +347,9 @@
             font-size: 3rem;
         }
 
-        .project-content {
+        .project-content { 
             padding: 25px;
-            flex-grow: 1; /* Allow content to fill space */
+            flex-grow: 1;
             display: flex;
             flex-direction: column;
         }
@@ -398,240 +363,20 @@
         .project-content p {
             margin-bottom: 20px;
             color: var(--gray);
-            flex-grow: 1; /* Push tags to bottom */
+            flex-grow: 1;
         }
 
         .tag {
             display: inline-block;
             padding: 5px 15px;
             border-radius: 20px;
-            background: rgba(94, 96, 206, 0.1);
+            background: rgba(var(--primary-rgb), 0.1);
             color: var(--primary);
             font-size: 0.85rem;
             margin-right: 10px;
-            margin-bottom: 10px; /* Space between tags if they wrap */
-        }
-
-        .view-all {
-            text-align: center;
-            margin-top: 30px;
-            display: flex; /* Use flexbox for button alignment */
-            justify-content: center; /* Center buttons */
-            gap: 15px; /* Space between buttons */
-            flex-wrap: wrap; /* Allow buttons to wrap */
-        }
-
-        /* Blog Section */
-        .blog {
-            padding: 100px 0;
-        }
-
-        .blog-post {
-            background: white;
-            border-radius: 15px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: var(--transition);
-            margin-bottom: 30px;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .blog-post:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .blog-img {
-            width: 100%;
-            height: 250px;
-            background-color: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--gray);
-            font-size: 3rem;
-        }
-
-        .blog-content {
-            padding: 30px;
-        }
-
-        .blog-date {
-            font-size: 0.9rem;
-            color: var(--gray);
             margin-bottom: 10px;
         }
 
-        .blog-title {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            color: var(--dark);
-        }
-
-        .blog-excerpt {
-            margin-bottom: 20px;
-            color: var(--gray);
-        }
-
-        .read-more {
-            display: inline-flex;
-            align-items: center;
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-            gap: 5px;
-            transition: var(--transition);
-        }
-
-        .read-more:hover {
-            gap: 10px;
-        }
-
-        /* Skills Section */
-        .skills {
-            padding: 100px 0;
-            background-color: #f8f9fa; /* Light background */
-        }
-
-        .skills-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 30px;
-        }
-
-        .skill-card {
-            background: white;
-            border-radius: 15px;
-            padding: 30px 20px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: var(--transition);
-        }
-
-        .skill-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
-        }
-
-        .skill-icon {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            color: var(--primary);
-        }
-
-        .skill-name {
-            font-weight: 600;
-            font-size: 1.2rem;
-        }
-
-        /* Contact Section */
-        .contact {
-            padding: 100px 0;
-        }
-
-        .contact-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 50px;
-            align-items: start; /* Align items to the top */
-        }
-
-        .contact-info h3 {
-            font-size: 2rem;
-            margin-bottom: 30px;
-        }
-
-        .contact-info p {
-            margin-bottom: 30px;
-            color: var(--gray);
-        }
-
-        .contact-method {
-            display: flex;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .contact-icon {
-            width: 50px;
-            height: 50px;
-            min-width: 50px; /* Prevent shrinking */
-            border-radius: 50%;
-            background: rgba(94, 96, 206, 0.1);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary);
-            font-size: 1.2rem;
-            margin-right: 15px;
-        }
-        .contact-method div p {
-            margin-bottom: 0; /* Remove bottom margin for contact details */
-            color: var(--dark); /* Make email/location darker */
-        }
-        .contact-method div h4 {
-             margin-bottom: 5px; /* Space between title and detail */
-        }
-
-
-        .contact-form {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 500;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            font-size: 1rem;
-            transition: var(--transition);
-            background-color: var(--light); /* Light background for inputs */
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(94, 96, 206, 0.2); /* Focus ring */
-        }
-
-        textarea.form-control {
-            min-height: 150px;
-            resize: vertical;
-        }
-
-        #successMessage {
-            display: none;
-            margin-top: 20px;
-            padding: 15px;
-            background-color: rgba(46, 204, 113, 0.1);
-            border: 1px solid rgba(46, 204, 113, 0.3); /* Subtle border */
-            border-radius: 8px;
-            text-align: center;
-            color: var(--success);
-            animation: fadeIn 0.5s ease; /* Fade in animation */
-        }
-        #successMessage i {
-             font-size: 24px; margin-bottom: 10px; display: block;
-        }
-         #successMessage p {
-             font-weight: 500; margin: 0; color: #27ae60; /* Darker success text */
-         }
-
-        /* Footer */
         footer {
             background-color: var(--dark);
             color: white;
@@ -640,7 +385,7 @@
 
         .footer-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
+            grid-template-columns: 1fr 2fr; 
             gap: 50px;
             margin-bottom: 50px;
         }
@@ -650,7 +395,7 @@
             margin-bottom: 20px;
             position: relative;
             padding-bottom: 10px;
-            color: white; /* Ensure footer headings are white */
+            color: white;
         }
 
         .footer-col h4:after {
@@ -662,14 +407,14 @@
             height: 2px;
             background: var(--primary);
         }
-
-        .footer-col p {
-            margin-bottom: 20px;
-            color: #aaa; /* Lighter text for descriptions */
-        }
-        .footer-col .social-links a { /* Style footer social links */
+      
+        .footer-col .social-links a {
              background: rgba(255, 255, 255, 0.1);
              color: #aaa;
+             margin-top: 0; 
+        }
+        .footer-col .social-links {
+            margin-top: 0; 
         }
         .footer-col .social-links a:hover {
             background: var(--primary);
@@ -678,7 +423,7 @@
 
         .footer-links {
             list-style: none;
-            padding: 0; /* Remove default padding */
+            padding: 0;
         }
 
         .footer-links li {
@@ -703,7 +448,6 @@
             color: #aaa;
         }
 
-        /* Animations */
         @keyframes fadeInUp {
             from {
                 opacity: 0;
@@ -715,76 +459,41 @@
             }
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Responsive Design */
         @media (max-width: 1024px) {
-            .hero h1 {
-                font-size: 3.5rem;
-            }
-
-            .contact-grid {
-                grid-template-columns: 1fr; /* Stack contact sections */
-            }
-
+            .hero h1 { font-size: 3.5rem; }
+            .nav-links { gap: 20px; }
             .footer-grid {
-                grid-template-columns: 1fr 1fr; /* Two columns for footer */
+                grid-template-columns: 1fr; 
                 gap: 40px;
+                text-align: center;
             }
-            .nav-links {
-                gap: 20px; /* Reduce gap between nav items */
+            .footer-col h4:after {
+                left: 50%;
+                transform: translateX(-50%);
             }
-             .btn-new {
-                margin-left: 10px; /* Adjust margin */
-            }
+             .footer-col .social-links { justify-content: center; }
         }
 
         @media (max-width: 768px) {
-             /* Adjust padding for smaller screens */
-            .container {
-                padding: 0 15px;
-            }
-            header {
-                 padding: 0; /* Remove padding for sticky header logic */
-            }
-            nav {
-                padding: 15px 0; /* Consistent padding */
-            }
-
+            .container { padding: 0 15px; }
+            header { padding: 0; }
+            nav { padding: 15px 0; }
             .hero {
-                padding-top: 120px; /* Adjust for header */
-                text-align: center; /* Center hero text */
+                padding-top: 120px;
+                text-align: center;
             }
-
             .hero-content {
-                 max-width: 100%; /* Allow full width */
-                 align-items: center; /* Center content */
+                 max-width: 100%;
+                 align-items: center;
             }
-
-            .hero h1 {
-                font-size: 2.8rem;
-            }
-            .hero h2 {
-                font-size: 1.3rem;
-            }
-
-            .hero-buttons {
-                justify-content: center; /* Center buttons */
-            }
-            .social-links {
-                justify-content: center; /* Center social links */
-            }
-
-            .mobile-menu-btn {
-                display: block; /* Show hamburger menu */
-            }
-
+            .hero h1 { font-size: 2.8rem; }
+            .hero h2 { font-size: 1.3rem; }
+            .hero-buttons { justify-content: center; }
+            .social-links { justify-content: center; }
+            .mobile-menu-btn { display: block; }
             .nav-links {
                 position: absolute;
-                top: 100%; /* Position below header */
+                top: 100%;
                 left: 0;
                 width: 100%;
                 background: white;
@@ -793,91 +502,42 @@
                 padding: 20px 0;
                 gap: 20px;
                 box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
-                /* Hide/show logic */
                 max-height: 0;
                 opacity: 0;
                 overflow: hidden;
                 visibility: hidden;
                 transition: max-height 0.4s ease-out, opacity 0.4s ease-out, visibility 0.4s ease-out;
             }
-
             .nav-links.active {
-                max-height: 500px; /* Allow enough height */
+                max-height: 500px;
                 opacity: 1;
                 visibility: visible;
-            }
-            /* Move new button inside mobile menu */
-             .nav-links .btn-new {
-                margin-left: 0;
-                margin-top: 10px; /* Add space above */
-                width: calc(100% - 40px); /* Make button wider */
-                justify-content: center;
-            }
-
-            .footer-grid {
-                grid-template-columns: 1fr; /* Stack footer columns */
-                gap: 30px;
-                 text-align: center; /* Center footer text */
-            }
-             .footer-col h4:after {
-                left: 50%; /* Center underline */
-                transform: translateX(-50%);
-            }
-            .footer-col .social-links {
-                justify-content: center; /* Center footer social links */
-            }
-             .view-all {
-                flex-direction: column; /* Stack buttons vertically */
-                align-items: center; /* Center stack */
-            }
-            .view-all .btn {
-                width: 80%; /* Make buttons wider */
-                max-width: 300px; /* Max width */
             }
         }
 
         @media (max-width: 576px) {
-            .hero h1 {
-                font-size: 2.3rem;
-            }
-
-            .hero h2 {
-                font-size: 1.2rem;
-            }
-
-            .projects-grid {
-                grid-template-columns: 1fr; /* Single column for projects */
-            }
-
+            .hero h1 { font-size: 2.3rem; }
+            .hero h2 { font-size: 1.2rem; }
+            .projects-grid { grid-template-columns: 1fr; }
             .hero-buttons {
-                flex-direction: column; /* Stack hero buttons */
-                align-items: center; /* Center stack */
+                flex-direction: column;
+                align-items: center;
                 width: 100%;
             }
-
             .btn {
-                width: 80%; /* Make buttons take more width */
-                max-width: 300px; /* Add max width */
+                width: 80%;
+                max-width: 300px;
             }
-
-            .section-title h2 {
-                font-size: 2rem;
-            }
-            .contact-form {
-                padding: 30px; /* Reduce padding */
-            }
-             .footer-grid {
-                gap: 25px;
-            }
+            .section-title h2 { font-size: 2rem; }
+            .school-status-banner { font-size: 0.95rem; padding: 10px 15px;}
         }
     </style>
 </head>
 <body>
-<div style="text-align: center; padding-top: 80px; padding-bottom: 20px;"><h2>New Videos page</h2></div>
     <header>
         <div class="container">
             <nav>
-                <a href="#" class="logo">
+                <a href="#home" class="logo">
                     <span class="logo-icon"><i class="fas fa-code"></i></span>
                     TheGraxIsReal
                 </a>
@@ -887,47 +547,36 @@
                 <div class="nav-links">
                     <a href="#home">Home</a>
                     <a href="#projects">Projects</a>
-                    <a href="#blog">Blog</a>
-                    <a href="#skills">Skills</a>
-                    <a href="#contact">Contact</a>
-                    <a href="games.html">Games</a>
-                    <a href="youtube_client_v2.html" class="btn-new"><i class="fas fa-video"></i> thegraxisreal Videos</a>
+                    <a href="graxybot.html">Graxybot</a>
+                    <a href="youtube_client_v2.html">Videos</a>
                 </div>
             </nav>
         </div>
     </header>
 
     <section id="home" class="hero">
-        <div class="hero-bg"></div> <div class="container">
+        <div class="hero-bg"></div>
+        <div class="container">
             <div class="hero-content">
                 <span class="hero-greeting">Hello, World! 👋</span>
                 <h1>I'm <span>thegraxisreal</span>,</h1>
                 <h2>Just making random stuff</h2>
-                <p>I'm 14, and I like to build random stuff, and promote my twitter.</p>
+                <div id="school-status-banner" class="school-status-banner">
+                    Loading school schedule...
+                </div>
                 <p class="announcement"> Talk to my AI model, Graxybot! </p>
-
                 <div class="hero-buttons">
                     <a href="#projects" class="btn btn-primary">
-                        <i class="fas fa-laptop-code"></i> View My Work
-                    </a>
-                    <a href="#contact" class="btn btn-outline">
-                        <i class="fas fa-paper-plane"></i> Get In Touch
+                        <i class="fas fa-laptop-code"></i> View My Projects
                     </a>
                 </div>
-
                 <div class="social-links">
                     <a href="https://twitter.com/thegraxisreal" title="Twitter" target="_blank" rel="noopener noreferrer">
                         <i class="fab fa-twitter"></i>
                     </a>
-                    <a href="#" title="GitHub" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-github"></i>
-                    </a>
-                    <a href="#" title="LinkedIn" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-linkedin-in"></i>
-                    </a>
-                    <a href="#" title="Instagram" target="_blank" rel="noopener noreferrer">
-                        <i class="fab fa-instagram"></i>
-                    </a>
+                    <a href="#" title="GitHub" target="_blank" rel="noopener noreferrer"> <i class="fab fa-github"></i></a>
+                    <a href="#" title="LinkedIn" target="_blank" rel="noopener noreferrer"> <i class="fab fa-linkedin-in"></i></a>
+                    <a href="#" title="Instagram" target="_blank" rel="noopener noreferrer"> <i class="fab fa-instagram"></i></a>
                 </div>
             </div>
         </div>
@@ -937,209 +586,51 @@
         <div class="container">
             <div class="section-title">
                 <h2>My Projects</h2>
-                <p>Check out what I've been working on lately. Mostly just HTML side projects, including my new AI Chatbot!</p>
+                <p>Here's a look at what I've been working on.</p>
             </div>
-
             <div class="projects-grid">
-                <a href="bloggg.html" style="text-decoration: none; color: inherit;">
-                    <div class="project-card">
-                        <div class="project-img" style="background: var(--gradient); color: white;">
-                            <i class="fas fa-globe-americas"></i>
-                        </div>
-                        <div class="project-content">
-                            <h3>Mock.Com</h3>
-                            <p>My Mock Apps and websites project.</p>
-                            <div>
-                                <span class="tag">HTML</span>
-                                <span class="tag">CSS</span>
-                                <span class="tag">JavaScript</span>
-                            </div>
-                        </div>
+                <a href="graxybot.html" class="project-card">
+                    <div class="project-img" style="background: linear-gradient(135deg, #48bfe3 0%, #5e60ce 100%); color: white;">
+                        <i class="fas fa-robot"></i>
                     </div>
-                </a>
-
-                <a href="games.html" style="text-decoration: none; color: inherit;">
-                    <div class="project-card">
-                        <div class="project-img" style="background: linear-gradient(135deg, #6930c3 0%, #5e60ce 100%); color: white;">
-                            <i class="fas fa-gamepad"></i>
-                        </div>
-                        <div class="project-content">
-                            <h3>Games</h3>
-                            <p>Some random and fun games built with web technologies.</p>
-                            <div>
-                                <span class="tag">HTML</span>
-                                <span class="tag">CSS</span>
-                                <span class="tag">JavaScript</span>
-                            </div>
-                        </div>
-                    </div>
-                </a>
-
-                <a href="graxybot.html" style="text-decoration: none; color: inherit;">
-                    <div class="project-card">
-                        <div class="project-img" style="background: linear-gradient(135deg, #48bfe3 0%, #5e60ce 100%); color: white;">
-                            <i class="fas fa-robot"></i> </div>
-                        <div class="project-content">
-                            <h3>Graxybot AI</h3> <p>My custom-built AI chatbot featuring Flash and Pro models.</p> <div>
-                                <span class="tag">HTML</span>
-                                <span class="tag">CSS</span>
-                                <span class="tag">JavaScript</span>
-                                <span class="tag">AI</span> </div>
-                        </div>
-                    </div>
-                </a>
-            </div>
-
-            <div class="view-all">
-                <a href="bloggg.html" class="btn btn-primary">View Mock.Com</a>
-                <a href="games.html" class="btn btn-outline">
-                    <i class="fas fa-gamepad"></i> Play Games
-                </a>
-                <a href="graxybot.html" class="btn btn-outline">
-                    <i class="fas fa-robot"></i> Try Graxybot
-                </a>
-            </div>
-        </div>
-    </section>
-
-    <section id="skills" class="skills">
-        <div class="container">
-            <div class="section-title">
-                <h2>My Skills</h2>
-                <p>Here are some of the technologies and tools I'm proficient with.</p>
-            </div>
-
-            <div class="skills-grid">
-                <div class="skill-card">
-                    <div class="skill-icon"><i class="fab fa-html5"></i></div>
-                    <div class="skill-name">HTML5</div>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon"><i class="fab fa-css3-alt"></i></div>
-                    <div class="skill-name">CSS3</div>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon"><i class="fab fa-js"></i></div>
-                    <div class="skill-name">JavaScript</div>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon"><i class="fab fa-swift"></i></div>
-                    <div class="skill-name">Swift</div>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon"><i class="fas fa-mobile-alt"></i></div>
-                    <div class="skill-name">iOS Development</div>
-                </div>
-                 <div class="skill-card">
-                    <div class="skill-icon"><i class="fas fa-brain"></i></div>
-                    <div class="skill-name">AI / Chatbots</div>
-                </div>
-                <div class="skill-card">
-                    <div class="skill-icon"><i class="fas fa-laptop-code"></i></div>
-                    <div class="skill-name">Responsive Design</div>
-                </div>
-                 <div class="skill-card">
-                    <div class="skill-icon"><i class="fab fa-git-alt"></i></div>
-                    <div class="skill-name">Git & GitHub</div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="blog" class="blog">
-        <div class="container">
-            <div class="section-title">
-                <h2>Latest Updates</h2>
-                <p>Stay tuned for updates about my journey in software development, new projects, and tech insights.</p>
-            </div>
-
-            <div class="blog-post">
-                 <div class="blog-img" style="background: linear-gradient(135deg, #6930c3 0%, #5e60ce 100%); color: white;">
-                    <div style="text-align: center;">
-                        <i class="fas fa-pen-fancy" style="font-size: 3.5rem; margin-bottom: 15px;"></i>
-                        <div style="background-color: rgba(255,255,255,0.2); padding: 5px 15px; border-radius: 20px; display: inline-block; font-size: 0.9rem; font-weight: 600;">
-                            Coming Soon
-                        </div>
-                    </div>
-                </div>
-                <div class="blog-content">
-                    <div class="blog-date">April 30, 2025</div> <h3 class="blog-title">Why I haven't written a blog post yet</h3> <p class="blog-excerpt">Been busy coding Graxybot! Blog posts coming soon, maybe...</p> <a href="#" class="read-more">Read More <i class="fas fa-arrow-right"></i></a>
-                </div>
-            </div>
-            </div>
-    </section>
-
-    <section id="contact" class="contact">
-        <div class="container">
-            <div class="section-title">
-                <h2>Get In Touch</h2>
-                <p>Have a question, want to talk about Graxybot, or work together? Feel free to contact me!</p>
-            </div>
-
-            <div class="contact-grid">
-                <div class="contact-info">
-                    <h3>Let's connect</h3>
-                    <p>I'm always open to discussing new projects, creative ideas or opportunities to be part of your vision.</p>
-
-                    <div class="contact-method">
-                        <div class="contact-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="project-content">
+                        <h3>Graxybot AI</h3>
+                        <p>My custom-built AI chatbot featuring Flash and Pro models. Click to interact!</p>
                         <div>
-                            <h4>Email</h4>
-                            <p>thegraxisreal@gmail.com</p>
+                            <span class="tag">HTML</span>
+                            <span class="tag">CSS</span>
+                            <span class="tag">JavaScript</span>
+                            <span class="tag">AI</span>
                         </div>
                     </div>
-
-                    <div class="contact-method">
-                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                </a>
+                <a href="games.html" class="project-card">
+                    <div class="project-img" style="background: linear-gradient(135deg, #6930c3 0%, #5e60ce 100%); color: white;">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="project-content">
+                        <h3>Web Games Collection</h3>
+                        <p>A collection of fun and interactive games built with web technologies.</p>
                         <div>
-                            <h4>Location</h4>
-                            <p>Somewhere on Earth</p>
+                            <span class="tag">HTML</span>
+                            <span class="tag">CSS</span>
+                            <span class="tag">JavaScript</span>
                         </div>
                     </div>
-
-                    <div class="social-links">
-                         <a href="https://twitter.com/thegraxisreal" title="Twitter" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" title="GitHub" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="#" title="LinkedIn" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="#" title="Instagram" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-instagram"></i>
-                        </a>
+                </a>
+                <a href="youtube_client_v2.html" class="project-card">
+                    <div class="project-img" style="background: linear-gradient(135deg, #c33030 0%, #ce5e5e 100%); color: white;">
+                        <i class="fas fa-video"></i>
                     </div>
-                </div>
-
-                <div class="contact-form">
-                    <form id="contactForm">
-                        <div class="form-group">
-                            <label for="name" class="form-label">Name</label>
-                            <input type="text" id="name" name="name" class="form-control" placeholder="Your Name" required>
+                    <div class="project-content">
+                        <h3>Latest Video Content</h3>
+                        <p>Watch my latest videos, tutorials, and updates on YouTube.</p>
+                        <div>
+                            <span class="tag">YouTube</span>
+                            <span class="tag">Content Creation</span>
                         </div>
-
-                        <div class="form-group">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" id="email" name="email" class="form-control" placeholder="Your Email" required>
-                        </div>
-
-                        <div class="form-group">
-                            <label for="message" class="form-label">Message</label>
-                            <textarea id="message" name="message" class="form-control" placeholder="Your Message" required></textarea>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary" id="submitBtn">
-                            <i class="fas fa-paper-plane"></i> Send Message
-                        </button>
-
-                        <div id="successMessage">
-                            <i class="fas fa-check-circle"></i>
-                            <p>Message sent successfully! Thanks for reaching out.</p>
-                        </div>
-                    </form>
-                </div>
+                    </div>
+                </a>
             </div>
         </div>
     </section>
@@ -1148,189 +639,203 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-col">
-                    <h4>About Me</h4>
-                    <p>I'm a 14-year-old developer passionate about creating cool digital experiences, from websites to AI chatbots. Specializing in HTML, CSS, JS, and Swift.</p>
+                    <h4>Connect With Me</h4>
                     <div class="social-links">
-                         <a href="https://twitter.com/thegraxisreal" title="Twitter" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-twitter"></i>
-                        </a>
-                        <a href="#" title="GitHub" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-github"></i>
-                        </a>
-                        <a href="#" title="LinkedIn" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-linkedin-in"></i>
-                        </a>
-                        <a href="#" title="Instagram" target="_blank" rel="noopener noreferrer">
-                            <i class="fab fa-instagram"></i>
-                        </a>
+                         <a href="https://twitter.com/thegraxisreal" title="Twitter" target="_blank" rel="noopener noreferrer"><i class="fab fa-twitter"></i></a>
+                        <a href="#" title="GitHub" target="_blank" rel="noopener noreferrer"><i class="fab fa-github"></i></a>
+                        <a href="#" title="LinkedIn" target="_blank" rel="noopener noreferrer"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" title="Instagram" target="_blank" rel="noopener noreferrer"><i class="fab fa-instagram"></i></a>
                     </div>
                 </div>
-
                 <div class="footer-col">
                     <h4>Quick Links</h4>
                     <ul class="footer-links">
                         <li><a href="#home">Home</a></li>
                         <li><a href="#projects">Projects</a></li>
-                        <li><a href="#blog">Blog</a></li>
-                        <li><a href="#skills">Skills</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                        <li><a href="games.html">Games</a></li>
-                        <li><a href="graxybot.html">Graxybot</a></li> </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Focus Areas</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Web Development</a></li>
-                        <li><a href="#">iOS Development</a></li>
-                        <li><a href="#">AI Chatbots</a></li>
-                        <li><a href="#">UI/UX Design</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-col">
-                    <h4>Resources</h4>
-                    <ul class="footer-links">
-                        <li><a href="#">Learning Path</a></li>
-                        <li><a href="#">Coding Tips</a></li>
-                        <li><a href="#">Tutorials</a></li>
+                        <li><a href="graxybot.html">Graxybot</a></li>
+                        <li><a href="youtube_client_v2.html">Videos</a></li>
                     </ul>
                 </div>
             </div>
-
             <div class="footer-bottom">
-                <p>&copy; 2025 TheGraxIsReal. All rights reserved.</p> </div>
+                <p>&copy; 2025 TheGraxIsReal. All rights reserved.</p>
+            </div>
         </div>
     </footer>
 
     <script>
-        // Mobile Menu Toggle Functionality
+        // --- Mobile Menu Toggle ---
         const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
-        const navLinks = document.querySelector('.nav-links');
-        const body = document.body; // Get body element
-
+        const navLinksContainer = document.querySelector('.nav-links');
+        const body = document.body;
         mobileMenuBtn.addEventListener('click', () => {
             const isExpanded = mobileMenuBtn.getAttribute('aria-expanded') === 'true';
-            mobileMenuBtn.setAttribute('aria-expanded', !isExpanded); // Toggle aria-expanded
-            navLinks.classList.toggle('active'); // Toggle visibility class
-            mobileMenuBtn.querySelector('i').classList.toggle('fa-bars'); // Toggle icon bars
-            mobileMenuBtn.querySelector('i').classList.toggle('fa-times'); // Toggle icon close (x)
-            body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : ''; // Prevent body scroll when menu open
+            mobileMenuBtn.setAttribute('aria-expanded', String(!isExpanded));
+            navLinksContainer.classList.toggle('active');
+            mobileMenuBtn.querySelector('i').classList.toggle('fa-bars');
+            mobileMenuBtn.querySelector('i').classList.toggle('fa-times');
+            body.style.overflow = navLinksContainer.classList.contains('active') ? 'hidden' : '';
         });
-
-        // Close mobile menu when clicking on a navigation link
         document.querySelectorAll('.nav-links a').forEach(link => {
             link.addEventListener('click', () => {
-                if (navLinks.classList.contains('active')) {
+                if (navLinksContainer.classList.contains('active') && link.getAttribute('href').startsWith('#')) {
                     mobileMenuBtn.setAttribute('aria-expanded', 'false');
-                    navLinks.classList.remove('active');
+                    navLinksContainer.classList.remove('active');
                     mobileMenuBtn.querySelector('i').classList.add('fa-bars');
                     mobileMenuBtn.querySelector('i').classList.remove('fa-times');
-                    body.style.overflow = ''; // Re-enable body scroll
+                    body.style.overflow = '';
+                } else if (navLinksContainer.classList.contains('active')) {
+                    mobileMenuBtn.setAttribute('aria-expanded', 'false');
+                    navLinksContainer.classList.remove('active');
+                    mobileMenuBtn.querySelector('i').classList.add('fa-bars');
+                    mobileMenuBtn.querySelector('i').classList.remove('fa-times');
                 }
             });
         });
 
-        // Sticky Header Appearance on Scroll
+        // --- Sticky Header ---
         const header = document.querySelector('header');
-        let lastScrollY = window.scrollY; // Store last scroll position
-
         window.addEventListener('scroll', () => {
             if (window.scrollY > 100) {
-                header.style.backgroundColor = 'rgba(255, 255, 255, 0.98)'; // Slightly less transparent when scrolled
-                header.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)'; // Stronger shadow
-                // Optional: Hide header on scroll down, show on scroll up
-                // if (window.scrollY > lastScrollY) {
-                //     // Scrolling Down
-                //     header.style.top = '-100px'; // Adjust based on header height
-                // } else {
-                //     // Scrolling Up
-                //     header.style.top = '0';
-                // }
+                header.style.backgroundColor = 'rgba(255, 255, 255, 0.98)';
+                header.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.1)';
             } else {
-                header.style.backgroundColor = 'rgba(255, 255, 255, 0.95)'; // Initial background
-                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)'; // Initial shadow
-                // header.style.top = '0'; // Ensure header is visible at top
+                header.style.backgroundColor = 'rgba(255, 255, 255, 0.95)';
+                header.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
             }
-             lastScrollY = window.scrollY; // Update last scroll position
         });
 
-        // Contact Form Submission Handler (Simulated)
-        const contactForm = document.getElementById('contactForm');
-        const successMessage = document.getElementById('successMessage');
-        const submitBtn = document.getElementById('submitBtn');
-
-        contactForm.addEventListener('submit', function(e) {
-            e.preventDefault(); // Prevent default form submission
-
-            // Basic client-side validation (optional, enhance as needed)
-            const name = document.getElementById('name').value.trim();
-            const email = document.getElementById('email').value.trim();
-            const message = document.getElementById('message').value.trim();
-
-            if (!name || !email || !message) {
-                 alert('Please fill in all fields.'); // Simple feedback
-                 return;
-            }
-
-            // Disable button and show loading state
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
-
-            // --- Simulate backend submission ---
-            // Replace this setTimeout with your actual fetch/AJAX call
-            // to send the form data to a server or service (like Formspree, Netlify Forms, etc.)
-            setTimeout(() => {
-                // --- On Successful Submission ---
-                successMessage.style.display = 'block'; // Show success message
-                contactForm.reset(); // Clear the form
-
-                // Reset button state after a delay
-                submitBtn.innerHTML = '<i class="fas fa-check"></i> Sent!';
-                setTimeout(() => {
-                    submitBtn.disabled = false; // Re-enable button
-                    submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-                    successMessage.style.display = 'none'; // Hide success message
-                }, 4000); // Hide message and reset button text after 4 seconds
-
-                // --- On Error (Example) ---
-                // Uncomment this block to simulate an error
-                /*
-                console.error("Form submission failed!");
-                alert("Sorry, something went wrong. Please try again later.");
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send Message';
-                */
-
-            }, 1500); // Simulate network delay (1.5 seconds)
-        });
-
-        // Smooth Scrolling for Anchor Links
+        // --- Smooth Scrolling ---
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
-                // Only prevent default if it's a link *within* the page
                 if (this.hash !== "") {
                      e.preventDefault();
-
                     const hash = this.hash;
                     const targetElement = document.querySelector(hash);
-
                     if(targetElement) {
-                        const headerOffset = document.querySelector('header').offsetHeight; // Get header height
+                        const headerOffset = document.querySelector('header').offsetHeight;
                         const elementPosition = targetElement.getBoundingClientRect().top;
-                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 20; // Adjust offset (-20 for extra space)
-
-                        window.scrollTo({
-                            top: offsetPosition,
-                            behavior: "smooth"
-                        });
-
-                         // Optionally update URL hash without jumping
-                         // history.pushState(null, null, hash);
+                        const offsetPosition = elementPosition + window.pageYOffset - headerOffset - 20; 
+                        window.scrollTo({ top: offsetPosition, behavior: "smooth" });
                     }
                 }
             });
         });
+
+        // --- School Period Status Logic ---
+        const schoolStatusBanner = document.getElementById('school-status-banner');
+        // Schedule: Times are in 24-hour format.
+        // Derived from the image provided by the user.
+        const schoolSchedule = [
+            { name: "Period 1", type: "period", startH: 8, startM: 0, endH: 8, endM: 47 },
+            { name: "Period 2", type: "period", startH: 8, startM: 51, endH: 9, endM: 32 },
+            { name: "Period 3", type: "period", startH: 9, startM: 36, endH: 10, endM: 17 },
+            { name: "Period 4", type: "period", startH: 10, startM: 21, endH: 11, endM: 2 },
+            { name: "Period 5", type: "period", startH: 11, startM: 6, endH: 11, endM: 47 },
+            { name: "FLEX", type: "flex", startH: 11, startM: 50, endH: 12, endM: 11 },
+            { name: "LUNCH", type: "lunch", startH: 12, startM: 12, endH: 12, endM: 32 },
+            { name: "Period 7", type: "period", startH: 12, startM: 36, endH: 13, endM: 17 },
+            { name: "Period 8", type: "period", startH: 13, startM: 21, endH: 14, endM: 2 },
+            { name: "Period 9", type: "period", startH: 14, startM: 6, endH: 14, endM: 48 }
+        ];
+
+        function getTodayAtTime(h, m) {
+            const now = new Date();
+            return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
+        }
+
+        function formatTime(dateObj) {
+            let hours = dateObj.getHours();
+            let minutes = dateObj.getMinutes();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12; // the hour '0' should be '12'
+            minutes = minutes < 10 ? '0'+minutes : minutes;
+            return hours + ':' + minutes + ' ' + ampm;
+        }
+
+
+        function updateSchoolStatus() {
+            const now = new Date();
+            const dayOfWeek = now.getDay(); // 0 (Sunday) to 6 (Saturday)
+            let statusText = "";
+
+            if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
+                statusText = "<i class='fas fa-couch'></i> Enjoy your weekend!";
+            } else { // Weekday
+                const currentTime = now.getTime();
+                let inSchoolHours = false;
+
+                // Check if before school starts
+                const firstPeriodStartTime = getTodayAtTime(schoolSchedule[0].startH, schoolSchedule[0].startM);
+                if (currentTime < firstPeriodStartTime.getTime()) {
+                    statusText = `<i class='fas fa-sun'></i> School starts with ${schoolSchedule[0].name} at ${formatTime(firstPeriodStartTime)}.`;
+                    inSchoolHours = true; // Technically not "in" but handled
+                } else {
+                    for (let i = 0; i < schoolSchedule.length; i++) {
+                        const currentBlock = schoolSchedule[i];
+                        const nextBlock = (i + 1 < schoolSchedule.length) ? schoolSchedule[i+1] : null;
+
+                        const currentBlockStartTime = getTodayAtTime(currentBlock.startH, currentBlock.startM);
+                        const currentBlockEndTime = getTodayAtTime(currentBlock.endH, currentBlock.endM);
+
+                        if (currentTime >= currentBlockStartTime.getTime() && currentTime < currentBlockEndTime.getTime()) {
+                            // Inside a period/block
+                            inSchoolHours = true;
+                            const minutesLeftInBlock = Math.floor((currentBlockEndTime.getTime() - currentTime) / 60000);
+                            
+                            if (currentBlock.type === "period") {
+                                let nextNumberedPeriod = null;
+                                for (let j = i + 1; j < schoolSchedule.length; j++) {
+                                    if (schoolSchedule[j].type === "period") {
+                                        nextNumberedPeriod = schoolSchedule[j];
+                                        break;
+                                    }
+                                }
+                                if (nextNumberedPeriod) {
+                                    const nextNumberedPeriodStartTime = getTodayAtTime(nextNumberedPeriod.startH, nextNumberedPeriod.startM);
+                                    const minutesUntilNextPeriod = Math.max(0, Math.floor((nextNumberedPeriodStartTime.getTime() - currentTime) / 60000));
+                                    statusText = `<i class='fas fa-chalkboard-teacher'></i> It is ${currentBlock.name}. ${minutesUntilNextPeriod} min left until ${nextNumberedPeriod.name}.`;
+                                } else { // Last numbered period of the day
+                                    statusText = `<i class='fas fa-chalkboard-teacher'></i> It is ${currentBlock.name}. ${minutesLeftInBlock} min left in the school day.`;
+                                }
+                            } else { // FLEX or LUNCH
+                                statusText = `<i class='fas ${currentBlock.type === "lunch" ? "fa-utensils" : "fa-puzzle-piece"}'></i> Currently ${currentBlock.name}. Ends in ${minutesLeftInBlock} min.`;
+                            }
+                            break; 
+                        } else if (nextBlock) {
+                            // Check for passing time
+                            const nextBlockStartTime = getTodayAtTime(nextBlock.startH, nextBlock.startM);
+                            if (currentTime >= currentBlockEndTime.getTime() && currentTime < nextBlockStartTime.getTime()) {
+                                inSchoolHours = true;
+                                const minutesToNextBlock = Math.max(0, Math.floor((nextBlockStartTime.getTime() - currentTime) / 60000));
+                                statusText = `<i class='fas fa-walking'></i> Passing. ${nextBlock.name} starts in ${minutesToNextBlock} min.`;
+                                break;
+                            }
+                        }
+                    }
+                }
+                
+                // Check if after school ends
+                if (!inSchoolHours) { // If loop completed and not set, means after last period
+                    const lastPeriodEndTime = getTodayAtTime(schoolSchedule[schoolSchedule.length - 1].endH, schoolSchedule[schoolSchedule.length - 1].endM);
+                    if (currentTime >= lastPeriodEndTime.getTime()) {
+                        statusText = "<i class='fas fa-school'></i> School's out! Enjoy your afternoon.";
+                    } else {
+                        // This case should ideally be covered by "before school starts" or passing times
+                        // but as a fallback if current time is somehow between the absolute start and end of day but not in a block.
+                         statusText = "Checking schedule...";
+                    }
+                }
+            }
+            schoolStatusBanner.innerHTML = statusText;
+        }
+
+        // Initial call and update every 30 seconds
+        if (schoolStatusBanner) {
+            updateSchoolStatus();
+            setInterval(updateSchoolStatus, 30000); // Update every 30 seconds
+        }
 
     </script>
 </body>
