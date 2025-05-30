@@ -3,1013 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TheGraxisReal Casino</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script type="module">
-        // Firebase App (the core)
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        // Firestore Database
-        import { getFirestore, doc, getDoc, setDoc, onSnapshot, updateDoc, serverTimestamp, enableIndexedDbPersistence, setLogLevel } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        // Firebase Auth
-        import { getAuth, signInAnonymously, signInWithCustomToken, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-
-        // --- Firebase Configuration ---
-        // IMPORTANT: Replace with your actual Firebase config if you deploy this elsewhere.
-        // For Canvas environment, __firebase_config is provided.
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "YOUR_API_KEY", // Replace if not in Canvas
-            authDomain: "YOUR_AUTH_DOMAIN",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_STORAGE_BUCKET",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-casino-app';
-
-        // --- Initialize Firebase ---
-        let app;
-        let db;
-        let auth;
-        let userId;
-        let balance = 1000; // Default starting balance
-        const initialBalance = 1000;
-        let balanceUnsubscribe = null; // To store the onSnapshot listener
-
-        // --- UI Elements ---
-        let balanceDisplay;
-        let userIdDisplay;
-        let gameContainer;
-        let messageModal, messageText, messageOkButton;
-
-        // --- Game States ---
-        let currentBet = 10;
-        const slotSymbols = ['🍒', '🍋', '🍊', '🍉', '⭐', '🔔', '💎'];
-        const slotReels = [
-            ['🍒', '🍋', '🍊', '🍉', '⭐', '🔔', '💎', '🍒', '🍋', '🍊'],
-            ['⭐', '🔔', '💎', '🍒', '🍋', '🍊', '🍉', '🍉', '⭐', '🔔'],
-            ['🍋', '🍊', '🍉', '⭐', '🔔', '💎', '🍒', '💎', '🍒', '🍋']
-        ];
-
-        // Blackjack state
-        let playerHand, dealerHand, deck, playerScore, dealerScore, gameInProgressBj;
-
-        // Roulette state
-        const rouletteNumbers = [
-            { value: 0, color: 'green' }, { value: 32, color: 'red' }, { value: 15, color: 'black' },
-            { value: 19, color: 'red' }, { value: 4, color: 'black' }, { value: 21, color: 'red' },
-            { value: 2, color: 'black' }, { value: 25, color: 'red' }, { value: 17, color: 'black' },
-            { value: 34, color: 'red' }, { value: 6, color: 'black' }, { value: 27, color: 'red' },
-            { value: 13, color: 'black' }, { value: 36, color: 'red' }, { value: 11, color: 'black' },
-            { value: 30, color: 'red' }, { value: 8, color: 'black' }, { value: 23, color: 'red' },
-            { value: 10, color: 'black' }, { value: 5, color: 'red' }, { value: 24, color: 'black' },
-            { value: 16, color: 'red' }, { value: 33, color: 'black' }, { value: 1, color: 'red' },
-            { value: 20, color: 'black' }, { value: 14, color: 'red' }, { value: 31, color: 'black' },
-            { value: 9, color: 'red' }, { value: 22, color: 'black' }, { value: 18, color: 'red' },
-            { value: 29, color: 'black' }, { value: 7, color: 'red' }, { value: 28, color: 'black' },
-            { value: 12, color: 'red' }, { value: 35, color: 'black' }, { value: 3, color: 'red' },
-            { value: 26, color: 'black' }
-        ];
-        let rouletteBetType = null;
-        let rouletteBetValue = null;
-
-        // Scratcher state
-        const scratcherGridSize = 3;
-        let scratcherTicket;
-        let scratcherRevealedCount;
-
-
-        // --- Firebase Initialization and Auth ---
-        async function initializeFirebaseApp() {
-            try {
-                app = initializeApp(firebaseConfig);
-                db = getFirestore(app);
-                auth = getAuth(app);
-                setLogLevel('debug'); // For Firestore logging
-
-                // Enable offline persistence
-                await enableIndexedDbPersistence(db).catch((err) => {
-                    if (err.code == 'failed-precondition') {
-                        console.warn("Firestore: Multiple tabs open, persistence can only be enabled in one tab at a time.");
-                    } else if (err.code == 'unimplemented') {
-                        console.warn("Firestore: The current browser does not support all of the features required to enable persistence.");
-                    }
-                });
-
-                onAuthStateChanged(auth, async (user) => {
-                    if (user) {
-                        console.log("User is signed in:", user.uid);
-                        userId = user.uid;
-                        if (userIdDisplay) userIdDisplay.textContent = `User ID: ${userId}`;
-                        await loadBalance();
-                    } else {
-                        console.log("User is signed out, signing in anonymously...");
-                        await signInAnonymously(auth).catch(error => {
-                            console.error("Anonymous sign-in failed:", error);
-                            showMessage(`Error signing in: ${error.message}`);
-                            // Fallback if anonymous sign-in fails (e.g., network issue)
-                            userId = `guest-${crypto.randomUUID()}`;
-                            if (userIdDisplay) userIdDisplay.textContent = `User ID: ${userId} (Offline)`;
-                            updateBalanceDisplay(); // Show default balance
-                        });
-                    }
-                });
-
-                // Attempt to sign in with custom token if available, otherwise anonymously
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                     console.log("Attempting to sign in with custom token...");
-                    await signInWithCustomToken(auth, __initial_auth_token).catch(async (error) => {
-                        console.error("Custom token sign-in failed, trying anonymous:", error);
-                        await signInAnonymously(auth).catch(e => {
-                             console.error("Anonymous sign-in after custom token failure failed:", e);
-                             showMessage(`Critical Auth Error: ${e.message}`);
-                        });
-                    });
-                } else if (!auth.currentUser) { // Only sign in anonymously if no user and no token
-                    console.log("No initial token, attempting anonymous sign-in...");
-                    await signInAnonymously(auth).catch(e => {
-                        console.error("Initial anonymous sign-in failed:", e);
-                        showMessage(`Auth Error: ${e.message}`);
-                    });
-                }
-
-            } catch (error) {
-                console.error("Firebase initialization failed:", error);
-                showMessage(`Failed to initialize casino services: ${error.message}. Some features may not work.`);
-                 // Provide a fallback user ID if Firebase completely fails
-                userId = `offline-${crypto.randomUUID()}`;
-                if (userIdDisplay) userIdDisplay.textContent = `User ID: ${userId} (Service Error)`;
-                updateBalanceDisplay();
-            }
-        }
-
-
-        // --- Balance Management ---
-        async function loadBalance() {
-            if (!userId || !db) {
-                console.warn("Cannot load balance: userId or db not available.");
-                updateBalanceDisplay(); // Show default or current in-memory balance
-                return;
-            }
-            const balanceDocRef = doc(db, "artifacts", appId, "users", userId, "casinoData", "balanceDoc");
-
-            // Unsubscribe from any previous listener
-            if (balanceUnsubscribe) {
-                balanceUnsubscribe();
-            }
-
-            try {
-                 // Set up a real-time listener for balance changes
-                balanceUnsubscribe = onSnapshot(balanceDocRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        const data = docSnap.data();
-                        balance = data.balance;
-                        console.log("Balance loaded/updated from Firestore:", balance);
-                    } else {
-                        console.log("No balance document found, creating one with initial balance.");
-                        balance = initialBalance; // Reset to initial if doc doesn't exist
-                        // No await here, let it run in background
-                        setDoc(balanceDocRef, { balance: balance, lastUpdated: serverTimestamp() })
-                            .catch(err => console.error("Error creating balance doc during onSnapshot:", err));
-                    }
-                    updateBalanceDisplay();
-                }, (error) => {
-                    console.error("Error in onSnapshot listener for balance:", error);
-                    showMessage(`Error fetching balance: ${error.message}. Using local value.`);
-                    updateBalanceDisplay(); // Still update with current memory value
-                });
-
-            } catch (error) {
-                console.error("Error setting up balance listener:", error);
-                showMessage(`Error loading balance: ${error.message}. Using default.`);
-                balance = initialBalance; // Fallback
-                updateBalanceDisplay();
-            }
-        }
-
-        async function saveBalance(newBalance, transactionDetails = {}) {
-            balance = newBalance;
-            updateBalanceDisplay();
-            if (!userId || !db) {
-                console.warn("Cannot save balance: userId or db not available. Balance updated locally.");
-                return;
-            }
-            const balanceDocRef = doc(db, "artifacts", appId, "users", userId, "casinoData", "balanceDoc");
-            try {
-                await setDoc(balanceDocRef, { balance: balance, lastUpdated: serverTimestamp(), lastTransaction: transactionDetails }, { merge: true });
-                console.log("Balance saved to Firestore:", balance);
-            } catch (error) {
-                console.error("Error saving balance to Firestore:", error);
-                showMessage(`Error saving balance: ${error.message}. Your balance is saved locally for this session.`);
-            }
-        }
-
-        function updateBalanceDisplay() {
-            if (balanceDisplay) {
-                balanceDisplay.textContent = `Balance: $${balance.toLocaleString()}`;
-            }
-        }
-
-        function canAfford(amount) {
-            return balance >= amount;
-        }
-
-        // --- Game Navigation ---
-        function showGame(gameId) {
-            const gameViews = document.querySelectorAll('.game-view');
-            gameViews.forEach(view => view.classList.add('hidden'));
-            document.getElementById(gameId)?.classList.remove('hidden');
-
-            // Reset or initialize game states when switching
-            if (gameId === 'blackjack') initBlackjack();
-            else if (gameId === 'roulette') initRoulette();
-            else if (gameId === 'scratcher') initScratcher();
-            else if (gameId === 'slots') initSlots();
-            else if (gameId === 'coinflip') initCoinFlip();
-
-            // Update bet display for games that use it
-            const betAmountInput = document.getElementById(`${gameId}BetAmount`);
-            if (betAmountInput) betAmountInput.value = currentBet;
-        }
-
-        // --- Message Modal ---
-        function showMessage(message, isSuccess = false) {
-            if (!messageModal || !messageText) return;
-            messageText.textContent = message;
-            messageText.className = `text-lg ${isSuccess ? 'text-green-300' : 'text-red-300'}`;
-            messageModal.classList.remove('hidden');
-            messageModal.classList.add('flex');
-        }
-
-        function hideMessage() {
-            if (!messageModal) return;
-            messageModal.classList.add('hidden');
-            messageModal.classList.remove('flex');
-        }
-
-
-        // --- Helper: Animation ---
-        function animateElement(element, animationClass, duration = 500) {
-            return new Promise(resolve => {
-                element.classList.add(animationClass);
-                setTimeout(() => {
-                    element.classList.remove(animationClass);
-                    resolve();
-                }, duration);
-            });
-        }
-
-        // --- Game: Slot Machine ---
-        function initSlots() {
-            const betInput = document.getElementById('slotsBetAmount');
-            if (betInput) betInput.value = currentBet;
-            // Clear previous results
-            const reelsElements = document.querySelectorAll('#slotsReels .reel-symbol');
-            reelsElements.forEach(el => el.textContent = '❓');
-            document.getElementById('slotsResult').textContent = 'Spin to win!';
-        }
-
-        async function spinSlots() {
-            const betAmountInput = document.getElementById('slotsBetAmount');
-            const betAmount = parseInt(betAmountInput.value);
-
-            if (isNaN(betAmount) || betAmount <= 0) {
-                showMessage("Please enter a valid bet amount.");
-                return;
-            }
-            if (!canAfford(betAmount)) {
-                showMessage("Not enough balance to make this bet.");
-                return;
-            }
-
-            await saveBalance(balance - betAmount, { game: "slots", type: "bet", amount: betAmount });
-
-            const reelsElements = [
-                document.getElementById('reel1'),
-                document.getElementById('reel2'),
-                document.getElementById('reel3')
-            ];
-            const resultDisplay = document.getElementById('slotsResult');
-            resultDisplay.textContent = "Spinning...";
-
-            let finalSymbols = [];
-
-            // Animation
-            const spinDuration = 1000; // Total spin time
-            const intervalTime = 50; // Update interval for visual spin
-            let elapsed = 0;
-
-            const spinInterval = setInterval(() => {
-                elapsed += intervalTime;
-                reelsElements.forEach((reel, index) => {
-                    const randomSymbol = slotReels[index][Math.floor(Math.random() * slotReels[index].length)];
-                    reel.textContent = randomSymbol;
-                    reel.classList.add('animate-pulse'); // Simple visual cue
-                });
-                if (elapsed >= spinDuration) {
-                    clearInterval(spinInterval);
-                    finishSpin();
-                }
-            }, intervalTime);
-
-            async function finishSpin() {
-                reelsElements.forEach((reel, index) => {
-                    const randomIndex = Math.floor(Math.random() * slotReels[index].length);
-                    const symbol = slotReels[index][randomIndex];
-                    finalSymbols.push(symbol);
-                    reel.textContent = symbol;
-                    reel.classList.remove('animate-pulse');
-                    animateElement(reel, 'animate-bounce', 300);
-                });
-
-                // Check for win
-                let winnings = 0;
-                if (finalSymbols[0] === finalSymbols[1] && finalSymbols[1] === finalSymbols[2]) {
-                    // Triple match
-                    if (finalSymbols[0] === '💎') winnings = betAmount * 100; // Jackpot
-                    else if (finalSymbols[0] === '⭐') winnings = betAmount * 50;
-                    else if (finalSymbols[0] === '🔔') winnings = betAmount * 20;
-                    else winnings = betAmount * 10;
-                } else if (finalSymbols[0] === finalSymbols[1] || finalSymbols[1] === finalSymbols[2] || finalSymbols[0] === finalSymbols[2]) {
-                    // Double match (simple payout for any two)
-                    if (finalSymbols.filter(s => s === '🍒').length >= 2) winnings = betAmount * 3;
-                    else winnings = betAmount * 2;
-                } else if (finalSymbols.includes('🍒')) {
-                     // Single cherry
-                    winnings = betAmount * 1;
-                }
-
-
-                if (winnings > 0) {
-                    resultDisplay.textContent = `You won $${winnings}!`;
-                    await saveBalance(balance + winnings, { game: "slots", type: "win", amount: winnings });
-                    showMessage(`Congratulations! You won $${winnings} on slots!`, true);
-                } else {
-                    resultDisplay.textContent = "Try again!";
-                }
-            }
-        }
-
-        // --- Game: Blackjack ---
-        function createDeck() {
-            const suits = ['♠', '♥', '♦', '♣'];
-            const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-            deck = [];
-            for (let suit of suits) {
-                for (let value of values) {
-                    deck.push({ suit, value });
-                }
-            }
-            // Shuffle deck
-            for (let i = deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [deck[i], deck[j]] = [deck[j], deck[i]];
-            }
-        }
-
-        function getCardValue(card) {
-            if (['K', 'Q', 'J'].includes(card.value)) return 10;
-            if (card.value === 'A') return 11; // Ace can be 1 or 11, handled in calculateScore
-            return parseInt(card.value);
-        }
-
-        function calculateScore(hand) {
-            let score = 0;
-            let aceCount = 0;
-            for (let card of hand) {
-                score += getCardValue(card);
-                if (card.value === 'A') aceCount++;
-            }
-            while (score > 21 && aceCount > 0) {
-                score -= 10;
-                aceCount--;
-            }
-            return score;
-        }
-
-        function renderHands() {
-            const playerHandDiv = document.getElementById('blackjackPlayerHand');
-            const dealerHandDiv = document.getElementById('blackjackDealerHand');
-            const playerScoreDiv = document.getElementById('blackjackPlayerScore');
-            const dealerScoreDiv = document.getElementById('blackjackDealerScore');
-
-            playerHandDiv.innerHTML = playerHand.map(card => `<div class="card bg-white text-black p-2 m-1 rounded shadow text-center w-16 h-24 flex flex-col justify-center items-center transition-transform duration-300 hover:scale-105">${card.value}<span class="text-2xl">${card.suit}</span></div>`).join('');
-            playerScore = calculateScore(playerHand);
-            playerScoreDiv.textContent = `Score: ${playerScore}`;
-
-            if (gameInProgressBj) {
-                dealerHandDiv.innerHTML = `<div class="card bg-white text-black p-2 m-1 rounded shadow text-center w-16 h-24 flex flex-col justify-center items-center">${dealerHand[0].value}<span class="text-2xl">${dealerHand[0].suit}</span></div>` +
-                                        `<div class="card bg-gray-400 text-gray-700 p-2 m-1 rounded shadow text-center w-16 h-24 flex flex-col justify-center items-center">?</div>`;
-                dealerScoreDiv.textContent = `Score: ?`;
-            } else {
-                dealerHandDiv.innerHTML = dealerHand.map(card => `<div class="card bg-white text-black p-2 m-1 rounded shadow text-center w-16 h-24 flex flex-col justify-center items-center">${card.value}<span class="text-2xl">${card.suit}</span></div>`).join('');
-                dealerScore = calculateScore(dealerHand);
-                dealerScoreDiv.textContent = `Score: ${dealerScore}`;
-            }
-        }
-
-        function initBlackjack() {
-            const betInput = document.getElementById('blackjackBetAmount');
-            if (betInput) betInput.value = currentBet;
-            document.getElementById('blackjackResult').textContent = 'Place your bet and deal.';
-            document.getElementById('blackjackHitButton').disabled = true;
-            document.getElementById('blackjackStandButton').disabled = true;
-            document.getElementById('blackjackDealButton').disabled = false;
-            playerHand = [];
-            dealerHand = [];
-            renderHands(); // Clear hands visually
-        }
-
-        async function dealBlackjack() {
-            const betAmountInput = document.getElementById('blackjackBetAmount');
-            const betAmount = parseInt(betAmountInput.value);
-
-            if (isNaN(betAmount) || betAmount <= 0) {
-                showMessage("Please enter a valid bet amount.");
-                return;
-            }
-            if (!canAfford(betAmount)) {
-                showMessage("Not enough balance to make this bet.");
-                return;
-            }
-
-            await saveBalance(balance - betAmount, { game: "blackjack", type: "bet", amount: betAmount });
-            currentBet = betAmount; // Store for payout
-
-            gameInProgressBj = true;
-            createDeck();
-            playerHand = [deck.pop(), deck.pop()];
-            dealerHand = [deck.pop(), deck.pop()];
-
-            renderHands();
-            document.getElementById('blackjackResult').textContent = 'Hit or Stand?';
-            document.getElementById('blackjackHitButton').disabled = false;
-            document.getElementById('blackjackStandButton').disabled = false;
-            document.getElementById('blackjackDealButton').disabled = true;
-
-            if (calculateScore(playerHand) === 21) {
-                // Player Blackjack
-                standBlackjack();
-            }
-        }
-
-        async function hitBlackjack() {
-            if (!gameInProgressBj) return;
-            playerHand.push(deck.pop());
-            renderHands();
-            playerScore = calculateScore(playerHand);
-            if (playerScore > 21) {
-                document.getElementById('blackjackResult').textContent = 'Bust! Dealer wins.';
-                endBlackjackGame(false); // Player loses
-            } else if (playerScore === 21) {
-                standBlackjack(); // Automatically stand on 21
-            }
-        }
-
-        async function standBlackjack() {
-            if (!gameInProgressBj) return;
-            gameInProgressBj = false; // Reveal dealer's hand
-
-            // Dealer's turn
-            dealerScore = calculateScore(dealerHand);
-            while (dealerScore < 17) {
-                dealerHand.push(deck.pop());
-                dealerScore = calculateScore(dealerHand);
-            }
-            renderHands(); // Show dealer's full hand and score
-
-            let playerWins = false;
-            if (playerScore > 21) { // Should have been caught by hit, but double check
-                document.getElementById('blackjackResult').textContent = 'Player Busts! Dealer wins.';
-            } else if (dealerScore > 21) {
-                document.getElementById('blackjackResult').textContent = 'Dealer Busts! Player wins!';
-                playerWins = true;
-            } else if (playerScore > dealerScore) {
-                document.getElementById('blackjackResult').textContent = 'Player wins!';
-                playerWins = true;
-            } else if (playerScore < dealerScore) {
-                document.getElementById('blackjackResult').textContent = 'Dealer wins.';
-            } else { // Push
-                document.getElementById('blackjackResult').textContent = 'Push! It\'s a tie.';
-                await saveBalance(balance + currentBet, { game: "blackjack", type: "push", amount: currentBet }); // Return bet
-                showMessage('Blackjack Push! Your bet is returned.', true);
-            }
-
-            if (playerWins) {
-                const winnings = currentBet * 2; // Standard payout is 1:1, so player gets bet back + winnings
-                if (playerScore === 21 && playerHand.length === 2) { // Blackjack
-                     const blackjackWinnings = currentBet + (currentBet * 1.5); // Blackjack pays 3:2
-                     await saveBalance(balance + blackjackWinnings, { game: "blackjack", type: "win_blackjack", amount: blackjackWinnings });
-                     showMessage(`Blackjack! You won $${blackjackWinnings}!`, true);
-                } else {
-                    await saveBalance(balance + winnings, { game: "blackjack", type: "win", amount: winnings });
-                    showMessage(`You won $${winnings} in Blackjack!`, true);
-                }
-            }
-            endBlackjackGame(playerWins);
-        }
-
-        function endBlackjackGame(playerWon) {
-            document.getElementById('blackjackHitButton').disabled = true;
-            document.getElementById('blackjackStandButton').disabled = true;
-            document.getElementById('blackjackDealButton').disabled = false;
-            gameInProgressBj = false;
-        }
-
-
-        // --- Game: Roulette ---
-        function initRoulette() {
-            const betInput = document.getElementById('rouletteBetAmount');
-            if (betInput) betInput.value = currentBet;
-            document.getElementById('rouletteResult').textContent = 'Place your bet and spin the wheel!';
-            const wheel = document.getElementById('rouletteWheelDisplay');
-            wheel.innerHTML = '<div class="text-4xl font-bold">🎡</div>'; // Placeholder
-            rouletteBetType = null;
-            rouletteBetValue = null;
-            updateRouletteBetDisplay();
-        }
-
-        function placeRouletteBet(type, value) {
-            rouletteBetType = type;
-            rouletteBetValue = value;
-            updateRouletteBetDisplay();
-        }
-
-        function updateRouletteBetDisplay() {
-            const display = document.getElementById('rouletteCurrentBet');
-            if (rouletteBetType && rouletteBetValue !== null) {
-                let betText = `Betting on: ${rouletteBetType} - ${rouletteBetValue}`;
-                if (rouletteBetType === 'color') betText = `Betting on: Color - ${rouletteBetValue}`;
-                if (rouletteBetType === 'evenOdd') betText = `Betting on: ${rouletteBetValue}`;
-                display.textContent = betText;
-            } else {
-                display.textContent = 'No bet placed.';
-            }
-        }
-
-        async function spinRoulette() {
-            const betAmountInput = document.getElementById('rouletteBetAmount');
-            const betAmount = parseInt(betAmountInput.value);
-
-            if (isNaN(betAmount) || betAmount <= 0) {
-                showMessage("Please enter a valid bet amount.");
-                return;
-            }
-            if (!rouletteBetType) {
-                showMessage("Please place a bet type (number, color, etc.).");
-                return;
-            }
-            if (!canAfford(betAmount)) {
-                showMessage("Not enough balance to make this bet.");
-                return;
-            }
-
-            await saveBalance(balance - betAmount, { game: "roulette", type: "bet", amount: betAmount });
-            currentBet = betAmount;
-
-            const resultDisplay = document.getElementById('rouletteResult');
-            const wheelDisplay = document.getElementById('rouletteWheelDisplay');
-            resultDisplay.textContent = 'Spinning...';
-            wheelDisplay.innerHTML = '<div class="animate-spin text-6xl">🎡</div>'; // Simple spin animation
-
-            // Simulate spin
-            setTimeout(async () => {
-                const winningIndex = Math.floor(Math.random() * rouletteNumbers.length);
-                const winningNumber = rouletteNumbers[winningIndex];
-
-                wheelDisplay.innerHTML = `<div class="text-5xl font-bold p-4 rounded-full shadow-lg ${winningNumber.color === 'red' ? 'bg-red-500' : winningNumber.color === 'black' ? 'bg-black text-white' : 'bg-green-500'}">${winningNumber.value}</div>`;
-                resultDisplay.textContent = `Landed on: ${winningNumber.value} (${winningNumber.color})`;
-
-                let winnings = 0;
-                let playerWon = false;
-
-                if (rouletteBetType === 'number' && winningNumber.value === rouletteBetValue) {
-                    winnings = currentBet * 35; // Payout for straight number
-                    playerWon = true;
-                } else if (rouletteBetType === 'color' && winningNumber.color === rouletteBetValue) {
-                    winnings = currentBet * 2; // Payout for color
-                    playerWon = true;
-                } else if (rouletteBetType === 'evenOdd') {
-                    if (winningNumber.value === 0) { // 0 is neither even nor odd for betting
-                        playerWon = false;
-                    } else if (rouletteBetValue === 'even' && winningNumber.value % 2 === 0) {
-                        winnings = currentBet * 2;
-                        playerWon = true;
-                    } else if (rouletteBetValue === 'odd' && winningNumber.value % 2 !== 0) {
-                        winnings = currentBet * 2;
-                        playerWon = true;
-                    }
-                }
-
-                if (playerWon) {
-                    resultDisplay.textContent += ` - You won $${winnings}!`;
-                    await saveBalance(balance + winnings, { game: "roulette", type: "win", amount: winnings, winningNumber: winningNumber.value });
-                    showMessage(`Roulette Win! You won $${winnings}!`, true);
-                } else {
-                    resultDisplay.textContent += ' - You lost.';
-                }
-            }, 2000); // 2 second spin
-        }
-
-
-        // --- Game: Coin Flip ---
-        function initCoinFlip() {
-            const betInput = document.getElementById('coinflipBetAmount');
-            if (betInput) betInput.value = currentBet;
-            document.getElementById('coinflipResult').textContent = 'Choose Heads or Tails.';
-            document.getElementById('coinImage').textContent = '🪙'; // Initial coin
-        }
-
-        async function flipCoin(choice) {
-            const betAmountInput = document.getElementById('coinflipBetAmount');
-            const betAmount = parseInt(betAmountInput.value);
-
-            if (isNaN(betAmount) || betAmount <= 0) {
-                showMessage("Please enter a valid bet amount.");
-                return;
-            }
-            if (!canAfford(betAmount)) {
-                showMessage("Not enough balance to make this bet.");
-                return;
-            }
-
-            await saveBalance(balance - betAmount, { game: "coinflip", type: "bet", amount: betAmount, choice: choice });
-
-            const resultDisplay = document.getElementById('coinflipResult');
-            const coinImage = document.getElementById('coinImage');
-            resultDisplay.textContent = 'Flipping...';
-            coinImage.classList.add('animate-ping'); // Simple animation
-
-            setTimeout(async () => {
-                coinImage.classList.remove('animate-ping');
-                const outcome = Math.random() < 0.5 ? 'Heads' : 'Tails';
-                coinImage.textContent = outcome === 'Heads' ? '🙂' : '🙃'; // Using emojis for head/tail
-                animateElement(coinImage, 'animate-bounce', 300);
-
-                if (outcome === choice) {
-                    const winnings = betAmount * 2;
-                    resultDisplay.textContent = `It's ${outcome}! You won $${winnings}!`;
-                    await saveBalance(balance + winnings, { game: "coinflip", type: "win", amount: winnings });
-                    showMessage(`Coin Flip Win! You won $${winnings}!`, true);
-                } else {
-                    resultDisplay.textContent = `It's ${outcome}. You lost.`;
-                }
-            }, 1000); // 1 second flip
-        }
-
-
-        // --- Game: Scratcher ---
-        function initScratcher() {
-            const ticketPrice = 50; // Fixed price for a scratcher
-            document.getElementById('scratcherPrice').textContent = `Price: $${ticketPrice}`;
-            document.getElementById('scratcherResult').textContent = 'Buy a ticket to play!';
-            const grid = document.getElementById('scratcherGrid');
-            grid.innerHTML = ''; // Clear previous grid
-            document.getElementById('buyScratcherButton').disabled = false;
-        }
-
-        async function buyScratcherTicket() {
-            const ticketPrice = 50;
-            if (!canAfford(ticketPrice)) {
-                showMessage(`Not enough balance to buy a ticket (Price: $${ticketPrice}).`);
-                return;
-            }
-
-            await saveBalance(balance - ticketPrice, { game: "scratcher", type: "buy_ticket", amount: ticketPrice });
-            document.getElementById('buyScratcherButton').disabled = true;
-            document.getElementById('scratcherResult').textContent = 'Scratch to reveal!';
-
-            // Generate ticket
-            scratcherTicket = [];
-            scratcherRevealedCount = 0;
-            const symbols = ['💰', '🪙', '💲', '💸', '❌']; // 💰 is jackpot
-            const prizeMap = {'💰': 500, '🪙': 100, '💲': 50, '💸': 25, '❌': 0};
-            
-            // Ensure at least one potential win for excitement, or make it truly random
-            // For simplicity, making it random with higher chance of 'X'
-            for (let i = 0; i < scratcherGridSize * scratcherGridSize; i++) {
-                let rand = Math.random();
-                if (rand < 0.05) scratcherTicket.push('💰'); // 5% Jackpot
-                else if (rand < 0.15) scratcherTicket.push('🪙'); // 10% Big prize
-                else if (rand < 0.30) scratcherTicket.push('💲'); // 15% Medium prize
-                else if (rand < 0.50) scratcherTicket.push('💸'); // 20% Small prize
-                else scratcherTicket.push('❌'); // 50% No prize symbol
-            }
-            // Shuffle the ticket symbols
-            for (let i = scratcherTicket.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [scratcherTicket[i], scratcherTicket[j]] = [scratcherTicket[j], scratcherTicket[i]];
-            }
-
-            renderScratcherGrid();
-        }
-
-        function renderScratcherGrid() {
-            const grid = document.getElementById('scratcherGrid');
-            grid.innerHTML = '';
-            grid.style.gridTemplateColumns = `repeat(${scratcherGridSize}, 1fr)`;
-
-            for (let i = 0; i < scratcherTicket.length; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'scratcher-cell bg-gray-400 hover:bg-gray-500 cursor-pointer w-20 h-20 flex items-center justify-center text-3xl rounded-lg shadow-md transition-all duration-200';
-                cell.dataset.index = i;
-                cell.textContent = '❓'; // Covered
-                cell.addEventListener('click', revealScratcherCell);
-                grid.appendChild(cell);
-            }
-        }
-
-        async function revealScratcherCell(event) {
-            const cell = event.target;
-            const index = parseInt(cell.dataset.index);
-
-            if (cell.textContent !== '❓') return; // Already revealed
-
-            cell.textContent = scratcherTicket[index];
-            cell.classList.remove('bg-gray-400', 'hover:bg-gray-500', 'cursor-pointer');
-            cell.classList.add(scratcherTicket[index] === '❌' ? 'bg-red-200' : 'bg-green-200', 'revealed');
-            animateElement(cell, 'animate-flip', 300); // Flip animation
-            scratcherRevealedCount++;
-
-            if (scratcherRevealedCount === scratcherTicket.length) {
-                // All cells revealed, calculate winnings
-                calculateScratcherWinnings();
-            }
-        }
-        
-        async function calculateScratcherWinnings() {
-            const counts = {};
-            scratcherTicket.forEach(symbol => {
-                counts[symbol] = (counts[symbol] || 0) + 1;
-            });
-
-            let winnings = 0;
-            const prizeMap = {'💰': 500, '🪙': 100, '💲': 50, '💸': 25, '❌': 0};
-
-            // Standard "match 3" for any paying symbol
-            for (const symbol in counts) {
-                if (counts[symbol] >= 3 && symbol !== '❌') {
-                    winnings = Math.max(winnings, prizeMap[symbol] * (counts[symbol] - 2)); // e.g. 3 match = 1x prize, 4 match = 2x prize
-                }
-            }
-            // Special: if 2 jackpot symbols, give a smaller prize
-            if (counts['💰'] === 2 && winnings < prizeMap['🪙']) {
-                 winnings = Math.max(winnings, prizeMap['🪙'] / 2); // Half of next best
-            }
-
-
-            if (winnings > 0) {
-                document.getElementById('scratcherResult').textContent = `You won $${winnings}!`;
-                await saveBalance(balance + winnings, { game: "scratcher", type: "win", amount: winnings });
-                showMessage(`Scratcher Win! You won $${winnings}!`, true);
-            } else {
-                document.getElementById('scratcherResult').textContent = 'No win this time. Try another ticket!';
-            }
-            document.getElementById('buyScratcherButton').disabled = false; // Allow buying another
-        }
-
-
-        // --- DOMContentLoaded ---
-        window.addEventListener('DOMContentLoaded', () => {
-            balanceDisplay = document.getElementById('balanceDisplay');
-            userIdDisplay = document.getElementById('userIdDisplay');
-            gameContainer = document.getElementById('gameContainer');
-            messageModal = document.getElementById('messageModal');
-            messageText = document.getElementById('messageText');
-            messageOkButton = document.getElementById('messageOkButton');
-
-            if (messageOkButton) {
-                messageOkButton.addEventListener('click', hideMessage);
-            }
-
-            // Nav buttons
-            document.getElementById('navSlots').addEventListener('click', () => showGame('slots'));
-            document.getElementById('navBlackjack').addEventListener('click', () => showGame('blackjack'));
-            document.getElementById('navRoulette').addEventListener('click', () => showGame('roulette'));
-            document.getElementById('navCoinflip').addEventListener('click', () => showGame('coinflip'));
-            document.getElementById('navScratcher').addEventListener('click', () => showGame('scratcher'));
-
-            // Game control buttons
-            // Slots
-            document.getElementById('spinSlotsButton').addEventListener('click', spinSlots);
-            // Blackjack
-            document.getElementById('blackjackDealButton').addEventListener('click', dealBlackjack);
-            document.getElementById('blackjackHitButton').addEventListener('click', hitBlackjack);
-            document.getElementById('blackjackStandButton').addEventListener('click', standBlackjack);
-            // Roulette
-            document.getElementById('spinRouletteButton').addEventListener('click', spinRoulette);
-            document.querySelectorAll('.roulette-bet-btn').forEach(button => {
-                button.addEventListener('click', (e) => {
-                    const type = e.target.dataset.type;
-                    let value = e.target.dataset.value;
-                    if (type === 'number') value = parseInt(value);
-                    placeRouletteBet(type, value);
-                });
-            });
-            // Coin Flip
-            document.getElementById('flipHeadsButton').addEventListener('click', () => flipCoin('Heads'));
-            document.getElementById('flipTailsButton').addEventListener('click', () => flipCoin('Tails'));
-            // Scratcher
-            document.getElementById('buyScratcherButton').addEventListener('click', buyScratcherTicket);
-
-            // Initialize Firebase and load first game
-            initializeFirebaseApp().then(() => {
-                 showGame('slots'); // Default game
-            });
-        });
-
-    </script>
+    <title>Casino Royale - Under Construction</title>
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #1a202c; /* Tailwind gray-900 */
-            color: #e2e8f0; /* Tailwind gray-300 */
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            overflow-x: hidden;
         }
-        .card {
-            transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
-        }
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 15px -3px rgba(0,0,0,0.2), 0 4px 6px -2px rgba(0,0,0,0.1);
-        }
-        .game-button {
-            @apply px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold rounded-lg shadow-md transition-all duration-150 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed;
-        }
-        .nav-button {
-            @apply px-4 py-2 bg-gray-700 hover:bg-gray-600 text-gray-200 font-medium rounded-md shadow-sm transition-colors duration-150;
-        }
-        .bet-input {
-            @apply block w-full sm:w-auto bg-gray-700 border border-gray-600 text-white rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500;
-        }
-        .game-view {
-            animation: fadeIn 0.5s ease-in-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        @keyframes spin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin { animation: spin 1s linear infinite; }
 
-        @keyframes pulseLight {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.7; }
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
         }
-        .animate-pulse-light { animation: pulseLight 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
 
-        @keyframes flip {
-            0% { transform: rotateY(0deg); }
-            50% { transform: rotateY(90deg); }
-            100% { transform: rotateY(0deg); } /* Symbol appears at 50% effectively */
+        .star {
+            position: absolute;
+            background: #fff;
+            border-radius: 50%;
+            animation: twinkle 2s infinite;
         }
-        .animate-flip { animation: flip 0.6s ease-in-out; }
 
-        .scratcher-cell.revealed {
-            cursor: default;
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; }
+            50% { opacity: 1; }
         }
-        #rouletteWheelDisplay > div {
-            transition: background-color 0.3s ease, transform 0.3s ease;
+
+        .container {
+            position: relative;
+            z-index: 2;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            text-align: center;
         }
-        #rouletteWheelDisplay > div:hover {
-            transform: scale(1.05);
+
+        .logo {
+            font-size: 3.5rem;
+            font-weight: bold;
+            background: linear-gradient(45deg, #ffd700, #ffed4e, #ffd700);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { filter: drop-shadow(0 0 20px rgba(255, 215, 0, 0.3)); }
+            to { filter: drop-shadow(0 0 30px rgba(255, 215, 0, 0.6)); }
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 2rem;
+            letter-spacing: 2px;
+        }
+
+        .construction-text {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24, #ff6b6b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .description {
+            font-size: 1.1rem;
+            color: #bbb;
+            max-width: 600px;
+            line-height: 1.6;
+            margin-bottom: 3rem;
+        }
+
+        .casino-icons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .icon {
+            font-size: 3rem;
+            animation: bounce 2s infinite;
+            filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+        }
+
+        .icon:nth-child(2) { animation-delay: 0.2s; }
+        .icon:nth-child(3) { animation-delay: 0.4s; }
+        .icon:nth-child(4) { animation-delay: 0.6s; }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
+        }
+
+        .progress-container {
+            width: 100%;
+            max-width: 500px;
+            margin-bottom: 2rem;
+        }
+
+        .progress-label {
+            font-size: 1rem;
+            margin-bottom: 10px;
+            color: #ffd700;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #ffd700;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ffd700, #ffed4e);
+            border-radius: 8px;
+            animation: progress 3s ease-in-out infinite;
+            width: 75%;
+        }
+
+        @keyframes progress {
+            0% { width: 70%; }
+            50% { width: 80%; }
+            100% { width: 75%; }
+        }
+
+        .countdown {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .countdown-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 10px;
+            border: 2px solid #ffd700;
+            min-width: 80px;
+        }
+
+        .countdown-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+            display: block;
+        }
+
+        .countdown-label {
+            font-size: 0.9rem;
+            color: #ccc;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .notify-form {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid #ffd700;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        .notify-form h3 {
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            border-radius: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            font-size: 1rem;
+        }
+
+        .notify-btn {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(45deg, #ffd700, #ffed4e);
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: bold;
+            color: #000;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .notify-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .social-links {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .social-link {
+            color: #ffd700;
+            font-size: 1.5rem;
+            text-decoration: none;
+            transition: transform 0.3s ease;
+        }
+
+        .social-link:hover {
+            transform: scale(1.2);
+        }
+
+        @media (max-width: 768px) {
+            .logo { font-size: 2.5rem; }
+            .construction-text { font-size: 2rem; }
+            .casino-icons { gap: 20px; }
+            .icon { font-size: 2.5rem; }
+            .countdown { gap: 15px; }
+            .countdown-item { padding: 15px; min-width: 70px; }
+            .countdown-number { font-size: 1.5rem; }
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col items-center p-4 selection:bg-purple-500 selection:text-white">
-
-    <header class="w-full max-w-5xl mb-6 text-center">
-        <h1 class="text-4xl sm:text-5xl font-bold text-purple-400 tracking-tight">
-            TheGraxisReal Casino
-        </h1>
-        <div id="balanceDisplay" class="text-2xl mt-2 text-green-400 font-semibold">
-            Balance: $1000
+<body>
+    <div class="stars" id="stars"></div>
+    
+    <div class="container">
+        <h1 class="logo">🎰 CASINO ROYALE</h1>
+        <p class="subtitle">LUXURY GAMING EXPERIENCE</p>
+        
+        <h2 class="construction-text">UNDER CONSTRUCTION</h2>
+        <p class="description">
+            We're building something extraordinary! Our world-class casino is coming soon with 
+            premium gaming tables, state-of-the-art slot machines, and an unforgettable 
+            entertainment experience. Get ready for the ultimate gaming destination!
+        </p>
+        
+        <div class="casino-icons">
+            <div class="icon">🎲</div>
+            <div class="icon">🃏</div>
+            <div class="icon">🎰</div>
+            <div class="icon">💎</div>
         </div>
-        <div id="userIdDisplay" class="text-xs mt-1 text-gray-500">
-            User ID: Loading...
-        </div>
-    </header>
-
-    <nav class="w-full max-w-3xl mb-8 flex flex-wrap justify-center gap-2 sm:gap-3">
-        <button id="navSlots" class="nav-button">🎰 Slot Machine</button>
-        <button id="navBlackjack" class="nav-button">🃏 Blackjack</button>
-        <button id="navRoulette" class="nav-button">🎡 Roulette</button>
-        <button id="navCoinflip" class="nav-button">🪙 Coin Flip</button>
-        <button id="navScratcher" class="nav-button">🎫 Scratcher</button>
-    </nav>
-
-    <main id="gameContainer" class="w-full max-w-3xl bg-gray-800 p-4 sm:p-6 rounded-xl shadow-2xl">
-        <div id="slots" class="game-view hidden space-y-6">
-            <h2 class="text-3xl font-semibold text-center text-purple-300">Slot Machine</h2>
-            <div id="slotsReels" class="flex justify-around items-center bg-gray-700 p-6 rounded-lg shadow-inner">
-                <div id="reel1" class="reel-symbol text-5xl sm:text-7xl p-4 bg-gray-800 rounded-md shadow-md w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center">❓</div>
-                <div id="reel2" class="reel-symbol text-5xl sm:text-7xl p-4 bg-gray-800 rounded-md shadow-md w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center">❓</div>
-                <div id="reel3" class="reel-symbol text-5xl sm:text-7xl p-4 bg-gray-800 rounded-md shadow-md w-20 h-20 sm:w-28 sm:h-28 flex items-center justify-center">❓</div>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <label for="slotsBetAmount" class="text-lg">Bet:</label>
-                <input type="number" id="slotsBetAmount" value="10" min="1" class="bet-input w-24 text-center">
-                <button id="spinSlotsButton" class="game-button w-full sm:w-auto">Spin!</button>
-            </div>
-            <p id="slotsResult" class="text-xl text-center font-medium min-h-[28px]">Spin to win!</p>
-            <div class="text-sm text-gray-400 text-center p-2 bg-gray-750 rounded-md">
-                <p>💎💎💎 = Bet x100 | ⭐⭐⭐ = Bet x50 | 🔔🔔🔔 = Bet x20</p>
-                <p>Any Other Triple = Bet x10 | Any Double = Bet x2 | Any 🍒 = Bet x1</p>
+        
+        <div class="progress-container">
+            <div class="progress-label">Construction Progress</div>
+            <div class="progress-bar">
+                <div class="progress-fill"></div>
             </div>
         </div>
-
-        <div id="blackjack" class="game-view hidden space-y-4">
-            <h2 class="text-3xl font-semibold text-center text-purple-300">Blackjack</h2>
-            <div>
-                <h3 class="text-xl font-medium mb-2">Dealer's Hand (<span id="blackjackDealerScore">Score: ?</span>)</h3>
-                <div id="blackjackDealerHand" class="flex flex-wrap justify-center items-center min-h-[110px] bg-gray-700 p-3 rounded-lg shadow-inner">
-                    </div>
+        
+        <div class="countdown">
+            <div class="countdown-item">
+                <span class="countdown-number" id="days">45</span>
+                <span class="countdown-label">Days</span>
             </div>
-            <div>
-                <h3 class="text-xl font-medium mb-2">Your Hand (<span id="blackjackPlayerScore">Score: ?</span>)</h3>
-                <div id="blackjackPlayerHand" class="flex flex-wrap justify-center items-center min-h-[110px] bg-gray-700 p-3 rounded-lg shadow-inner">
-                    </div>
+            <div class="countdown-item">
+                <span class="countdown-number" id="hours">12</span>
+                <span class="countdown-label">Hours</span>
             </div>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-                <label for="blackjackBetAmount" class="text-lg">Bet:</label>
-                <input type="number" id="blackjackBetAmount" value="10" min="1" class="bet-input w-24 text-center">
-                <button id="blackjackDealButton" class="game-button">Deal</button>
-                <button id="blackjackHitButton" class="game-button bg-green-600 hover:bg-green-700" disabled>Hit</button>
-                <button id="blackjackStandButton" class="game-button bg-red-600 hover:bg-red-700" disabled>Stand</button>
+            <div class="countdown-item">
+                <span class="countdown-number" id="minutes">30</span>
+                <span class="countdown-label">Minutes</span>
             </div>
-            <p id="blackjackResult" class="text-xl text-center font-medium min-h-[28px]">Place your bet and deal.</p>
-        </div>
-
-        <div id="roulette" class="game-view hidden space-y-6">
-            <h2 class="text-3xl font-semibold text-center text-purple-300">Roulette</h2>
-            <div id="rouletteWheelDisplay" class="flex justify-center items-center h-40 bg-gray-700 p-4 rounded-lg shadow-inner">
-                <div class="text-4xl font-bold">🎡</div>
-            </div>
-            <div class="text-center">
-                <p id="rouletteCurrentBet" class="text-lg mb-2">No bet placed.</p>
-                <label for="rouletteBetAmount" class="text-lg">Bet Amount:</label>
-                <input type="number" id="rouletteBetAmount" value="10" min="1" class="bet-input w-24 text-center inline-block mx-2">
-                <button id="spinRouletteButton" class="game-button">Spin Wheel</button>
-            </div>
-            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2 p-2 bg-gray-750 rounded-md">
-                <h4 class="col-span-full text-lg font-medium text-center mb-2">Place Your Bet:</h4>
-                <button class="roulette-bet-btn bg-gray-600 hover:bg-gray-500 p-2 rounded" data-type="number" data-value="0">0</button>
-                <button class="roulette-bet-btn bg-red-500 hover:bg-red-400 p-2 rounded" data-type="number" data-value="1">1</button>
-                <button class="roulette-bet-btn bg-black hover:bg-gray-600 p-2 rounded text-white" data-type="number" data-value="2">2</button>
-                <button class="roulette-bet-btn bg-red-500 hover:bg-red-400 p-2 rounded" data-type="number" data-value="3">3</button>
-                <button class="roulette-bet-btn bg-black hover:bg-gray-600 p-2 rounded text-white" data-type="number" data-value="4">4</button>
-                <button class="roulette-bet-btn bg-red-500 hover:bg-red-400 p-2 rounded" data-type="number" data-value="5">5</button>
-                <button class="roulette-bet-btn bg-red-600 hover:bg-red-500 p-2 rounded col-span-3" data-type="color" data-value="red">Red</button>
-                <button class="roulette-bet-btn bg-black hover:bg-gray-600 p-2 rounded text-white col-span-3" data-type="color" data-value="black">Black</button>
-                <button class="roulette-bet-btn bg-blue-500 hover:bg-blue-400 p-2 rounded col-span-3" data-type="evenOdd" data-value="even">Even</p></button>
-                <button class="roulette-bet-btn bg-yellow-500 hover:bg-yellow-400 p-2 rounded text-black col-span-3" data-type="evenOdd" data-value="odd">Odd</p></button>
-            </div>
-            <p id="rouletteResult" class="text-xl text-center font-medium min-h-[28px]">Place your bet and spin the wheel!</p>
-        </div>
-
-        <div id="coinflip" class="game-view hidden space-y-6 text-center">
-            <h2 class="text-3xl font-semibold text-purple-300">Coin Flip</h2>
-            <div id="coinImage" class="text-8xl my-6 animate-pulse-light">🪙</div>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-                <label for="coinflipBetAmount" class="text-lg">Bet:</label>
-                <input type="number" id="coinflipBetAmount" value="10" min="1" class="bet-input w-24 text-center">
-            </div>
-            <div class="flex justify-center gap-4">
-                <button id="flipHeadsButton" class="game-button bg-sky-500 hover:bg-sky-600 w-1/2 sm:w-auto">Heads 🙂</button>
-                <button id="flipTailsButton" class="game-button bg-orange-500 hover:bg-orange-600 w-1/2 sm:w-auto">Tails 🙃</button>
-            </div>
-            <p id="coinflipResult" class="text-xl font-medium min-h-[28px]">Choose Heads or Tails.</p>
-        </div>
-
-        <div id="scratcher" class="game-view hidden space-y-6 text-center">
-            <h2 class="text-3xl font-semibold text-purple-300">Scratcher Ticket</h2>
-            <p id="scratcherPrice" class="text-lg">Price: $50</p>
-            <button id="buyScratcherButton" class="game-button">Buy Ticket</button>
-            <div id="scratcherGrid" class="grid gap-2 justify-center my-4">
-                </div>
-            <p id="scratcherResult" class="text-xl font-medium min-h-[28px]">Buy a ticket to play!</p>
-            <div class="text-sm text-gray-400 text-center p-2 bg-gray-750 rounded-md">
-                <p>Match 3 symbols to win! (💰💰💰 = $500, 🪙🪙🪙 = $100, 💲💲💲 = $50, 💸💸💸 = $25)</p>
-                <p>Two 💰💰 give a small prize!</p>
+            <div class="countdown-item">
+                <span class="countdown-number" id="seconds">15</span>
+                <span class="countdown-label">Seconds</span>
             </div>
         </div>
-    </main>
-
-    <div id="messageModal" class="hidden fixed inset-0 bg-black bg-opacity-75 items-center justify-center p-4 z-50">
-        <div class="bg-gray-800 p-6 sm:p-8 rounded-xl shadow-2xl max-w-md w-full text-center border-2 border-purple-500">
-            <p id="messageText" class="text-lg mb-6">Message goes here.</p>
-            <button id="messageOkButton" class="game-button">OK</button>
+        
+        <div class="notify-form">
+            <h3>🔔 Get Notified When We Launch</h3>
+            <div class="input-group">
+                <input type="email" placeholder="Enter your email address" required>
+            </div>
+            <button class="notify-btn" onclick="subscribe()">NOTIFY ME</button>
+        </div>
+        
+        <div class="social-links">
+            <a href="#" class="social-link">📘</a>
+            <a href="#" class="social-link">📷</a>
+            <a href="#" class="social-link">🐦</a>
+            <a href="#" class="social-link">💼</a>
         </div>
     </div>
 
-    <footer class="mt-12 text-center text-gray-500 text-sm">
-        <p>&copy; 2024 TheGraxisReal Casino. For entertainment purposes only.</p>
-        <p>Remember to gamble responsibly (if this were real money!).</p>
-    </footer>
+    <script>
+        // Create animated stars
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            for (let i = 0; i < 100; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * 100 + '%';
+                star.style.width = Math.random() * 3 + 1 + 'px';
+                star.style.height = star.style.width;
+                star.style.animationDelay = Math.random() * 2 + 's';
+                starsContainer.appendChild(star);
+            }
+        }
 
+        // Countdown timer
+        function updateCountdown() {
+            const targetDate = new Date('2025-07-15T00:00:00').getTime();
+            const now = new Date().getTime();
+            const difference = targetDate - now;
+
+            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('days').textContent = days;
+            document.getElementById('hours').textContent = hours;
+            document.getElementById('minutes').textContent = minutes;
+            document.getElementById('seconds').textContent = seconds;
+        }
+
+        // Email subscription
+        function subscribe() {
+            const email = document.querySelector('input[type="email"]').value;
+            if (email) {
+                alert('Thank you! We\'ll notify you when Casino Royale opens!');
+                document.querySelector('input[type="email"]').value = '';
+            } else {
+                alert('Please enter a valid email address.');
+            }
+        }
+
+        // Initialize
+        createStars();
+        updateCountdown();
+        setInterval(updateCountdown, 1000);
+    </script>
 </body>
 </html>
-
