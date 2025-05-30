@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Casino Royale - Under Construction</title>
+    <title>The Graxis Real Casino - Under Construction</title>
     <style>
         * {
             margin: 0;
@@ -63,6 +63,7 @@
             margin-bottom: 1rem;
             text-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
             animation: glow 2s ease-in-out infinite alternate;
+            letter-spacing: 2px;
         }
 
         @keyframes glow {
@@ -74,7 +75,8 @@
             font-size: 1.2rem;
             color: #ccc;
             margin-bottom: 2rem;
-            letter-spacing: 2px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
         }
 
         .construction-text {
@@ -145,13 +147,13 @@
             background: linear-gradient(90deg, #ffd700, #ffed4e);
             border-radius: 8px;
             animation: progress 3s ease-in-out infinite;
-            width: 75%;
+            width: 90%;
         }
 
         @keyframes progress {
-            0% { width: 70%; }
-            50% { width: 80%; }
-            100% { width: 75%; }
+            0% { width: 88%; }
+            50% { width: 92%; }
+            100% { width: 90%; }
         }
 
         .countdown {
@@ -168,6 +170,7 @@
             border-radius: 10px;
             border: 2px solid #ffd700;
             min-width: 80px;
+            backdrop-filter: blur(10px);
         }
 
         .countdown-number {
@@ -184,6 +187,14 @@
             letter-spacing: 1px;
         }
 
+        .launch-date {
+            font-size: 1.3rem;
+            color: #ffd700;
+            margin-bottom: 2rem;
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
         .notify-form {
             background: rgba(255, 255, 255, 0.1);
             padding: 30px;
@@ -191,6 +202,7 @@
             border: 2px solid #ffd700;
             max-width: 400px;
             width: 100%;
+            backdrop-filter: blur(10px);
         }
 
         .notify-form h3 {
@@ -262,14 +274,15 @@
     <div class="stars" id="stars"></div>
     
     <div class="container">
-        <h1 class="logo">🎰 CASINO ROYALE</h1>
-        <p class="subtitle">LUXURY GAMING EXPERIENCE</p>
+        <h1 class="logo">🎰 THE GRAXIS REAL</h1>
+        <p class="subtitle">Premium Gaming Experience</p>
         
         <h2 class="construction-text">UNDER CONSTRUCTION</h2>
         <p class="description">
-            We're building something extraordinary! Our world-class casino is coming soon with 
-            premium gaming tables, state-of-the-art slot machines, and an unforgettable 
-            entertainment experience. Get ready for the ultimate gaming destination!
+            Get ready for the most exclusive gaming destination! The Graxis Real Casino is being 
+            crafted with precision to deliver an unparalleled experience featuring luxury gaming 
+            tables, cutting-edge slot machines, and world-class entertainment. The ultimate 
+            gaming adventure awaits!
         </p>
         
         <div class="casino-icons">
@@ -280,15 +293,17 @@
         </div>
         
         <div class="progress-container">
-            <div class="progress-label">Construction Progress</div>
+            <div class="progress-label">Construction Progress - 90% Complete</div>
             <div class="progress-bar">
                 <div class="progress-fill"></div>
             </div>
         </div>
+
+        <div class="launch-date">🚀 Grand Opening: June 15, 2025</div>
         
         <div class="countdown">
             <div class="countdown-item">
-                <span class="countdown-number" id="days">45</span>
+                <span class="countdown-number" id="days">16</span>
                 <span class="countdown-label">Days</span>
             </div>
             <div class="countdown-item">
@@ -296,11 +311,11 @@
                 <span class="countdown-label">Hours</span>
             </div>
             <div class="countdown-item">
-                <span class="countdown-number" id="minutes">30</span>
+                <span class="countdown-number" id="minutes">32</span>
                 <span class="countdown-label">Minutes</span>
             </div>
             <div class="countdown-item">
-                <span class="countdown-number" id="seconds">15</span>
+                <span class="countdown-number" id="seconds">28</span>
                 <span class="countdown-label">Seconds</span>
             </div>
         </div>
@@ -337,31 +352,39 @@
             }
         }
 
-        // Countdown timer
+        // Countdown timer - Set to June 15, 2025 (16 days from May 30, 2025)
         function updateCountdown() {
-            const targetDate = new Date('2025-07-15T00:00:00').getTime();
+            const targetDate = new Date('2025-06-15T00:00:00').getTime();
             const now = new Date().getTime();
             const difference = targetDate - now;
 
-            const days = Math.floor(difference / (1000 * 60 * 60 * 24));
-            const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
-            const seconds = Math.floor((difference % (1000 * 60)) / 1000);
+            if (difference > 0) {
+                const days = Math.floor(difference / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((difference % (1000 * 60)) / 1000);
 
-            document.getElementById('days').textContent = days;
-            document.getElementById('hours').textContent = hours;
-            document.getElementById('minutes').textContent = minutes;
-            document.getElementById('seconds').textContent = seconds;
+                document.getElementById('days').textContent = days;
+                document.getElementById('hours').textContent = hours;
+                document.getElementById('minutes').textContent = minutes;
+                document.getElementById('seconds').textContent = seconds;
+            } else {
+                // Casino has launched!
+                document.getElementById('days').textContent = '0';
+                document.getElementById('hours').textContent = '0';
+                document.getElementById('minutes').textContent = '0';
+                document.getElementById('seconds').textContent = '0';
+            }
         }
 
         // Email subscription
         function subscribe() {
             const email = document.querySelector('input[type="email"]').value;
-            if (email) {
-                alert('Thank you! We\'ll notify you when Casino Royale opens!');
+            if (email && email.includes('@')) {
+                alert('🎉 Thank you! We\'ll notify you when The Graxis Real Casino opens!');
                 document.querySelector('input[type="email"]').value = '';
             } else {
-                alert('Please enter a valid email address.');
+                alert('⚠️ Please enter a valid email address.');
             }
         }
 
