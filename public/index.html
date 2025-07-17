@@ -217,27 +217,9 @@
             margin-bottom: 20px; /* Adjusted margin */
         }
 
-        /* School Status Banner Styling */
-        .school-status-banner {
-            background-color: rgba(var(--primary-rgb), 0.1);
-            color: var(--primary);
-            padding: 12px 18px;
-            border-radius: 10px;
-            text-align: center;
-            font-size: 1.05rem; /* Slightly adjusted font size */
-            font-weight: 500;
-            margin-top: 15px; /* Space above the banner */
-            margin-bottom: 20px; /* Space below the banner */
-            border: 1px solid rgba(var(--primary-rgb), 0.2);
-            line-height: 1.5;
-        }
-        .school-status-banner i { /* For potential icon usage */
-            margin-right: 8px;
-        }
-
 
         .hero .announcement {
-            margin-top: 20px; /* Ensure space if school banner is short */
+            margin-top: 20px;
             margin-bottom: 30px; /* Adjusted margin */
             font-size: 1.1rem;
             font-weight: 500;
@@ -566,7 +548,6 @@
                 max-width: 300px;
             }
             .section-title h2 { font-size: 2rem; }
-            .school-status-banner { font-size: 0.95rem; padding: 10px 15px;}
             .top-announcement-banner { font-size: 0.9rem; padding: 10px 15px; }
 
             /* Adjust hero padding top for small screens if the top announcement banner is present */
@@ -612,8 +593,9 @@
                 <span class="hero-greeting">Hello, World! 👋</span>
                 <h1>I'm <span>thegraxisreal</span>,</h1>
                 <h2>Just making random stuff</h2>
-                <div id="school-status-banner" class="school-status-banner">
-                    Loading school schedule...
+                <div id="life-timer-container">
+                    <p>When will you die?</p>
+                    <a href="quiz.html" class="btn btn-primary">Take the survey</a>
                 </div>
                 <p class="announcement"> Talk to my AI model, Graxybot! </p>
                 <div class="hero-buttons">
@@ -708,6 +690,7 @@
             </div>
             <div class="footer-bottom">
                 <p>&copy; 2025 TheGraxIsReal. All rights reserved.</p>
+                <button id="reset-timer-btn" class="btn" style="background: var(--gray); color: white; margin-top: 15px; display: none;">Reset Timer</button>
             </div>
         </div>
     </footer>
@@ -802,6 +785,7 @@
 
 
         // --- Smooth Scrolling ---
+        // --- Smooth Scrolling ---
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 if (this.hash !== "") {
@@ -830,116 +814,48 @@
             });
         });
 
-        // --- School Period Status Logic ---
-        const schoolStatusBanner = document.getElementById('school-status-banner');
-        const schoolSchedule = [
-            { name: "Period 1", type: "period", startH: 8, startM: 0, endH: 8, endM: 47 },
-            { name: "Period 2", type: "period", startH: 8, startM: 51, endH: 9, endM: 32 },
-            { name: "Period 3", type: "period", startH: 9, startM: 36, endH: 10, endM: 17 },
-            { name: "Period 4", type: "period", startH: 10, startM: 21, endH: 11, endM: 2 },
-            { name: "Period 5", type: "period", startH: 11, startM: 6, endH: 11, endM: 47 },
-            { name: "FLEX", type: "flex", startH: 11, startM: 50, endH: 12, endM: 11 },
-            { name: "LUNCH", type: "lunch", startH: 12, startM: 12, endH: 12, endM: 32 },
-            { name: "Period 7", type: "period", startH: 12, startM: 36, endH: 13, endM: 17 },
-            { name: "Period 8", type: "period", startH: 13, startM: 21, endH: 14, endM: 2 },
-            { name: "Period 9", type: "period", startH: 14, startM: 6, endH: 14, endM: 48 }
-        ];
+        // --- Life Countdown Timer Logic ---
+        const lifeTimerContainer = document.getElementById('life-timer-container');
+        const deathDateString = localStorage.getItem('deathDate');
 
-        function getTodayAtTime(h, m) {
-            const now = new Date();
-            return new Date(now.getFullYear(), now.getMonth(), now.getDate(), h, m, 0, 0);
-        }
+        if (deathDateString) {
+            const deathDate = new Date(deathDateString);
+            
+            lifeTimerContainer.innerHTML = `
+                <p id="countdown-timer" style="font-size: 2.5rem; font-weight: 700; margin: 0; line-height: 1.2;"></p>
+                <p style="font-size: 1rem; color: var(--gray); font-weight: 500; margin-top: 5px;">Seconds Remaining</p>
+            `;
 
-        function formatTime(dateObj) {
-            let hours = dateObj.getHours();
-            let minutes = dateObj.getMinutes();
-            const ampm = hours >= 12 ? 'PM' : 'AM';
-            hours = hours % 12;
-            hours = hours ? hours : 12; // the hour '0' should be '12'
-            minutes = minutes < 10 ? '0'+minutes : minutes;
-            return hours + ':' + minutes + ' ' + ampm;
-        }
+            const countdownTimer = document.getElementById('countdown-timer');
+            const resetBtn = document.getElementById('reset-timer-btn');
+            if(resetBtn) resetBtn.style.display = 'inline-block';
 
+            function updateCountdown() {
+                const now = new Date();
+                const secondsRemaining = Math.floor((deathDate - now) / 1000);
 
-        function updateSchoolStatus() {
-            const now = new Date();
-            const dayOfWeek = now.getDay(); // 0 (Sunday) to 6 (Saturday)
-            let statusText = "";
-
-            if (dayOfWeek === 0 || dayOfWeek === 6) { // Sunday or Saturday
-                statusText = "<i class='fas fa-couch'></i> Enjoy your weekend!";
-            } else { // Weekday
-                const currentTime = now.getTime();
-                let inSchoolHoursActivity = false; // Renamed to avoid conflict with a potential global
-
-                const firstPeriodStartTime = getTodayAtTime(schoolSchedule[0].startH, schoolSchedule[0].startM);
-                if (currentTime < firstPeriodStartTime.getTime()) {
-                    statusText = `<i class='fas fa-sun'></i> School starts with ${schoolSchedule[0].name} at ${formatTime(firstPeriodStartTime)}.`;
-                    inSchoolHoursActivity = true;
+                if (secondsRemaining > 0) {
+                    countdownTimer.textContent = secondsRemaining.toString();
                 } else {
-                    for (let i = 0; i < schoolSchedule.length; i++) {
-                        const currentBlock = schoolSchedule[i];
-                        const nextBlock = (i + 1 < schoolSchedule.length) ? schoolSchedule[i+1] : null;
-
-                        const currentBlockStartTime = getTodayAtTime(currentBlock.startH, currentBlock.startM);
-                        const currentBlockEndTime = getTodayAtTime(currentBlock.endH, currentBlock.endM);
-
-                        if (currentTime >= currentBlockStartTime.getTime() && currentTime < currentBlockEndTime.getTime()) {
-                            inSchoolHoursActivity = true;
-                            const minutesLeftInBlock = Math.floor((currentBlockEndTime.getTime() - currentTime) / 60000);
-                            
-                            if (currentBlock.type === "period") {
-                                let nextNumberedPeriod = null;
-                                for (let j = i + 1; j < schoolSchedule.length; j++) {
-                                    if (schoolSchedule[j].type === "period") {
-                                        nextNumberedPeriod = schoolSchedule[j];
-                                        break;
-                                    }
-                                }
-                                if (nextNumberedPeriod) {
-                                    const nextNumberedPeriodStartTime = getTodayAtTime(nextNumberedPeriod.startH, nextNumberedPeriod.startM);
-                                    // Calculate minutes until the start of the next numbered period, not just any block
-                                    const minutesUntilNextPeriod = Math.max(0, Math.floor((nextNumberedPeriodStartTime.getTime() - currentBlockEndTime.getTime()) / 60000) + minutesLeftInBlock);
-
-                                    statusText = `<i class='fas fa-chalkboard-teacher'></i> It is ${currentBlock.name}. ${minutesLeftInBlock} min left. Next is ${nextNumberedPeriod.name}.`;
-                                } else { 
-                                    statusText = `<i class='fas fa-chalkboard-teacher'></i> It is ${currentBlock.name}. ${minutesLeftInBlock} min left in the school day.`;
-                                }
-                            } else { 
-                                statusText = `<i class='fas ${currentBlock.type === "lunch" ? "fa-utensils" : "fa-puzzle-piece"}'></i> Currently ${currentBlock.name}. Ends in ${minutesLeftInBlock} min.`;
-                            }
-                            break; 
-                        } else if (nextBlock) {
-                            const nextBlockStartTime = getTodayAtTime(nextBlock.startH, nextBlock.startM);
-                            if (currentTime >= currentBlockEndTime.getTime() && currentTime < nextBlockStartTime.getTime()) {
-                                inSchoolHoursActivity = true;
-                                const minutesToNextBlock = Math.max(0, Math.floor((nextBlockStartTime.getTime() - currentTime) / 60000));
-                                statusText = `<i class='fas fa-walking'></i> Passing. ${nextBlock.name} starts in ${minutesToNextBlock} min.`;
-                                break;
-                            }
-                        }
-                    }
-                }
-                
-                if (!inSchoolHoursActivity) { 
-                    const lastPeriodEndTime = getTodayAtTime(schoolSchedule[schoolSchedule.length - 1].endH, schoolSchedule[schoolSchedule.length - 1].endM);
-                    if (currentTime >= lastPeriodEndTime.getTime()) {
-                        statusText = "<i class='fas fa-school'></i> School's out! Enjoy your afternoon.";
-                    } else {
-                         statusText = "Checking schedule..."; // Fallback
-                    }
+                    countdownTimer.textContent = "Time's up!";
+                    clearInterval(timerInterval);
                 }
             }
-            if (schoolStatusBanner) { // Ensure banner element exists
-                schoolStatusBanner.innerHTML = statusText;
-            }
-        }
 
-        if (schoolStatusBanner) {
-            updateSchoolStatus();
-            setInterval(updateSchoolStatus, 30000); 
-        }
+            const timerInterval = setInterval(updateCountdown, 1000);
+            updateCountdown(); // Initial call
 
+            resetBtn.addEventListener('click', () => {
+                localStorage.removeItem('deathDate');
+                window.location.reload();
+            });
+
+        } else {
+            lifeTimerContainer.innerHTML = `
+                <p style="font-size: 1.5rem; font-weight: 600; margin-bottom: 15px;">When will you die?</p>
+                <a href="quiz.html" class="btn btn-primary">Take the Survey</a>
+            `;
+        }
     </script>
 </body>
 </html>
