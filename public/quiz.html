@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Life Expectancy Quiz - thegraxisreal</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #5e60ce;
+            --primary-light: #6930c3;
+            --secondary: #48bfe3;
+            --dark: #1e1e2c;
+            --light: #f8f9fa;
+            --gray: #6c757d;
+            --success: #2ecc71;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --transition: all 0.3s ease;
+            --primary-rgb: 94, 96, 206;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        body {
+            background-color: var(--light);
+            color: var(--dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .quiz-container {
+            width: 100%;
+            max-width: 600px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            padding: 40px;
+            text-align: center;
+        }
+        .quiz-header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--dark);
+            margin-bottom: 10px;
+        }
+        .quiz-header p {
+            font-size: 1.1rem;
+            color: var(--gray);
+            margin-bottom: 30px;
+        }
+        .progress-bar-container {
+            width: 100%;
+            background-color: #e9ecef;
+            border-radius: 50px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+        .progress-bar {
+            width: 0%;
+            height: 10px;
+            background: var(--gradient);
+            border-radius: 50px;
+            transition: width 0.5s ease;
+        }
+        .question-container {
+            text-align: left;
+        }
+        .question-text {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+        .answers-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+        .answer-btn {
+            display: block;
+            width: 100%;
+            padding: 15px 20px;
+            background: var(--light);
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+        .answer-btn:hover {
+            background: rgba(var(--primary-rgb), 0.1);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        .input-answer {
+            width: 100%;
+            padding: 15px;
+            font-size: 1rem;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            margin-bottom: 20px;
+        }
+        .next-btn {
+            display: inline-block;
+            padding: 14px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: var(--transition);
+            font-size: 1rem;
+            background: var(--gradient);
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+        .next-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 20px rgba(var(--primary-rgb), 0.3);
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div class="quiz-header">
+            <h1>Life Expectancy Quiz</h1>
+            <p>Answer these questions to estimate your remaining time.</p>
+        </div>
+        <div class="progress-bar-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+        <div id="quiz-content">
+            <!-- Questions will be injected here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "What is your current age?",
+                type: "number",
+                key: "age"
+            },
+            {
+                question: "What is your biological sex?",
+                answers: [
+                    { text: "Male", value: -2 },
+                    { text: "Female", value: +2 }
+                ],
+                key: "sex"
+            },
+            {
+                question: "Do you smoke or use tobacco products regularly?",
+                answers: [
+                    { text: "Yes", value: -7 },
+                    { text: "No", value: +2 }
+                ],
+                key: "smoking"
+            },
+            {
+                question: "How often do you engage in at least 30 minutes of moderate exercise?",
+                answers: [
+                    { text: "Daily", value: +5 },
+                    { text: "A few times a week", value: +3 },
+                    { text: "Rarely or never", value: -5 }
+                ],
+                key: "exercise"
+            },
+            {
+                question: "How would you describe your diet?",
+                answers: [
+                    { text: "Very healthy (whole foods, low processed)", value: +5 },
+                    { text: "Average (a mix of healthy and unhealthy)", value: 0 },
+                    { text: "Mostly unhealthy (processed, high sugar/fat)", value: -7 }
+                ],
+                key: "diet"
+            },
+            {
+                question: "On average, how many alcoholic drinks do you have per week?",
+                answers: [
+                    { text: "0", value: +1 },
+                    { text: "1-7 (moderate)", value: +2 },
+                    { text: "8-14 (heavy)", value: -3 },
+                    { text: "15 or more (very heavy)", value: -6 }
+                ],
+                key: "alcohol"
+            },
+            {
+                question: "How would you describe your daily stress levels?",
+                answers: [
+                    { text: "Low", value: +2 },
+                    { text: "Moderate", value: -1 },
+                    { text: "High", value: -4 }
+                ],
+                key: "stress"
+            },
+            {
+                question: "On average, how many hours do you sleep per night?",
+                answers: [
+                    { text: "Less than 6 hours", value: -4 },
+                    { text: "6-8 hours", value: +3 },
+                    { text: "More than 8 hours", value: +1 }
+                ],
+                key: "sleep"
+            },
+            {
+                question: "How often do you have routine medical check-ups?",
+                answers: [
+                    { text: "Annually", value: +3 },
+                    { text: "Every few years", value: 0 },
+                    { text: "Rarely or never", value: -3 }
+                ],
+                key: "healthcare"
+            },
+            {
+                question: "What is your highest level of education?",
+                answers: [
+                    { text: "High school or less", value: -1 },
+                    { text: "Some college or associate's degree", value: +1 },
+                    { text: "Bachelor's degree or higher", value: +2 }
+                ],
+                key: "education"
+            },
+            {
+                question: "How would you rate your social connections and relationships?",
+                answers: [
+                    { text: "Strong and supportive", value: +3 },
+                    { text: "Average", value: 0 },
+                    { text: "Weak or isolated", value: -3 }
+                ],
+                key: "social"
+            },
+            {
+                question: "Do you have a family history of longevity (e.g., multiple relatives living past 90)?",
+                answers: [
+                    { text: "Yes", value: +5 },
+                    { text: "No / I don't know", value: 0 }
+                ],
+                key: "familyHistory"
+            }
+        ];
+
+        let currentQuestionIndex = 0;
+        let userAnswers = {};
+
+        const progressBar = document.getElementById('progress-bar');
+        const quizContent = document.getElementById('quiz-content');
+
+        function showQuestion() {
+            const questionData = quizData[currentQuestionIndex];
+            let questionHTML = `<div class="question-container">`;
+            questionHTML += `<p class="question-text">${currentQuestionIndex + 1}. ${questionData.question}</p>`;
+
+            if (questionData.type === 'number') {
+                questionHTML += `<input type="number" id="age-input" class="input-answer" placeholder="Enter your age">`;
+                questionHTML += `<button class="next-btn" onclick="submitNumberAnswer()">Next</button>`;
+            } else {
+                questionHTML += `<div class="answers-grid">`;
+                questionData.answers.forEach(answer => {
+                    questionHTML += `<button class="answer-btn" onclick="submitAnswer(${answer.value})">${answer.text}</button>`;
+                });
+                questionHTML += `</div>`;
+            }
+            questionHTML += `</div>`;
+            quizContent.innerHTML = questionHTML;
+            updateProgressBar();
+        }
+
+        function updateProgressBar() {
+            const progress = ((currentQuestionIndex) / quizData.length) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        function submitNumberAnswer() {
+            const ageInput = document.getElementById('age-input');
+            const age = parseInt(ageInput.value, 10);
+            if (age && age > 0 && age < 120) {
+                userAnswers['age'] = age;
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                alert("Please enter a valid age.");
+            }
+        }
+
+        function submitAnswer(value) {
+            userAnswers[quizData[currentQuestionIndex].key] = value;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                calculateAndStoreDeathDate();
+            }
+        }
+
+        function calculateAndStoreDeathDate() {
+            const baseLifeExpectancy = 78; // A general baseline
+            let lifeExpectancy = baseLifeExpectancy;
+
+            for (const key in userAnswers) {
+                if (key !== 'age') {
+                    lifeExpectancy += userAnswers[key];
+                }
+            }
+
+            const userAge = userAnswers['age'];
+            const yearsRemaining = lifeExpectancy - userAge;
+            
+            const deathDate = new Date();
+            deathDate.setFullYear(deathDate.getFullYear() + yearsRemaining);
+            
+            localStorage.setItem('deathDate', deathDate.toISOString());
+            
+            // Show a finishing message and then redirect
+            quizContent.innerHTML = `
+                <div class="quiz-header">
+                    <h1>Thank you!</h1>
+                    <p>Your personal timer is now ready. Redirecting you back to the homepage...</p>
+                </div>`;
+            progressBar.style.width = '100%';
+
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 3000);
+        }
+
+        showQuestion();
+    </script>
+</body>
+</html>
