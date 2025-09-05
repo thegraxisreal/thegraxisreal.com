@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LatBrew - Matrix Theme</title>
+<style>
+    body {
+        font-family: Consolas, monospace;
+        margin: 0;
+        background: #050505;
+        color: #d4ffd4;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 20px;
+        overflow: hidden;
+    }
+    canvas {
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: -1;
+    }
+    h1 {
+        text-align: center;
+        margin-bottom: 20px;
+        color: #e0ffe0;
+        text-shadow: 0 0 10px #00ff00, 0 0 20px #007700, 0 0 30px #004400;
+        font-size: 2.4em;
+        letter-spacing: 1.5px;
+        font-weight: bold;
+    }
+    textarea {
+        width: 100%;
+        max-width: 520px;
+        height: 100px;
+        margin-bottom: 14px;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #00aa00;
+        resize: none;
+        font-size: 16px;
+        background-color: rgba(15, 15, 15, 0.92);
+        color: #e0ffe0;
+        box-shadow: 0 0 12px rgba(0,255,0,0.3) inset;
+    }
+    button {
+        padding: 10px 18px;
+        margin: 5px;
+        border: none;
+        border-radius: 6px;
+        background: linear-gradient(180deg, #009900, #006600);
+        color: #e0ffe0;
+        font-size: 15px;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.1s ease, background 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 0 3px 8px rgba(0,0,0,0.6), 0 0 8px rgba(0,255,0,0.4);
+    }
+    button:hover {
+        background: linear-gradient(180deg, #00cc00, #009900);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.7), 0 0 12px rgba(0,255,0,0.6);
+    }
+    h3 {
+        margin-top: 14px;
+        font-size: 1.1em;
+        color: #e0ffe0;
+    }
+</style>
+</head>
+<body>
+<canvas id="matrix"></canvas>
+<h1>LatBrew</h1>
+<textarea id="inputText" placeholder="Enter text here..."></textarea>
+<br>
+<button onclick="encodeToHebrewArabic()">Encode</button>
+<button onclick="encodeToLatin()">Decode</button>
+<button onclick="swapText()">Swap</button>
+<h3>Output:</h3>
+<textarea id="outputText" readonly></textarea>
+
+<script>
+    // Latin letters a–z
+    const latin = 'abcdefghijklmnopqrstuvwxyz'.split('');
+
+    // Strict one-to-one mapped symbols (single code point each; no combining marks)
+    // a  b  c  d  e  f  g  h  i  j  k  l  m  n  o  p  q  r  s  t   u    v    w    x   y    z
+    const mapped = ['א','ב','ג','ד','ה','ו','ז','ח','ט','י','כ','ל','מ','נ','ס','ע','פ','צ','ק','ר','ױ','ڤ','װ','ש','ײ','ژ'];
+
+    // Build dictionaries
+    const L2M = Object.create(null); // latin -> mapped
+    const M2L = Object.create(null); // mapped -> latin
+    for (let i = 0; i < 26; i++) {
+        L2M[latin[i]] = mapped[i];
+        M2L[mapped[i]] = latin[i];
+    }
+
+    function encodeToHebrewArabic() {
+        const text = document.getElementById('inputText').value.toLowerCase();
+        let out = '';
+        for (const ch of text) out += (L2M[ch] ?? ch);
+        document.getElementById('outputText').value = out;
+    }
+
+    function encodeToLatin() {
+        const text = document.getElementById('inputText').value;
+        let out = '';
+        for (const ch of Array.from(text)) out += (M2L[ch] ?? ch);
+        document.getElementById('outputText').value = out;
+    }
+
+    function swapText() {
+        const inputEl = document.getElementById('inputText');
+        const outputEl = document.getElementById('outputText');
+        const temp = inputEl.value;
+        inputEl.value = outputEl.value;
+        outputEl.value = temp;
+    }
+
+    // Matrix rain effect
+    const canvas = document.getElementById('matrix');
+    const ctx = canvas.getContext('2d');
+    function sizeCanvas(){
+        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+    }
+    sizeCanvas();
+    window.addEventListener('resize', sizeCanvas);
+
+    const chars = 'アァイィウヴエェオカキクケコサシスセソタチツテトナニヌネノハヒフヘホマミムメモヤユヨラリルレロワンabcdefghijklmnopqrstuvwxyzאבגדהוזחטיכלמנסעפצקרשת'.split('');
+    const fontSize = 14;
+    let columns = Math.floor(canvas.width / fontSize);
+    let drops = Array(columns).fill(1);
+
+    function draw() {
+        // Slightly darker for readability
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.10)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#0a0';
+        ctx.font = fontSize + 'px monospace';
+        for (let i = 0; i < drops.length; i++) {
+            const t = chars[Math.floor(Math.random() * chars.length)];
+            ctx.fillText(t, i * fontSize, drops[i] * fontSize);
+            if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) drops[i] = 0;
+            drops[i]++;
+        }
+    }
+    setInterval(draw, 35);
+</script>
+</body>
+</html>
