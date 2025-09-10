@@ -87,6 +87,9 @@ window.addEventListener('DOMContentLoaded', () => {
   }
   startReporter();
 
+  // Ensure a username is set globally, even on deep links
+  ensureUsername();
+
   loadFromHash(location.hash);
 });
 
@@ -181,4 +184,44 @@ function startReporter() {
   };
   tick();
   startReporter._t = setInterval(tick, 60000);
+}
+
+// Prompt once for username (modal), used on initial load or deep links
+function ensureUsername() {
+  const key = 'tgx_username';
+  const existing = localStorage.getItem(key);
+  if (existing && existing.trim()) return;
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed'; overlay.style.inset = '0'; overlay.style.background = 'rgba(0,0,0,.5)'; overlay.style.display = 'grid'; overlay.style.placeItems = 'center'; overlay.style.zIndex = '80';
+  const panel = document.createElement('div');
+  panel.className = 'card stack'; panel.style.maxWidth = '520px'; panel.style.margin = '1rem';
+  panel.innerHTML = `
+    <h3 style="margin:.25rem 0">Choose a username</h3>
+    <p class="muted">This name will appear on the public leaderboard and cannot be changed later.</p>
+    <input id="name-input" type="text" placeholder="username (letters, numbers, underscore)" style="padding:.7rem .8rem; border-radius:10px; border:1px solid #2b3a52; background:#0b1322; color:var(--fg);" />
+    <div class="row" style="justify-content:flex-end; gap:.5rem">
+      <button id="name-submit" class="primary">Confirm</button>
+    </div>
+    <div id="name-err" class="muted"></div>
+  `;
+  overlay.appendChild(panel);
+  document.body.appendChild(overlay);
+  function validate(v) {
+    const s = (v || '').trim();
+    if (s.length < 3) return 'At least 3 characters';
+    if (s.length > 20) return 'Max 20 characters';
+    if (!/^\w+$/.test(s)) return 'Use letters, numbers, underscore only';
+    return '';
+  }
+  function submit() {
+    const input = panel.querySelector('#name-input');
+    const err = panel.querySelector('#name-err');
+    const msg = validate(input.value);
+    if (msg) { err.textContent = msg; return; }
+    localStorage.setItem(key, input.value.trim());
+    document.body.removeChild(overlay);
+  }
+  panel.querySelector('#name-submit').addEventListener('click', submit);
+  panel.querySelector('#name-input').addEventListener('keydown', (e)=>{ if (e.key==='Enter') submit(); });
+  setTimeout(()=> panel.querySelector('#name-input').focus(), 50);
 }
