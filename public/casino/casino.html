@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Casino</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header>
+      <h1 class="brand neon mega sign">thegraxisreal casino</h1>
+      <nav class="top-nav">
+        <a class="btn glass lg" href="#/slots">Slots</a>
+        <a class="btn glass lg" href="#/blackjack">Blackjack</a>
+        <a class="btn glass lg" href="#/horse">Horse Race</a>
+        <a class="btn glass lg" href="#/plinko">Plinko</a>
+        <a class="btn glass lg" href="#/coinflip">Coin Flip</a>
+        <a class="btn glass lg" href="#/bar">Bar</a>
+        <a class="btn glass lg" href="#/shop">Gift Shop</a>
+        <a class="btn glass lg bm-link" href="#/blackmarket">Black Market</a>
+        <a class="btn glass lg new-glow" href="#/leaderboard">Leaderboard</a>
+        <a class="btn glass lg" href="#/">Home</a>
+      </nav>
+    </header>
+
+    <main id="game-root">
+      <p>Select a game from the menu.</p>
+    </main>
+
+    <!-- Money HUD (global balance) -->
+    <div id="money-hud" class="money-hud">
+      <div class="money-label">Balance</div>
+      <div id="money-amount" class="money-amount">$0</div>
+    </div>
+
+    <script type="module" src="./app.js"></script>
+  </body>
+  </html>
