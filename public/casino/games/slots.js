@@ -1,4 +1,5 @@
 import store, { subscribe, getBalance, addBalance, canAfford } from '../store.js';
+import { formatMoneyExtended as formatMoney } from '../format.js';
 import { CHEAT_IDS, getCheatState, consumeCheat } from '../cheats.js';
 
 let cleanup = () => {};
@@ -73,7 +74,7 @@ export async function mount(root) {
 
   let timers = [];
 
-  const fmt = (n) => `$${n.toLocaleString()}`;
+  const fmt = (n) => formatMoney(n);
   const update = () => {
     balanceEl.textContent = fmt(getBalance());
     betEl.textContent = fmt(state.bet);

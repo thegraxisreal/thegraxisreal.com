@@ -1,4 +1,5 @@
 import store, { subscribe, getBalance, addBalance, canAfford } from '../store.js';
+import { formatMoneyExtended as formatMoney } from '../format.js';
 import { CHEAT_IDS, getCheatState, consumeCheat } from '../cheats.js';
 
 let cleanup = () => {};
@@ -52,7 +53,7 @@ export async function mount(root) {
   };
   const minBet = 1;
   const maxBet = 200;
-  const fmt = (n) => `$${n.toLocaleString()}`;
+  const fmt = (n) => formatMoney(n);
 
   const balEl = wrap.querySelector('#pl-balance');
   const betEl = wrap.querySelector('#pl-bet');

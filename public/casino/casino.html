@@ -15,9 +15,16 @@
         <a class="btn glass lg" href="#/horse">Horse Race</a>
         <a class="btn glass lg" href="#/plinko">Plinko</a>
         <a class="btn glass lg" href="#/coinflip">Coin Flip</a>
-        <a class="btn glass lg" href="#/bar">Bar</a>
-        <a class="btn glass lg" href="#/shop">Gift Shop</a>
-        <a class="btn glass lg bm-link" href="#/blackmarket">Black Market</a>
+        <details class="shop-menu">
+          <summary class="btn glass lg">Shop</summary>
+          <div class="shop-panel" role="menu" aria-label="Shop submenu">
+            <a class="menu-item" href="#/shop" role="menuitem">Gift Shop</a>
+            <a class="menu-item" href="#/bar" role="menuitem">Bar</a>
+            <a class="menu-item bm-link" href="#/blackmarket" role="menuitem">Black Market</a>
+          </div>
+        </details>
+        <a class="btn glass lg" href="#/lottery">Lottery</a>
+        <a class="btn glass lg new-glow" href="#/email">Email</a>
         <a class="btn glass lg new-glow" href="#/leaderboard">Leaderboard</a>
         <a class="btn glass lg" href="#/">Home</a>
       </nav>
@@ -31,6 +38,7 @@
     <div id="money-hud" class="money-hud">
       <div class="money-label">Balance</div>
       <div id="money-amount" class="money-amount">$0</div>
+      <div id="email-ping" class="email-ping" style="display:none">New Email!</div>
     </div>
 
     <script type="module" src="./app.js"></script>

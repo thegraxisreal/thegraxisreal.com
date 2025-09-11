@@ -3,14 +3,18 @@ import { CHEAT_IDS, canBuyCheat, secondsUntilRestock, setCheatCharge, startCoold
 
 let cleanup = () => {};
 
-const PRICE = 100000; // 100k each
-
+// Per‑item pricing (requested):
+//  - Two‑Heads Coin: 100k
+//  - Peg Grease (Plinko): 1m
+//  - Cold Deck (Blackjack): 1m
+//  - Horse Steroids: 1b
+//  - Lucky Slots Drink: 1b
 const ITEMS = [
-  { id: CHEAT_IDS.slots, name: 'Lucky Slots Drink', desc: 'A legendary concoction from the original thegraxisreal casino. Guarantees a jackpot on your next spin.', game: 'Slots' },
-  { id: CHEAT_IDS.horse, name: 'Horse Steroids', desc: 'Makes your chosen horse run like the wind. Guarantees a win next race.', game: 'Horse Race' },
-  { id: CHEAT_IDS.plinko, name: 'Peg Grease', desc: 'Greases the pegs just right. Your next drop finds the best payout.', game: 'Plinko' },
-  { id: CHEAT_IDS.coinflip, name: 'Two‑Heads Coin', desc: 'A weighted coin for the bold. Your next flip lands your pick.', game: 'Coin Flip' },
-  { id: CHEAT_IDS.blackjack, name: 'Cold Deck', desc: 'The house has a cold deck tonight. Your next hand is unbeatable.', game: 'Blackjack' },
+  { id: CHEAT_IDS.slots,     name: 'Lucky Slots Drink', desc: 'A legendary concoction from the original thegraxisreal casino. Guarantees a jackpot on your next spin.', game: 'Slots',      price: 1_000_000_000 },
+  { id: CHEAT_IDS.horse,     name: 'Horse Steroids',    desc: 'Makes your chosen horse run like the wind. Guarantees a win next race.',                               game: 'Horse Race', price: 500_000_000 },
+  { id: CHEAT_IDS.plinko,    name: 'Peg Grease',        desc: 'Greases the pegs just right. Your next drop finds the best payout.',                                 game: 'Plinko',     price: 1_000_000 },
+  { id: CHEAT_IDS.coinflip,  name: 'Two‑Heads Coin',    desc: 'A weighted coin for the bold. Your next flip lands your pick.',                                      game: 'Coin Flip',  price: 100_000 },
+  { id: CHEAT_IDS.blackjack, name: 'Cold Deck',         desc: 'The house has a cold deck tonight. Your next hand is unbeatable.',                                   game: 'Blackjack',  price: 1_000_000 },
 ];
 
 export async function mount(root) {
@@ -57,15 +61,16 @@ export async function mount(root) {
           <div class="store-desc">${it.desc}</div>
         </div>
         <div class="store-cta">
-          <div class="price">$${PRICE.toLocaleString()}</div>
+          <div class="price">$${it.price.toLocaleString()}</div>
           ${cta}
         </div>
       `;
       const buyBtn = card.querySelector('[data-buy]');
       if (buyBtn) buyBtn.addEventListener('click', () => {
-        if (!canAfford(PRICE)) return;
+        const price = it.price || 0;
+        if (!canAfford(price)) return;
         if (!canBuyCheat(it.id)) return;
-        addBalance(-PRICE);
+        addBalance(-price);
         setCheatCharge(it.id, true);
         startCooldown(it.id, 90);
         render();

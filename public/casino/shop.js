@@ -73,7 +73,7 @@ export async function mount(root) {
         </div>
         <div class="store-cta">
           <div class="price">${t.price ? `$${t.price.toLocaleString()}` : 'Free'}</div>
-          ${owned ? `<button data-equip="${t.id}" class="glass xl" ${equipped?'disabled':''}>Select</button>` : `<button data-buy-theme="${t.id}" class="primary xl">Buy</button>`}
+          ${owned ? `<button data-equip="${t.id}" class="glass xs" ${equipped?'disabled':''}>Select</button>` : `<button data-buy-theme="${t.id}" class="primary xs">Buy</button>`}
         </div>
       `;
       // Events
@@ -117,7 +117,7 @@ export async function mount(root) {
         </div>
         <div class="store-cta">
           <div class="price">${st.owned ? '—' : `$${it.price.toLocaleString()}`}</div>
-          ${st.owned ? `<button data-toggle="${it.id}" class="${st.enabled?'primary':'glass'} xl">${st.enabled? 'On':'Off'}</button>` : `<button data-buy-item="${it.id}" class="primary xl">Buy</button>`}
+          ${st.owned ? `<button data-toggle="${it.id}" class="${st.enabled?'primary':'glass'} xs">${st.enabled? 'On':'Off'}</button>` : `<button data-buy-item="${it.id}" class="primary xs">Buy</button>`}
         </div>
       `;
       const buyBtn = card.querySelector('[data-buy-item]');

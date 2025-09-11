@@ -128,3 +128,129 @@ const server = http.createServer((req, res) => {
 server.listen(PORT, () => {
   console.log(`Leaderboard server listening on http://localhost:${PORT}`);
 });
+
+// ---------------- Lottery (synchronized rounds) ----------------
+// Rounds aligned to wall clock every 3 minutes. Sale window = first 60s of each round.
+// Ticket price is chosen at the start of each round from predefined options; jackpot = 50x price.
+
+const LOTTERY_INTERVAL_MS = 3 * 60 * 1000; // 3 minutes
+const LOTTERY_SALE_MS = 60 * 1000; // 60s window
+// Keep values within JS safe integer range to prevent precision bugs
+const TICKET_OPTIONS = [
+  1_000_000,              // 1m
+  500_000_000,            // 500m
+  1_000_000_000,          // 1b
+  500_000_000_000,        // 500b
+  1_000_000_000_000,      // 1t
+  500_000_000_000_000,    // 500t
+  1_000_000_000_000_000,  // 1q
+  // 500q would exceed Number.MAX_SAFE_INTEGER; omit to avoid precision loss
+];
+
+// roundId -> { start, saleEnd, nextStart, price, jackpot, entrants:Set<string>, winner:{username, amount} | null }
+const lotteryRounds = new Map();
+let lastWinner = null; // { roundId, username, amount }
+
+function currentRoundId(now) {
+  return Math.floor(now / LOTTERY_INTERVAL_MS) * LOTTERY_INTERVAL_MS;
+}
+
+function ensureRound(now) {
+  const id = currentRoundId(now);
+  let r = lotteryRounds.get(id);
+  if (!r) {
+    const start = id;
+    const saleEnd = start + LOTTERY_SALE_MS;
+    const nextStart = start + LOTTERY_INTERVAL_MS;
+    const price = TICKET_OPTIONS[Math.floor(Math.random() * TICKET_OPTIONS.length)];
+    const jackpot = price * 50;
+    r = { start, saleEnd, nextStart, price, jackpot, entrants: new Set(), winner: null };
+    lotteryRounds.set(id, r);
+  }
+  return r;
+}
+
+function maybeSettleRound(now) {
+  const id = currentRoundId(now);
+  const r = ensureRound(now);
+  // If current round sale has ended and no winner yet, settle now
+  if (now >= r.saleEnd && !r.winner) {
+    if (r.entrants.size > 0) {
+      const arr = Array.from(r.entrants.values());
+      const winnerName = arr[Math.floor(Math.random() * arr.length)];
+      r.winner = { username: winnerName, amount: r.jackpot };
+      lastWinner = { roundId: r.start, username: winnerName, amount: r.jackpot };
+    } else {
+      r.winner = null;
+    }
+  }
+  return { id, r };
+}
+
+function sendLotteryStatus(req, res) {
+  const now = Date.now();
+  const { id, r } = maybeSettleRound(now);
+  const phase = now < r.saleEnd ? 'open' : 'waiting';
+  const entrants = r.entrants.size;
+  const body = {
+    ok: true,
+    now,
+    round: {
+      id,
+      start: r.start,
+      saleEnd: r.saleEnd,
+      nextStart: r.nextStart,
+      price: r.price,
+      jackpot: r.jackpot,
+      phase,
+      entrants,
+    },
+    lastWinner,
+  };
+  return send(res, 200, body);
+}
+
+function handleLotteryBuy(req, res, urlObj) {
+  if (req.method !== 'POST') return send(res, 405, { ok: false, error: 'method' });
+  let data = '';
+  req.on('data', (c) => { data += c; if (data.length > 1e6) req.destroy(); });
+  req.on('end', () => {
+    try {
+      const json = JSON.parse(data || '{}');
+      let { username } = json;
+      if (typeof username !== 'string' || !username.trim()) return send(res, 400, { ok:false, error: 'invalid username' });
+      username = username.trim();
+      const now = Date.now();
+      const round = ensureRound(now);
+      if (now >= round.saleEnd) return send(res, 400, { ok:false, error: 'closed' });
+      if (round.entrants.has(username.toLowerCase())) return send(res, 400, { ok:false, error: 'already' });
+      round.entrants.add(username.toLowerCase());
+      usersSet.add(username);
+      return send(res, 200, { ok:true, price: round.price, jackpot: round.jackpot, roundId: round.start });
+    } catch (e) {
+      return send(res, 400, { ok:false, error: 'bad json' });
+    }
+  });
+}
+
+// Extend server routing for lottery
+const _origCreate = server.listeners('request')[0];
+server.removeAllListeners('request');
+server.on('request', (req, res) => {
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,POST,OPTIONS',
+      'Access-Control-Allow-Headers': req.headers['access-control-request-headers'] || '*',
+    });
+    return res.end();
+  }
+  const urlObj = new URL(req.url, `http://${req.headers.host}`);
+  if (req.method === 'GET' && urlObj.pathname === '/health') return send(res, 200, { ok: true });
+  if (req.method === 'POST' && urlObj.pathname === '/report') return handleReport(req, res);
+  if (req.method === 'GET' && urlObj.pathname === '/leaderboard') return handleLeaderboard(req, res);
+  if (req.method === 'GET' && urlObj.pathname === '/users') return handleUsers(req, res);
+  if (req.method === 'GET' && urlObj.pathname === '/lottery') return sendLotteryStatus(req, res);
+  if (urlObj.pathname === '/lottery/buy') return handleLotteryBuy(req, res, urlObj);
+  return send(res, 404, { ok: false, error: 'not found' });
+});

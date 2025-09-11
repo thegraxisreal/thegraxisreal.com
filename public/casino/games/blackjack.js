@@ -1,4 +1,5 @@
 import store, { subscribe, getBalance, addBalance, canAfford } from '../store.js';
+import { formatMoneyExtended as formatMoney } from '../format.js';
 import { CHEAT_IDS, getCheatState, consumeCheat } from '../cheats.js';
 
 let cleanup = () => {};
@@ -81,7 +82,7 @@ export async function mount(root) {
     dealerHoleRevealed: false,
   };
 
-  function fmt(n) { return `$${n.toLocaleString()}`; }
+  function fmt(n) { return formatMoney(n); }
 
   // Deck helpers
   const RANKS = ['A','2','3','4','5','6','7','8','9','10','J','Q','K'];

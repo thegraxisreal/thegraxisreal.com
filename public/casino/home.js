@@ -1,4 +1,5 @@
-import store, { subscribe, getBalance, addBalance } from './store.js';
+import store, { subscribe, getBalance, addBalance, setBalance } from './store.js';
+import { formatMoneyExtended as formatMoney } from './format.js';
 
 let cleanup = () => {};
 
@@ -18,15 +19,22 @@ export async function mount(root) {
         <li>Blackjack, Horse Race, Plinko, and Coin Flip are coming soon.</li>
       </ul>
     </div>
+    <div class="toolbar" style="justify-content:flex-end; margin-top:.5rem;">
+      <button id="reset-money" class="glass">Reset Money to $1,000</button>
+    </div>
   `;
   root.appendChild(el);
 
   // Update HUD in case home is first load
   const moneyEl = document.getElementById('money-amount');
-  const unsub = subscribe(({ balance }) => {
-    if (moneyEl) moneyEl.textContent = format(balance);
-  });
-  moneyEl.textContent = format(getBalance());
+  const renderHud = (b) => {
+    if (!moneyEl) return;
+    // If hovered, show full digits; else compact
+    const hovered = moneyEl.matches(':hover');
+    moneyEl.textContent = hovered ? `$${Math.floor(Math.max(0,b)).toLocaleString()}` : formatMoney(b);
+  };
+  const unsub = subscribe(({ balance }) => { renderHud(balance); });
+  renderHud(getBalance());
 
   // Username capture on first visit (or if missing)
   const NAME_KEY = 'tgx_username';
@@ -132,6 +140,12 @@ export async function mount(root) {
           <button data-give="1000000" class="glass">+ $1,000,000</button>
           <button data-give="1000000000" class="glass">+ $1,000,000,000 (1b)</button>
           <button data-give="1000000000000" class="glass">+ $1,000,000,000,000 (1t)</button>
+          <div class="row" style="gap:.5rem; flex-wrap:wrap; margin-top:.25rem;">
+            <button data-give="1000000000000000" class="glass">+ 1qu</button>
+            <button data-give="1000000000000000000" class="glass">+ 1qi</button>
+            <button data-give="1000000000000000000000" class="glass">+ 1s</button>
+            <button data-give="1000000000000000000000000" class="glass">+ 1A</button>
+          </div>
         </div>
       `;
       panel.querySelector('#adm-name-save').addEventListener('click', () => {
@@ -144,14 +158,54 @@ export async function mount(root) {
       panel.querySelectorAll('[data-give]').forEach(btn => {
         btn.addEventListener('click', () => { const v = parseInt(btn.getAttribute('data-give'), 10); grant(v); /* stays open */ });
       });
+      // Inject Force Email button for testing
+      try {
+        const hostStack = panel.querySelector('div.stack');
+        if (hostStack) {
+          const row = document.createElement('div');
+          row.className = 'row';
+          row.style.gap = '.5rem';
+          row.style.justifyContent = 'flex-end';
+          row.style.flexWrap = 'wrap';
+          row.style.marginTop = '.25rem';
+          const forceBtn = document.createElement('button');
+          forceBtn.id = 'adm-force-email';
+          forceBtn.className = 'primary';
+          forceBtn.textContent = 'Force Email';
+          row.appendChild(forceBtn);
+          hostStack.appendChild(row);
+          forceBtn.addEventListener('click', async () => {
+            try {
+              const mod = await import('./app.js');
+              if (mod && typeof mod.__debugAddEmail === 'function') {
+                mod.__debugAddEmail();
+                flash('Email generated');
+                location.hash = '#/email';
+              }
+            } catch (e) {
+              flash('Failed to generate email');
+            }
+          });
+        }
+      } catch {}
     }
     document.body.appendChild(panel);
   }
 
+  // Reset money to $1,000
+  const resetBtn = el.querySelector('#reset-money');
+  function onReset() {
+    if (confirm('Reset your balance to $1,000?')) {
+      setBalance(1000);
+      flash('Balance reset to $1,000');
+    }
+  }
+  resetBtn.addEventListener('click', onReset);
+
   function onLockClick() {
     const code = prompt('Enter admin code');
     if (code === '1234') { grant(1_000_000); }
-    else if (code === 'b@rnD00rex!t') { showPanel(true); }
+    else if (code === '852585') { showPanel(true); }
     else if (code != null) { flash('Invalid code'); }
   }
   lockBtn.addEventListener('click', onLockClick);
@@ -163,9 +217,10 @@ export async function mount(root) {
     lockBtn?.removeEventListener('click', onLockClick);
     lockBtn?.remove();
     closePanel();
+    resetBtn?.removeEventListener('click', onReset);
   };
 }
 
 export function unmount() { cleanup(); cleanup = () => {}; }
 
-function format(n) { return `$${n.toLocaleString()}`; }
+function format(n) { return formatMoney(n); }

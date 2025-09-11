@@ -1,4 +1,5 @@
 import store, { subscribe, getBalance, addBalance, canAfford } from './store.js';
+import { formatMoneyExtended as formatMoney } from './format.js';
 
 let cleanup = () => {};
 
@@ -68,10 +69,8 @@ export async function mount(root) {
   const drinksEl = wrap.querySelector('#bar-drinks');
   const soberBtn = wrap.querySelector('#bar-sober');
 
-  const unsub = subscribe(({ balance }) => { balEl.textContent = fmt(balance); });
-  balEl.textContent = fmt(getBalance());
-
-  function fmt(n) { return `$${n.toLocaleString()}`; }
+  const unsub = subscribe(({ balance }) => { balEl.textContent = formatMoney(balance); });
+  balEl.textContent = formatMoney(getBalance());
 
   // Chat bubbles (ephemeral)
   const replies = [

@@ -1,4 +1,5 @@
 import store, { subscribe, getBalance, addBalance, canAfford } from '../store.js';
+import { formatMoneyExtended as formatMoney } from '../format.js';
 import { CHEAT_IDS, getCheatState, consumeCheat } from '../cheats.js';
 
 let cleanup = () => {};
@@ -77,7 +78,7 @@ export async function mount(root) {
   balEl.textContent = fmt(getBalance());
 
   // Helpers
-  function fmt(n) { return `$${n.toLocaleString()}`; }
+  function fmt(n) { return formatMoney(n); }
   function randIn(min, max) { return min + Math.random() * (max - min); }
 
   // Build horses with probabilities and multipliers targeting ~94% EV

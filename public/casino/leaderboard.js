@@ -1,3 +1,4 @@
+import { formatMoneyExtended as formatMoney } from './format.js';
 let cleanup = () => {};
 
 const NGROK_KEY = 'tgx_ngrok_base';
@@ -25,13 +26,7 @@ export async function mount(root) {
   const listEl = wrap.querySelector('#lb-list');
   const statusEl = wrap.querySelector('#lb-status');
 
-  function fmtNum(n) {
-    const abs = Math.floor(Math.max(0, n));
-    if (abs < 10_000_000) return `$${abs.toLocaleString()}`;
-    const units = [ ['q',1e15], ['t',1e12], ['b',1e9], ['m',1e6] ];
-    for (const [s,v] of units) if (abs >= v) return `$${Math.floor(abs / v)}${s}`;
-    return `$${abs.toLocaleString()}`;
-  }
+  const fmtNum = (n) => formatMoney(n);
 
   let timer = 0;
   async function fetchNow() {

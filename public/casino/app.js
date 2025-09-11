@@ -1,4 +1,5 @@
 import store, { subscribe, getBalance } from './store.js';
+import { formatMoney, formatMoneyExtended } from './format.js';
 
 // Simple hash-based router and dynamic importer
 const routes = {
@@ -12,6 +13,8 @@ const routes = {
   shop: () => import('./shop.js'),
   blackmarket: () => import('./blackmarket.js'),
   leaderboard: () => import('./leaderboard.js'),
+  email: () => import('./email.js'),
+  lottery: () => import('./games/lottery.js'),
 };
 
 let activeModule = null;
@@ -46,27 +49,46 @@ window.addEventListener('hashchange', () => loadFromHash(location.hash));
 window.addEventListener('DOMContentLoaded', () => {
   // Initialize money HUD
   const hud = document.getElementById('money-amount');
-  function formatHUD(n) {
-    const abs = Math.floor(Math.max(0, n));
-    const units = [
-      { v: 1e15, s: 'q' },
-      { v: 1e12, s: 't' },
-      { v: 1e9, s: 'b' },
-      { v: 1e6, s: 'm' },
-    ];
-    if (abs < 10_000_000) return `$${abs.toLocaleString()}`;
-    for (const u of units) {
-      if (abs >= u.v) {
-        const val = Math.floor(abs / u.v);
-        return `$${val}${u.s}`;
-      }
-    }
-    return `$${abs.toLocaleString()}`;
-  }
+  let hudHover = false;
+  function fullMoney(n) { return `$${Math.floor(Math.max(0, n)).toLocaleString()}`; }
+  function formatHUD(n) { return formatMoneyExtended(n); }
   if (hud) hud.textContent = formatHUD(getBalance());
+  // Delta indicator under HUD (ignores stock income)
+  let prevBal = getBalance();
   subscribe(({ balance }) => {
-    if (hud) hud.textContent = formatHUD(balance);
+    if (!hud) return;
+    // Update display respecting hover
+    hud.textContent = hudHover ? fullMoney(balance) : formatHUD(balance);
+    // Delta logic
+    const delta = Math.floor(balance) - Math.floor(prevBal);
+    if (delta !== 0) {
+      // If delta equals pending stock income, ignore
+      const pending = Math.floor(startIncomeLoop._pendingInc || 0);
+      if (!(pending && delta === pending)) {
+        showMoneyDelta(delta);
+      }
+      startIncomeLoop._pendingInc = 0;
+    }
+    prevBal = balance;
   });
+  if (hud) {
+    hud.addEventListener('mouseenter', () => {
+      hudHover = true;
+      hud.textContent = fullMoney(getBalance());
+    });
+    hud.addEventListener('mouseleave', () => {
+      hudHover = false;
+      hud.textContent = formatHUD(getBalance());
+    });
+  }
+
+  // Prepare delta container
+  const hudWrap = document.getElementById('money-hud');
+  if (hudWrap && !document.getElementById('money-delta')) {
+    const d = document.createElement('div');
+    d.id = 'money-delta';
+    hudWrap.appendChild(d);
+  }
 
   // Apply equipped theme from shop state
   try {
@@ -89,6 +111,30 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Ensure a username is set globally, even on deep links
   ensureUsername();
+
+  // Shop menu now uses <details>; no JS required
+
+  // Start background email generator and HUD ping
+  initEmailSystem();
+  updateEmailPing();
+
+  // Close Shop menu when navigating into any shop route
+  function closeShopMenuIfShopRoute() {
+    const key = (location.hash || '').replace(/^#\/?/, '') || 'home';
+    if (key === 'shop' || key === 'bar' || key === 'blackmarket') {
+      const d = document.querySelector('details.shop-menu');
+      if (d && d.open) d.open = false;
+    }
+  }
+  window.addEventListener('hashchange', closeShopMenuIfShopRoute);
+  // Also close immediately when clicking a submenu item
+  document.addEventListener('click', (e) => {
+    const link = e.target && e.target.closest('.shop-panel a');
+    if (link) {
+      const d = document.querySelector('details.shop-menu');
+      if (d && d.open) d.open = false;
+    }
+  });
 
   loadFromHash(location.hash);
 });
@@ -146,7 +192,11 @@ function startIncomeLoop() {
       if (items.stocks1 && items.stocks1.owned && items.stocks1.enabled) inc += 50;
       if (items.stocks2 && items.stocks2.owned && items.stocks2.enabled) inc += 500;
       if (items.stocks3 && items.stocks3.owned && items.stocks3.enabled) inc += 5000;
-      if (inc > 0) { try { import('./store.js').then(m => m.addBalance(inc)); } catch { addBalance(inc); } }
+      if (inc > 0) {
+        // mark pending so HUD delta can ignore this passive income
+        startIncomeLoop._pendingInc = inc;
+        try { import('./store.js').then(m => m.addBalance(inc)); } catch { addBalance(inc); }
+      }
     } catch {}
   };
   pay();
@@ -160,6 +210,21 @@ export function __applyThemeFromShop() {
     if (state && state.themes && state.themes.equipped) applyTheme(state.themes.equipped);
   } catch {}
   ensureClock();
+}
+
+// Render ephemeral delta under HUD
+function showMoneyDelta(delta) {
+  try {
+    const hudWrap = document.getElementById('money-hud');
+    if (!hudWrap) return;
+    const host = document.getElementById('money-delta') || (() => { const d = document.createElement('div'); d.id='money-delta'; hudWrap.appendChild(d); return d; })();
+    const node = document.createElement('div');
+    node.className = 'money-delta ' + (delta > 0 ? 'plus' : 'minus');
+    const abs = Math.abs(delta);
+    node.textContent = (delta > 0 ? '+$' : '-$') + Math.floor(abs).toLocaleString();
+    host.appendChild(node);
+    setTimeout(() => node.remove(), 1800);
+  } catch {}
 }
 
 // Reporter sends {username,balance} every 60s if username + NGROK_BASE set
@@ -224,4 +289,116 @@ function ensureUsername() {
   panel.querySelector('#name-submit').addEventListener('click', submit);
   panel.querySelector('#name-input').addEventListener('keydown', (e)=>{ if (e.key==='Enter') submit(); });
   setTimeout(()=> panel.querySelector('#name-input').focus(), 50);
+}
+
+// (shop menu logic removed)
+
+// ---------------- Email system (background) ----------------
+function loadEmailState() {
+  try {
+    const s = JSON.parse(localStorage.getItem('tgx_email_state_v1') || '{}');
+    s.emails = Array.isArray(s.emails) ? s.emails : [];
+    s.unread = Math.max(0, s.unread | 0);
+    if (!Number.isFinite(s.startBalance)) s.startBalance = 1000;
+    return s;
+  } catch { return { emails: [], unread: 0, startBalance: 1000 }; }
+}
+function saveEmailState(s) { try { localStorage.setItem('tgx_email_state_v1', JSON.stringify(s)); } catch {} }
+
+function initEmailSystem() {
+  // seed start balance once
+  try { if (!localStorage.getItem('tgx_start_balance_v1')) localStorage.setItem('tgx_start_balance_v1', '1000'); } catch {}
+  scheduleNextEmail();
+  // Clear unread when viewing email tab
+  window.addEventListener('hashchange', () => {
+    if ((location.hash || '').replace(/^#\/?/, '') === 'email') {
+      const s = loadEmailState(); s.unread = 0; saveEmailState(s); updateEmailPing();
+    }
+  });
+  const ping = document.getElementById('email-ping');
+  if (ping) ping.addEventListener('click', () => { location.hash = '#/email'; });
+}
+
+function scheduleNextEmail() {
+  clearTimeout(scheduleNextEmail._t);
+  const delay = 60000 + Math.random() * 60000; // 60–120s
+  scheduleNextEmail._t = setTimeout(() => { try { generateEmail(); } finally { scheduleNextEmail(); } }, delay);
+}
+
+function updateEmailPing() {
+  const ping = document.getElementById('email-ping');
+  if (!ping) return;
+  const s = loadEmailState();
+  ping.style.display = s.unread > 0 ? 'block' : 'none';
+}
+
+function generateEmail() {
+  const now = Date.now();
+  const balance = getBalance();
+  const s = loadEmailState();
+  const start = Number(localStorage.getItem('tgx_start_balance_v1') || s.startBalance || 1000);
+  const profit = Math.max(0, balance - start);
+
+  const sender = pickRandom(SENDERS);
+  const tpl = pickRandom(TEMPLATES(balance));
+  // Always use TOTAL balance with a strong sink: 30% – 100%
+  const percent = randIn(0.30, 1.00);
+  const basis = 'total';
+  const amountBase = balance;
+  let requested = Math.floor(amountBase * percent);
+  if (!Number.isFinite(requested) || requested <= 0) requested = Math.floor(randIn(10, 120));
+  // Clamp to available funds (allow up to 100%)
+  requested = Math.max(1, Math.min(requested, Math.floor(balance)));
+
+  const email = {
+    id: String(now) + '_' + Math.floor(Math.random() * 1e6),
+    ts: now,
+    sender,
+    subject: tpl.subject(sender),
+    body: tpl.body(sender),
+    percent: Math.round(percent * 100),
+    basis,
+    requested,
+    read: false,
+  };
+  s.emails.push(email);
+  while (s.emails.length > 5) s.emails.shift();
+  s.unread = (s.unread | 0) + 1;
+  saveEmailState(s);
+  updateEmailPing();
+  try { window.dispatchEvent(new CustomEvent('tgx-email-added')); } catch {}
+}
+
+function pickRandom(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+function randIn(a, b) { return a + Math.random() * (b - a); }
+
+const SENDERS = [
+  'Uncle Frank','Aunt Marge','Cousin Vinny','Roommate Greg','Neighbor Linda','Boss (Oops)','High School Friend','Random Influencer','IRS?','Prince of Bel‑Air',
+  'Gym Buddy','Bowling League','Your Dentist','Ex‑Coworker','Crypto Bro','The Landlord','Streamer You Follow','Barista','HR Robot','Tech Support',
+  'Charity (Totally Real)','Parking Authority','Local Wizard','Space Camp','Pet Sitter','Time Traveler','Pirate Captain','The Algorithm','Night Club Promoter','Lucky Leprechaun'
+];
+
+function TEMPLATES(balance) {
+  return [
+    { minPct:.3, maxPct:.9, basis:'profit', subject:(s)=>`${s} needs a small favor`, body:(s)=>`Hey, could you spot me a cut from your recent wins? Promise I’ll pay you back... eventually.` },
+    { minPct:.5, maxPct:.8, basis:'profit', subject:(s)=>`It’s ${s} — emergency!`, body:()=>`My chair exploded. Don’t ask. I need a replacement and you have “disposable income”.` },
+    { minPct:.2, maxPct:.6, basis:'profit', subject:(s)=>`${s}: Business opportunity`, body:()=>`Limited‑time investment in artisanal AI‑powered birdhouses. We just need seed cash.` },
+    { minPct:.6, maxPct:.9, basis:'profit', subject:(s)=>`${s} says: Bro please`, body:()=>`Listen. I would never ask. But this time I am asking. Big time.` },
+    { minPct:.3, maxPct:.5, basis:'profit', subject:()=>`Parking Ticket Department`, body:()=>`We noticed your car parked near a casino. That’s a fee now. It’s a new thing.` },
+    { minPct:.4, maxPct:.7, basis:'profit', subject:()=>`Gym dues overdue`, body:()=>`You haven’t been in months, but the vibes fee compounds. Help the vibes.` },
+    { minPct:.7, maxPct:.9, basis:'profit', subject:()=>`Space Camp Scholarship`, body:()=>`Send a kid to space (briefly). They’ll wave at you from the stratosphere.` },
+    { minPct:.2, maxPct:.4, basis:'profit', subject:()=>`Local Wizard Invoice`, body:()=>`You stepped over a chalk circle. The ward must be repainted. Arts & crafts aren’t free.` },
+    { minPct:.5, maxPct:.9, basis:'profit', subject:()=>`Crypto Bro Needs Fiat`, body:()=>`It’s complicated. It’s actually simple. Just send cash. We’ll all make it.` },
+    { minPct:.3, maxPct:.6, basis:'profit', subject:()=>`Tech Support #A113`, body:()=>`We fixed your winnings from the cloud. Maintenance fee applies.` },
+    { minPct:.2, maxPct:.3, basis:'profit', subject:()=>`Charity: Save the Pixels`, body:()=>`Every pixel deserves a home. Your donation rescues low‑res sprites.` },
+    { minPct:.8, maxPct:.9, basis:'profit', subject:(s)=>`${s} — urgent wedding fund`, body:()=>`Venue wants 8 inflatable swans. You understand.` },
+    { minPct:.4, maxPct:.7, basis:'profit', subject:()=>`Pet Sitter SOS`, body:()=>`Your fish learned taxes. I need a raise.` },
+    { minPct:.5, maxPct:.9, basis:'auto', subject:()=>`IRS… probably`, body:()=>`This is definitely real. Send a percentage to remain breathtakingly compliant.` },
+    { minPct:.6, maxPct:.9, basis:'auto', subject:()=>`From The Algorithm`, body:()=>`Your generosity is trending. Confirm by sending a proportional offering.` },
+  ];
+}
+
+// Debug/testing hook: force-generate an email immediately
+export function __debugAddEmail() {
+  try { generateEmail(); } catch {}
 }
