@@ -118,6 +118,9 @@ window.addEventListener('DOMContentLoaded', () => {
   initEmailSystem();
   updateEmailPing();
 
+  // Apply any active global bar effects (e.g., Beer blur)
+  initGlobalBarEffects();
+
   // Close Shop menu when navigating into any shop route
   function closeShopMenuIfShopRoute() {
     const key = (location.hash || '').replace(/^#\/?/, '') || 'home';
@@ -145,6 +148,10 @@ function applyTheme(id) {
   if (!t) return;
   const r = document.documentElement;
   for (const k in t.vars) r.style.setProperty(k, t.vars[k]);
+  // Theme extras
+  removeThemeExtras();
+  if (id === 'fire') enableFireTheme();
+  if (id === 'rich') enableRichTheme();
 }
 
 function getThemes() {
@@ -155,6 +162,9 @@ function getThemes() {
     gold:    { vars: { '--bg':'#1e1503','--panel':'#281d05','--panel-2':'#2f230a','--fg':'#fff8e6','--muted':'#e6d8b0','--accent':'#f5c542','--accent-2':'#ffea86' } },
     emerald: { vars: { '--bg':'#071c16','--panel':'#0a261e','--panel-2':'#0c2e24','--fg':'#e7fff6','--muted':'#a8dccc','--accent':'#3ddc84','--accent-2':'#00ffd0' } },
     diamond: { vars: { '--bg':'#0a0f18','--panel':'#0e1420','--panel-2':'#111a2a','--fg':'#f5fbff','--muted':'#c6d8f0','--accent':'#9ad8ff','--accent-2':'#e3f3ff' } },
+    fire:    { vars: { '--bg':'#120a06','--panel':'#1c0f08','--panel-2':'#220f0a','--fg':'#ffe9d6','--muted':'#e2b7a0','--accent':'#ff7a18','--accent-2':'#ffd166' } },
+    liquid:  { vars: { '--bg':'#ffffff','--panel':'rgba(255,255,255,.35)','--panel-2':'rgba(255,255,255,.25)','--fg':'#0a0f18','--muted':'#6b7686','--accent':'#0ea5e9','--accent-2':'#82cfff' } },
+    rich:    { vars: { '--bg':'#08240e','--panel':'#0e2f15','--panel-2':'#12381a','--fg':'#e6ffe6','--muted':'#a8dca8','--accent':'#17c964','--accent-2':'#b8ffb8' } },
   };
 }
 
@@ -192,6 +202,8 @@ function startIncomeLoop() {
       if (items.stocks1 && items.stocks1.owned && items.stocks1.enabled) inc += 50;
       if (items.stocks2 && items.stocks2.owned && items.stocks2.enabled) inc += 500;
       if (items.stocks3 && items.stocks3.owned && items.stocks3.enabled) inc += 5000;
+      if (items.stocks4 && items.stocks4.owned && items.stocks4.enabled) inc += 50000;
+      if (items.stocks5 && items.stocks5.owned && items.stocks5.enabled) inc += 500000;
       if (inc > 0) {
         // mark pending so HUD delta can ignore this passive income
         startIncomeLoop._pendingInc = inc;
@@ -211,6 +223,48 @@ export function __applyThemeFromShop() {
   } catch {}
   ensureClock();
 }
+
+function removeThemeExtras() {
+  document.getElementById('theme-fire-style')?.remove();
+  document.getElementById('theme-fire-bg')?.remove();
+  document.getElementById('theme-rich-style')?.remove();
+  document.getElementById('theme-rich-rain')?.remove();
+  clearInterval(enableRichTheme._t);
+  document.removeEventListener('click', richClickBurst, true);
+}
+function enableFireTheme() {
+  const style = document.createElement('style');
+  style.id = 'theme-fire-style';
+  style.textContent = `
+    @keyframes fireShift { 0%{ filter:hue-rotate(0deg) saturate(1.1);} 50%{ filter:hue-rotate(20deg) saturate(1.4);} 100%{ filter:hue-rotate(0deg) saturate(1.1);} }
+    .fire-layer { position: fixed; inset: -10% -10% 0 -10%; z-index: -1; background:
+      radial-gradient(1200px 600px at 60% -10%, rgba(255,150,0,.22), transparent),
+      radial-gradient(800px 500px at 30% 0%, rgba(255,60,0,.18), transparent),
+      radial-gradient(600px 400px at 70% 10%, rgba(255,200,0,.16), transparent),
+      linear-gradient(#1a0d07,#120a06);
+      animation: fireShift 6s ease-in-out infinite; pointer-events:none; }
+  `;
+  document.head.appendChild(style);
+  const layer = document.createElement('div');
+  layer.id = 'theme-fire-bg';
+  layer.className = 'fire-layer';
+  document.body.appendChild(layer);
+}
+function enableRichTheme() {
+  const style = document.createElement('style');
+  style.id = 'theme-rich-style';
+  style.textContent = `.money-emoji{position:fixed;will-change:transform,opacity;z-index:1200;pointer-events:none}@keyframes fall{0%{transform:translateY(-10vh) rotate(0deg);opacity:0}10%{opacity:1}100%{transform:translateY(110vh) rotate(360deg);opacity:0}}`;
+  document.head.appendChild(style);
+  const rain = document.createElement('div'); rain.id='theme-rich-rain'; document.body.appendChild(rain);
+  enableRichTheme._t = setInterval(()=>{ for(let i=0;i<3;i++) spawnEmoji(Math.random()*window.innerWidth, -20, 1+Math.random()*1.5); },700);
+  document.addEventListener('click', richClickBurst, true);
+}
+function richClickBurst(e){
+  const t=e.target; if(!t) return; if(!(t.closest('button')||t.closest('.btn'))) return;
+  const rect=t.getBoundingClientRect(); const x=rect.left+rect.width/2; const y=rect.top+rect.height/2;
+  for(let i=0;i<6;i++) spawnEmoji(x+(Math.random()-0.5)*20, y+(Math.random()-0.5)*10, 0.9+Math.random()*0.6, true);
+}
+function spawnEmoji(x,y,speed=1){ const n=document.createElement('div'); n.className='money-emoji'; n.textContent='💸'; n.style.left=x+'px'; n.style.top=y+'px'; n.style.fontSize=(18+Math.random()*10)+'px'; n.style.animation=`fall ${3/speed}s linear forwards`; document.body.appendChild(n); setTimeout(()=>n.remove(), (3000/speed)|0); }
 
 // Render ephemeral delta under HUD
 function showMoneyDelta(delta) {
@@ -299,15 +353,15 @@ function loadEmailState() {
     const s = JSON.parse(localStorage.getItem('tgx_email_state_v1') || '{}');
     s.emails = Array.isArray(s.emails) ? s.emails : [];
     s.unread = Math.max(0, s.unread | 0);
-    if (!Number.isFinite(s.startBalance)) s.startBalance = 1000;
+    if (!Number.isFinite(s.startBalance)) s.startBalance = 100000;
     return s;
-  } catch { return { emails: [], unread: 0, startBalance: 1000 }; }
+  } catch { return { emails: [], unread: 0, startBalance: 100000 }; }
 }
 function saveEmailState(s) { try { localStorage.setItem('tgx_email_state_v1', JSON.stringify(s)); } catch {} }
 
 function initEmailSystem() {
   // seed start balance once
-  try { if (!localStorage.getItem('tgx_start_balance_v1')) localStorage.setItem('tgx_start_balance_v1', '1000'); } catch {}
+  try { if (!localStorage.getItem('tgx_start_balance_v1')) localStorage.setItem('tgx_start_balance_v1', '100000'); } catch {}
   scheduleNextEmail();
   // Clear unread when viewing email tab
   window.addEventListener('hashchange', () => {
@@ -336,7 +390,7 @@ function generateEmail() {
   const now = Date.now();
   const balance = getBalance();
   const s = loadEmailState();
-  const start = Number(localStorage.getItem('tgx_start_balance_v1') || s.startBalance || 1000);
+  const start = Number(localStorage.getItem('tgx_start_balance_v1') || s.startBalance || 100000);
   const profit = Math.max(0, balance - start);
 
   const sender = pickRandom(SENDERS);
@@ -401,4 +455,32 @@ function TEMPLATES(balance) {
 // Debug/testing hook: force-generate an email immediately
 export function __debugAddEmail() {
   try { generateEmail(); } catch {}
+}
+
+// ---------------- Global Bar Effects (persist across pages) ----------------
+function getBarEffect() {
+  try { return JSON.parse(localStorage.getItem('tgx_global_effect') || 'null'); } catch { return null; }
+}
+function setBarEffect(effect) {
+  if (effect) localStorage.setItem('tgx_global_effect', JSON.stringify(effect));
+  else localStorage.removeItem('tgx_global_effect');
+}
+function applyBarEffect() {
+  const eff = getBarEffect();
+  const now = Date.now();
+  const body = document.body;
+  if (!body) return;
+  // Clear all
+  body.classList.remove('global-blur');
+  if (!eff) return;
+  if (eff.until && now >= eff.until) { setBarEffect(null); return; }
+  if (eff.type === 'blur') {
+    body.classList.add('global-blur');
+  }
+}
+function initGlobalBarEffects() {
+  applyBarEffect();
+  clearInterval(initGlobalBarEffects._t);
+  initGlobalBarEffects._t = setInterval(applyBarEffect, 1000);
+  window.addEventListener('hashchange', applyBarEffect);
 }

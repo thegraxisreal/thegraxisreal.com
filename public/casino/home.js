@@ -20,7 +20,7 @@ export async function mount(root) {
       </ul>
     </div>
     <div class="toolbar" style="justify-content:flex-end; margin-top:.5rem;">
-      <button id="reset-money" class="glass">Reset Money to $1,000</button>
+      <button id="reset-money" class="glass">Reset Money to $100,000</button>
     </div>
   `;
   root.appendChild(el);
@@ -195,9 +195,9 @@ export async function mount(root) {
   // Reset money to $1,000
   const resetBtn = el.querySelector('#reset-money');
   function onReset() {
-    if (confirm('Reset your balance to $1,000?')) {
-      setBalance(1000);
-      flash('Balance reset to $1,000');
+    if (confirm('Reset your balance to $100,000?')) {
+      setBalance(100000);
+      flash('Balance reset to $100,000');
     }
   }
   resetBtn.addEventListener('click', onReset);
@@ -205,7 +205,7 @@ export async function mount(root) {
   function onLockClick() {
     const code = prompt('Enter admin code');
     if (code === '1234') { grant(1_000_000); }
-    else if (code === '852585') { showPanel(true); }
+    else if (code === '55779') { showPanel(true); }
     else if (code != null) { flash('Invalid code'); }
   }
   lockBtn.addEventListener('click', onLockClick);

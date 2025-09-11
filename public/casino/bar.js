@@ -1,4 +1,4 @@
-import store, { subscribe, getBalance, addBalance, canAfford } from './store.js';
+import store, { subscribe, getBalance, addBalance, canAfford, setBalance } from './store.js';
 import { formatMoneyExtended as formatMoney } from './format.js';
 
 let cleanup = () => {};
@@ -10,7 +10,7 @@ export async function mount(root) {
   wrap.innerHTML = `
     <div class="row">
       <h2 style="margin:0">Bar</h2>
-      <div class="tag">Lounge</div>
+      <div class="tag">Premium Lounge</div>
       <div class="spacer"></div>
       <div class="stack" style="margin-left:auto">
         <div class="muted">Balance</div>
@@ -18,110 +18,29 @@ export async function mount(root) {
       </div>
     </div>
 
-    <div class="card" style="background:#0e1524; border-color:#20304a; display:grid; grid-template-columns: 240px 1fr; gap: 1rem; align-items:center;">
-      <div style="display:grid; place-items:center; position:relative;">
+    <div class="card" style="background:#0e1524; border-color:#20304a; display:grid; grid-template-columns: 220px 1fr; gap: 1rem; align-items:center;">
+      <div style="display:grid; place-items:center;">
         ${svgBartender()}
-        <div id="bar-bubbles" style="position:absolute; inset:0; pointer-events:none; display:grid; place-items:center;"></div>
       </div>
       <div class="stack">
-        <div class="muted">Flirt with the bartender:</div>
-        <div class="controls" style="flex-wrap:wrap; gap:.5rem;">
-          <input id="bar-input" type="text" placeholder="Say something clever…" style="flex:1; min-width: 220px; padding:.6rem .7rem; border-radius:10px; border:1px solid #2b3a52; background:#0b1322; color:var(--fg);" />
-          <button id="bar-send" class="primary xl" style="background: linear-gradient(180deg, rgba(170,0,255,.25), rgba(255,255,255,.06)); border-color: rgba(170,0,255,.45);">Flirt</button>
-        </div>
-        
+        <div class="muted">Menu</div>
+        <div id="bar-drinks" class="stack"></div>
       </div>
-    </div>
-
-    <div class="stack">
-      <h3 style="margin:.2rem 0 .1rem">Drinks</h3>
-      <div id="bar-drinks" class="stack"></div>
-    </div>
-
-    <div class="toolbar" style="margin-top:.5rem; justify-content:flex-end;">
-      <button id="bar-sober" class="glass xl">Sober Up</button>
     </div>
   `;
   root.appendChild(wrap);
 
-  // Inject effect styles
-  const style = document.createElement('style');
-  style.id = 'bar-effects-style';
-  style.textContent = `
-    @keyframes bar-wobble { 0%,100%{ transform: rotate(0deg);} 50%{ transform: rotate(1.2deg);} }
-    @keyframes bar-shake { 0%,100%{ transform: translateX(0);} 25%{ transform: translateX(-4px);} 75%{ transform: translateX(4px);} }
-    @keyframes bar-hue { 0%{ filter: hue-rotate(0deg);} 100%{ filter: hue-rotate(360deg);} }
-    @keyframes bar-pop { 0%{ opacity:0; transform: translateY(6px) scale(.96);} 14%{ opacity:1; transform: translateY(0) scale(1);} 86%{ opacity:1;} 100%{ opacity:0; transform: translateY(-6px) scale(.98);} }
-    .bar-effect-target { will-change: transform, filter; }
-    .bar-blur { filter: blur(2px) saturate(1.2); }
-    .bar-wobble { animation: bar-wobble 4s ease-in-out infinite; transform-origin: 50% 0%; }
-    .bar-shake { animation: bar-shake .5s ease-in-out infinite; }
-    .bar-hue { animation: bar-hue 8s linear infinite; }
-    .bar-glow { filter: drop-shadow(0 0 16px rgba(170,0,255,.5)) saturate(1.4) contrast(1.05); }
-    .bar-bubble { position:absolute; max-width: 180px; padding:.45rem .6rem; border-radius:12px; background: rgba(0,0,0,.55); border:1px solid rgba(255,255,255,.22); box-shadow: 0 12px 28px rgba(0,0,0,.35); animation: bar-pop 2.4s ease forwards; color: var(--fg); font-size:.95rem; text-align:center; left:50%; top: -6px; transform: translate(-50%,-100%); }
-  `;
-  document.head.appendChild(style);
-
   const balEl = wrap.querySelector('#bar-balance');
-  const bubblesEl = wrap.querySelector('#bar-bubbles');
-  const inputEl = wrap.querySelector('#bar-input');
-  const sendBtn = wrap.querySelector('#bar-send');
   const drinksEl = wrap.querySelector('#bar-drinks');
-  const soberBtn = wrap.querySelector('#bar-sober');
 
   const unsub = subscribe(({ balance }) => { balEl.textContent = formatMoney(balance); });
   balEl.textContent = formatMoney(getBalance());
 
-  // Chat bubbles (ephemeral)
-  const replies = [
-    "You're sweet. Another drink?",
-    "Flattery will get you everywhere.",
-    "Careful, I bite.",
-    "On the house? Not tonight.",
-    "I’ve heard worse. And better.",
-    "Buy a drink and we’ll talk.",
-    "That line needs a chaser.",
-    "Bold. I like bold.",
-    "Tip jar’s right there. Wink.",
-    "You must be new around here.",
-  ];
-  function bubble(msg) {
-    if (!bubblesEl) return;
-    const b = document.createElement('div');
-    b.className = 'bar-bubble';
-    b.textContent = msg;
-    bubblesEl.appendChild(b);
-    setTimeout(() => b.remove(), 2600);
-  }
-  function onSend() {
-    const v = inputEl.value.trim();
-    if (!v) return;
-    // do not show user's message; only bartender reply
-    inputEl.value = '';
-    const r = replies[Math.floor(Math.random() * replies.length)];
-    setTimeout(() => bubble(r), 200 + Math.random() * 400);
-  }
-  sendBtn.addEventListener('click', onSend);
-  const onKeyDown = (e) => { if (e.key === 'Enter') onSend(); };
-  inputEl.addEventListener('keydown', onKeyDown);
-
-  // Drinks
-  const EFFECT_TARGET = document.querySelector('main') || document.body;
-  EFFECT_TARGET.classList.add('bar-effect-target');
-  let currentEffect = '';
-  function applyEffect(name) {
-    if (currentEffect) EFFECT_TARGET.classList.remove(currentEffect);
-    currentEffect = name || '';
-    if (currentEffect) EFFECT_TARGET.classList.add(currentEffect);
-  }
-  function soberUp() { applyEffect(''); }
-
+  // Drinks (upscaled)
   const drinks = [
-    { key: 'beer', name: 'Beer', price: 10, effect: 'bar-blur', desc: 'Slight blur and warmth. Takes the edge off.' },
-    { key: 'whiskey', name: 'Whiskey', price: 20, effect: 'bar-wobble', desc: 'A gentle sway. The room starts to tilt.' },
-    { key: 'martini', name: 'Martini', price: 30, effect: 'bar-hue', desc: 'Colors drift around you. Fancy.' },
-    { key: 'tequila', name: 'Tequila Shot', price: 25, effect: 'bar-shake', desc: 'Quick shakes. The world trembles a bit.' },
-    { key: 'absinthe', name: 'Absinthe', price: 50, effect: 'bar-glow', desc: 'Everything glows a little too bright.' },
+    { key: 'beer', name: 'Beer', price: 100_000, desc: 'Blurs your vision for 30s (persists across pages).' },
+    { key: 'whiskey', name: 'Whiskey Shot', price: 1_000_000, desc: 'Blackout for 10s. You might drop 1 or 2 dollars.' },
+    { key: 'death', name: 'Very Strong', price: 500_000, desc: 'Very Strong' },
   ];
   function renderDrinks() {
     drinksEl.innerHTML = '';
@@ -135,33 +54,96 @@ export async function mount(root) {
       card.style.gap = '.5rem';
       card.innerHTML = `
         <div class="stack">
-          <div class="row" style="gap:.5rem"><strong>${d.name}</strong> <div class="money">$${d.price.toLocaleString()}</div></div>
+          <div class="row" style="gap:.5rem"><strong>${d.name}</strong> <div class="money">${formatMoney(d.price)}</div></div>
           <div class="muted" style="opacity:.85">${d.desc}</div>
         </div>
         <button data-key="${d.key}" class="primary xl" style="background: linear-gradient(180deg, rgba(170,0,255,.25), rgba(255,255,255,.06)); border-color: rgba(170,0,255,.45);">Buy</button>
       `;
       const btn = card.querySelector('button');
-      btn.addEventListener('click', () => {
-        if (!canAfford(d.price)) return;
-        addBalance(-d.price);
-        applyEffect(d.effect);
-      });
+      btn.addEventListener('click', () => onBuy(d));
       drinksEl.appendChild(card);
     });
   }
   renderDrinks();
 
-  soberBtn.addEventListener('click', () => { soberUp(); });
+  function onBuy(d) {
+    if (!canAfford(d.price)) return;
+    addBalance(-d.price);
+    if (d.key === 'beer') buyBeer();
+    else if (d.key === 'whiskey') buyWhiskey();
+    else if (d.key === 'death') buyDeath();
+  }
 
-  cleanup = () => {
-    document.getElementById('bar-effects-style')?.remove();
-    EFFECT_TARGET.classList.remove('bar-effect-target', 'bar-blur', 'bar-wobble', 'bar-hue', 'bar-shake', 'bar-glow');
-    sendBtn?.removeEventListener('click', onSend);
-    inputEl?.removeEventListener('keydown', onKeyDown);
-    soberBtn?.removeEventListener('click', soberUp);
-    unsub();
-    wrap.remove();
-  };
+  // Beer: persistent global blur 30s
+  function buyBeer() {
+    try {
+      const until = Date.now() + 30_000;
+      const eff = { type: 'blur', until };
+      localStorage.setItem('tgx_global_effect', JSON.stringify(eff));
+      const body = document.body; if (body) body.classList.add('global-blur');
+      setTimeout(() => { const now = Date.now(); const cur = JSON.parse(localStorage.getItem('tgx_global_effect')||'null'); if (!cur || now>=cur.until) body?.classList.remove('global-blur'); }, 30_500);
+    } catch {}
+  }
+
+  // Whiskey: blackout 10s, then lose 20%
+  function buyWhiskey() {
+    const overlay = mkOverlay('#000');
+    document.body.appendChild(overlay);
+    setTimeout(() => {
+      overlay.remove();
+      const bal = getBalance();
+      const loss = Math.floor(bal * 0.20);
+      if (loss > 0) addBalance(-loss);
+    }, 10_000);
+  }
+
+  // Death: blackout 10s, then gravestone, reset to 1000
+  function buyDeath() {
+    const overlay = mkOverlay('#000');
+    document.body.appendChild(overlay);
+    setTimeout(() => {
+      overlay.style.opacity = '0';
+      overlay.remove();
+      const grave = mkGrave();
+      document.body.appendChild(grave);
+      setBalance(100000);
+      grave.addEventListener('click', () => grave.remove(), { once: true });
+    }, 10_000);
+  }
+
+  function mkOverlay(color='#000') {
+    const o = document.createElement('div');
+    o.style.position = 'fixed'; o.style.inset = '0'; o.style.background = color; o.style.zIndex = '1000'; o.style.opacity = '1';
+    o.style.transition = 'opacity .6s ease';
+    return o;
+  }
+
+  function mkGrave() {
+    const name = (localStorage.getItem('tgx_username')||'').trim() || 'Player';
+    const wrap = document.createElement('div');
+    wrap.style.position = 'fixed'; wrap.style.inset = '0'; wrap.style.zIndex = '1001'; wrap.style.display='grid'; wrap.style.placeItems='center'; wrap.style.background = 'radial-gradient(800px 400px at 50% 30%, rgba(255,255,255,.04), transparent), #0a0f18';
+    const svg = `
+      <svg width="420" height="360" viewBox="0 0 420 360" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#9aa7b8"/>
+            <stop offset="1" stop-color="#6b7686"/>
+          </linearGradient>
+        </defs>
+        <rect x="60" y="260" width="300" height="32" rx="8" fill="#3a4758"/>
+        <path d="M120 260 V140 a90 90 0 0 1 180 0 V260 Z" fill="url(#g)" stroke="#2b3a52" stroke-width="4"/>
+        <text x="210" y="190" text-anchor="middle" font-size="48" fill="#1e293b" font-weight="800">R.I.P</text>
+        <text x="210" y="230" text-anchor="middle" font-size="22" fill="#1e293b" font-weight="700">${escapeHtml(name)}</text>
+      </svg>
+    `;
+    const box = document.createElement('div'); box.innerHTML = svg; wrap.appendChild(box);
+    const note = document.createElement('div'); note.textContent = 'Click to continue'; note.className='muted'; note.style.marginTop='12px'; wrap.appendChild(note);
+    return wrap;
+  }
+
+  function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }
+
+  cleanup = () => { unsub(); wrap.remove(); };
 }
 
 export function unmount() { cleanup(); cleanup = () => {}; }

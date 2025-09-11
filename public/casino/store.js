@@ -6,7 +6,7 @@ const KEY = 'tgx_casino_balance_v1';
 function readInitial() {
   const raw = localStorage.getItem(KEY);
   const n = raw ? parseInt(raw, 10) : NaN;
-  if (!Number.isFinite(n) || n <= 0) return 1000; // default starting balance
+  if (!Number.isFinite(n) || n <= 0) return 100000; // default starting balance
   return n;
 }
 
@@ -39,4 +39,3 @@ export function subscribe(fn) { subs.add(fn); return () => subs.delete(fn); }
 // Expose a tiny API for games
 const store = { getBalance, setBalance, addBalance, canAfford, subscribe };
 export default store;
-

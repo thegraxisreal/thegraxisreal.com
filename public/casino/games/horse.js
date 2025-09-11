@@ -19,13 +19,11 @@ export async function mount(root) {
       </div>
     </div>
 
-    <!-- Race track on top -->
-    <div id="hr-track" style="position:relative; border:1px solid #20304a; border-radius:12px; background:#0e1524; height:300px; overflow:hidden; box-shadow: inset 0 4px 14px rgba(0,0,0,.35);"></div>
-
-    <!-- Selection list underneath -->
-    <div class="stack">
-      <div class="muted">Pick a horse:</div>
-      <div id="hr-list" class="stack"></div>
+    <div class="card" style="background:#0e1524; border-color:#20304a;">
+      <div id="hr-wrap" style="display:grid; grid-template-columns: 140px 1fr; gap:.75rem; align-items:center;">
+        <div id="hr-names" class="stack"></div>
+        <svg id="hr-svg" width="100%" height="260" viewBox="0 0 800 260" preserveAspectRatio="none"></svg>
+      </div>
     </div>
 
     <div class="toolbar" style="margin-top:.5rem; justify-content:space-between;">
@@ -61,8 +59,8 @@ export async function mount(root) {
   const betEl = wrap.querySelector('#hr-bet');
   const startBtn = wrap.querySelector('#hr-start');
   const betMaxBtn = wrap.querySelector('#hr-bet-max');
-  const listEl = wrap.querySelector('#hr-list');
-  const trackEl = wrap.querySelector('#hr-track');
+  const namesEl = wrap.querySelector('#hr-names');
+  const svg = wrap.querySelector('#hr-svg');
   const logEl = wrap.querySelector('#hr-log');
   // Cheat button beside Start
   const cheatBtn = document.createElement('button');
@@ -102,53 +100,15 @@ export async function mount(root) {
     }));
   }
 
-  // Render horse list with odds and selection
-  function renderList() {
-    listEl.innerHTML = '';
-    state.horses.forEach((h, i) => {
-      const row = document.createElement('div');
-      row.className = 'row';
-      row.style.gap = '8px';
-      row.style.alignItems = 'center';
-      row.style.cursor = 'pointer';
-      row.style.padding = '.4rem .5rem';
-      row.style.border = '1px solid #2b3a52';
-      row.style.borderRadius = '10px';
-      row.setAttribute('data-i', String(i));
-      row.innerHTML = `
-        <div class="controls" style="gap:.5rem">
-          <div style="width:20px; height:20px; border-radius:50%; background:${h.color}; box-shadow: 0 0 10px rgba(0,0,0,.35);"></div>
-          <strong>${h.name}</strong>
-        </div>
-        <div class="spacer"></div>
-        <div class="tag">×${h.mult.toFixed(2)}</div>
-      `;
-      row.addEventListener('click', onSelect);
-      listEl.appendChild(row);
-    });
-  }
-
-  function onSelect(e) {
-    if (state.racing) return;
-    const row = e.currentTarget;
-    const i = parseInt(row.getAttribute('data-i'), 10);
-    state.selected = i;
-    highlightSelection();
-    cheatHorse = false;
-    updateUI();
-  }
-
   function highlightSelection() {
-    const rows = listEl.querySelectorAll('[data-i]');
-    rows.forEach(el => {
-      if (parseInt(el.getAttribute('data-i'), 10) === state.selected) {
-        el.style.outline = '2px solid rgba(0,212,255,.6)';
-        el.style.borderRadius = '10px';
-        el.style.background = 'rgba(255,255,255,.04)';
-      } else {
-        el.style.outline = 'none';
-        el.style.background = 'transparent';
-      }
+    namesEl.querySelectorAll('[data-i]').forEach(el => {
+      const i = parseInt(el.getAttribute('data-i'), 10);
+      el.style.outline = (i === state.selected) ? '2px solid rgba(0,212,255,.6)' : 'none';
+      el.style.background = (i === state.selected) ? 'rgba(255,255,255,.06)' : 'transparent';
+    });
+    svg.querySelectorAll('[data-lane]').forEach(el => {
+      const i = parseInt(el.getAttribute('data-lane'), 10);
+      el.style.opacity = (i === state.selected || state.selected==null) ? '1' : '.85';
     });
   }
 
@@ -158,75 +118,35 @@ export async function mount(root) {
   let finishX = 0;
 
   function layoutTrack() {
-    trackEl.innerHTML = '';
-    const W = trackEl.clientWidth;
-    const H = trackEl.clientHeight;
-    const lanes = state.lanes;
-    const laneH = H / lanes;
-    finishX = W - 48; // padding for finish flag
-
-    // Finish line
-    const finish = document.createElement('div');
-    finish.style.position = 'absolute';
-    finish.style.left = finishX + 'px';
-    finish.style.top = '0';
-    finish.style.bottom = '0';
-    finish.style.width = '4px';
-    finish.style.background = '#20304a';
-    trackEl.appendChild(finish);
-
-    // Start line marker
-    const start = document.createElement('div');
-    start.style.position = 'absolute';
-    start.style.left = '16px';
-    start.style.top = '0';
-    start.style.bottom = '0';
-    start.style.width = '2px';
-    start.style.background = '#1b263a';
-    trackEl.appendChild(start);
-
-    runners = state.horses.map((h, i) => {
-      const y = i * laneH;
-      const lane = document.createElement('div');
-      lane.style.position = 'absolute';
-      lane.style.left = '0';
-      lane.style.top = `${Math.round(y)}px`;
-      lane.style.height = `${Math.floor(laneH)}px`;
-      lane.style.borderTop = i === 0 ? 'none' : '1px dashed #1b263a';
-      lane.style.borderBottom = '1px dashed #1b263a';
-      lane.style.paddingLeft = '8px';
-
-      const marker = document.createElement('div');
-      marker.style.position = 'absolute';
-      marker.style.left = '16px';
-      marker.style.top = '50%';
-      marker.style.transform = 'translate(0, -50%)';
-      marker.style.width = '24px';
-      marker.style.height = '24px';
-      marker.style.borderRadius = '50%';
-      marker.style.background = h.color;
-      marker.style.boxShadow = '0 0 12px rgba(0,0,0,.45)';
-      marker.textContent = '🐎';
-      marker.style.display = 'grid';
-      marker.style.placeItems = 'center';
-      marker.style.fontSize = '16px';
-
-      const nameTag = document.createElement('div');
-      nameTag.className = 'tag';
-      nameTag.textContent = h.name;
-      nameTag.style.position = 'absolute';
-      nameTag.style.left = '8px';
-      nameTag.style.top = '6px';
-      nameTag.style.pointerEvents = 'none';
-
-      lane.appendChild(nameTag);
-      lane.appendChild(marker);
-      trackEl.appendChild(lane);
-
-      // Base speed proportional to probability with randomness
-      const base = 120 + h.prob * 140; // px/s
-      return { el: marker, x: 16, v: 0, base };
+    // Names list
+    namesEl.innerHTML = '';
+    state.horses.forEach((h, i) => {
+      const row = document.createElement('div');
+      row.className = 'row'; row.style.gap = '.5rem'; row.style.alignItems = 'center'; row.style.cursor = 'pointer';
+      row.setAttribute('data-i', String(i));
+      row.innerHTML = `<div style="width:14px;height:14px;border-radius:50%;background:${h.color}"></div><strong>${h.name}</strong><div class="spacer"></div><div class="tag">×${h.mult.toFixed(2)}</div>`;
+      row.addEventListener('click', () => { if (state.racing) return; state.selected = i; highlightSelection(); updateUI(); });
+      namesEl.appendChild(row);
     });
+
+    // SVG lanes
+    while (svg.firstChild) svg.removeChild(svg.firstChild);
+    const bbox = svg.getBoundingClientRect();
+    const W = Math.max(600, Math.floor(bbox.width || 800));
+    const H = 260; svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    const lanes = state.lanes; const laneH = H/lanes; finishX = W - 40;
+    for (let i=0;i<lanes;i++) {
+      const y = i*laneH;
+      const r = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      r.setAttribute('x','0'); r.setAttribute('y', String(y)); r.setAttribute('width', String(W)); r.setAttribute('height', String(laneH));
+      r.setAttribute('fill', i%2? '#0c1422':'#0b1322'); r.setAttribute('opacity','0.95'); r.setAttribute('data-lane', String(i)); svg.appendChild(r);
+      if (i>0) { const line = document.createElementNS('http://www.w3.org/2000/svg','line'); line.setAttribute('x1','0'); line.setAttribute('y1', String(y)); line.setAttribute('x2', String(W)); line.setAttribute('y2', String(y)); line.setAttribute('stroke','#1b263a'); line.setAttribute('stroke-dasharray','4 6'); svg.appendChild(line); }
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x','8'); t.setAttribute('y', String(y + laneH - 8)); t.setAttribute('fill','#a8dccc'); t.setAttribute('font-size','12'); t.textContent = `×${state.horses[i].mult.toFixed(2)}`; svg.appendChild(t);
+    }
+    const start = document.createElementNS('http://www.w3.org/2000/svg','line'); start.setAttribute('x1','20'); start.setAttribute('y1','0'); start.setAttribute('x2','20'); start.setAttribute('y2', String(H)); start.setAttribute('stroke','#1b263a'); start.setAttribute('stroke-width','2'); svg.appendChild(start);
+    const finish = document.createElementNS('http://www.w3.org/2000/svg','line'); finish.setAttribute('x1', String(finishX)); finish.setAttribute('y1','0'); finish.setAttribute('x2', String(finishX)); finish.setAttribute('y2', String(H)); finish.setAttribute('stroke','#20304a'); finish.setAttribute('stroke-width','4'); svg.appendChild(finish);
+
+    runners = state.horses.map((h,i) => { const y = i*laneH + laneH/2 + 6; const t = document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('x','20'); t.setAttribute('y', String(y)); t.setAttribute('font-size','16'); t.textContent = '🐎'; svg.appendChild(t); const base = 120 + h.prob*140; return { el:t, x:20, v:0, base }; });
   }
 
   function startRace() {
@@ -263,7 +183,7 @@ export async function mount(root) {
         if (cheatHorse && state.selected === i) { r.v += 600 * dt; }
         r.x += r.v * dt;
         if (r.x >= finishX) { r.x = finishX; if (winner === -1) winner = i; }
-        r.el.style.left = `${Math.floor(r.x)}px`;
+        r.el.setAttribute('x', String(Math.floor(r.x)));
       });
 
       if (winner !== -1) {
@@ -340,7 +260,6 @@ export async function mount(root) {
   // Initialize
   state.selected = null;
   generateHorses();
-  renderList();
   highlightSelection();
   layoutTrack();
   updateUI();
@@ -354,8 +273,6 @@ export async function mount(root) {
     betEl?.removeEventListener('click', onBetEdit);
     startBtn?.removeEventListener('click', startRace);
     cheatBtn?.removeEventListener('click', onCheat);
-    const rows = listEl.querySelectorAll('[data-i]');
-    rows.forEach(el => el.removeEventListener('click', onSelect));
     window.removeEventListener('resize', onResize);
     wrap.remove();
   };

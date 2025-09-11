@@ -10,9 +10,9 @@ let cleanup = () => {};
 //  - Horse Steroids: 1b
 //  - Lucky Slots Drink: 1b
 const ITEMS = [
-  { id: CHEAT_IDS.slots,     name: 'Lucky Slots Drink', desc: 'A legendary concoction from the original thegraxisreal casino. Guarantees a jackpot on your next spin.', game: 'Slots',      price: 1_000_000_000 },
-  { id: CHEAT_IDS.horse,     name: 'Horse Steroids',    desc: 'Makes your chosen horse run like the wind. Guarantees a win next race.',                               game: 'Horse Race', price: 500_000_000 },
-  { id: CHEAT_IDS.plinko,    name: 'Peg Grease',        desc: 'Greases the pegs just right. Your next drop finds the best payout.',                                 game: 'Plinko',     price: 1_000_000 },
+  { id: CHEAT_IDS.slots,     name: 'Lucky Slots Drink', desc: 'A legendary concoction from the original thegraxisreal casino. Guarantees a jackpot on your next spin.', game: 'Slots',      price: 7_000_000 },
+  { id: CHEAT_IDS.horse,     name: 'Horse Steroids',    desc: 'Makes your chosen horse run like the wind. Guarantees a win next race.',                               game: 'Horse Race', price: 5_000_000 },
+  { id: CHEAT_IDS.plinko,    name: 'Peg Grease',        desc: 'Greases the pegs just right. Your next drop finds the best payout.',                                 game: 'Plinko',     price: 100_000 },
   { id: CHEAT_IDS.coinflip,  name: 'Two‑Heads Coin',    desc: 'A weighted coin for the bold. Your next flip lands your pick.',                                      game: 'Coin Flip',  price: 100_000 },
   { id: CHEAT_IDS.blackjack, name: 'Cold Deck',         desc: 'The house has a cold deck tonight. Your next hand is unbeatable.',                                   game: 'Blackjack',  price: 1_000_000 },
 ];

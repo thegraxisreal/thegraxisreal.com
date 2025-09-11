@@ -17,6 +17,9 @@ const THEMES = [
   { id:'neon', name:'Neon', price:250000, desc:'High-contrast neon vibe.', vars:'blue' },
   { id:'gold', name:'Gold', price:1000000, desc:'Pure luxury. Gilded panels and warm glow.', vars:'gold' },
   { id:'diamond', name:'Diamond', price:1000000000, desc:'1 billion. Frosted whites and clarity.', vars:'diamond' },
+  { id:'fire', name:'Fire', price:1000000000000, desc:'Animated fire background with shifting warm highlights.', vars:'fire' },
+  { id:'liquid', name:'Liquid Glass', price:15000000, desc:'Clear, semi-transparent UI over a bright backdrop.', vars:'liquid' },
+  { id:'rich', name:"I'm Rich", price:500000000000000000, desc:'Green vibe with raining money. Buttons spray cash.', vars:'rich' },
 ];
 
 const ITEMS = [
@@ -24,6 +27,8 @@ const ITEMS = [
   { id:'stocks1', name:'Stocks Lv.1', price:5000, type:'toggle', desc:'Pays $50 every 5s when enabled.' },
   { id:'stocks2', name:'Stocks Lv.2', price:50000, type:'toggle', desc:'Pays $500 every 5s when enabled.' },
   { id:'stocks3', name:'Stocks Lv.3', price:500000, type:'toggle', desc:'Pays $5,000 every 5s when enabled.' },
+  { id:'stocks4', name:'Stocks Lv.4', price:5000000, type:'toggle', desc:'Pays $50,000 every 5s when enabled.' },
+  { id:'stocks5', name:'Stocks Lv.5', price:50000000, type:'toggle', desc:'Pays $500,000 every 5s when enabled.' },
 ];
 
 export async function mount(root) {
