@@ -20,18 +20,33 @@ export async function mount(root) {
     <div class="card" style="background:#0e1524; border-color:#20304a;">
       <div id="lb-list" class="stack"></div>
     </div>
+    <div id="lb-closed" style="display:none; position:absolute; inset:0; z-index:5; align-items:center; justify-content:center; padding:2rem; background:repeating-linear-gradient(45deg, #ffcc00 0 16px, #111 16px 32px);">
+      <div style="max-width:640px; width:100%; text-align:center; background:rgba(0,0,0,.8); color:#ffcc00; border:2px solid #ffcc00; padding:1.25rem 1.5rem; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,.5); font-weight:900;">
+        <div style="font-size:1.4rem; letter-spacing:.3px;">Leaderboard closed — logan probably crashed it</div>
+      </div>
+    </div>
   `;
   root.appendChild(wrap);
 
   const listEl = wrap.querySelector('#lb-list');
   const statusEl = wrap.querySelector('#lb-status');
+  wrap.style.position = 'relative';
+  const closedEl = wrap.querySelector('#lb-closed');
 
   const fmtNum = (n) => formatMoney(n);
 
   let timer = 0;
+  function setClosed(on, msg) {
+    if (on) {
+      if (msg) closedEl.querySelector('div > div')?.textContent && (closedEl.querySelector('div > div').textContent = msg);
+      closedEl.style.display = 'flex';
+    } else {
+      closedEl.style.display = 'none';
+    }
+  }
   async function fetchNow() {
     const base = localStorage.getItem(NGROK_KEY);
-    if (!base) { statusEl.textContent = 'Ask admin to configure endpoint.'; return; }
+    if (!base) { statusEl.textContent = 'Leaderboard closed — logan probably crashed it'; setClosed(true, 'Leaderboard closed — logan probably crashed it'); return; }
     try {
       // Fetch leaderboard top 10
       const url = `${base.replace(/\/$/,'')}/leaderboard?ngrok_skip_browser_warning=true`;
@@ -39,6 +54,7 @@ export async function mount(root) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
       const top = (data && data.top) || [];
+      setClosed(false);
       listEl.innerHTML = '';
       if (!top.length) {
         listEl.innerHTML = '<div class="muted">No data yet. It updates as players report in.</div>';
@@ -58,7 +74,8 @@ export async function mount(root) {
       statusEl.textContent = 'Updated ' + new Date().toLocaleTimeString();
     } catch (e) {
       try { console.error('Leaderboard fetch failed:', e); } catch {}
-      statusEl.textContent = 'Failed to load leaderboard. Ensure server is running.';
+      statusEl.textContent = 'Leaderboard closed — logan probably crashed it';
+      setClosed(true, 'Leaderboard closed — logan probably crashed it');
     }
   }
 

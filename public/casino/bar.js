@@ -149,7 +149,18 @@ export async function mount(root) {
 export function unmount() { cleanup(); cleanup = () => {}; }
 
 function svgBartender() {
-  // Simple friendly bartender SVG
+  // Simple friendly bartender SVG (adds a top hat if enabled from Shop)
+  let hat = false;
+  try {
+    const s = JSON.parse(localStorage.getItem('tgx_casino_shop_v1')||'{}');
+    hat = !!(s.items && s.items.charlie_hat && s.items.charlie_hat.enabled);
+  } catch {}
+  const hatSvg = hat ? `
+    <g transform='translate(0,-8)'>
+      <rect x="64" y="28" width="52" height="10" rx="5" fill="#0b0b0b" stroke="#444"/>
+      <rect x="74" y="6" width="32" height="26" rx="6" fill="#0b0b0b" stroke="#444"/>
+      <rect x="74" y="12" width="32" height="6" rx="3" fill="#ffd166" opacity=".85"/>
+    </g>` : '';
   return `
   <svg width="180" height="180" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
     <defs>
@@ -159,7 +170,10 @@ function svgBartender() {
       </linearGradient>
     </defs>
     <rect x="20" y="110" width="140" height="18" rx="6" fill="#332244"/>
-    <circle cx="90" cy="70" r="34" fill="url(#g1)"/>
+    <g id="head">
+      <circle cx="90" cy="70" r="34" fill="url(#g1)"/>
+      ${hatSvg}
+    </g>
     <rect x="66" y="102" width="48" height="40" rx="10" fill="#4a2a6a"/>
     <path d="M70 64c6 10 34 10 40 0" stroke="#321a4a" stroke-width="3" stroke-linecap="round"/>
     <circle cx="78" cy="66" r="3" fill="#321a4a"/>

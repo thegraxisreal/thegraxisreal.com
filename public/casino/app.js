@@ -9,6 +9,8 @@ const routes = {
   horse: () => import('./games/horse.js'),
   plinko: () => import('./games/plinko.js'),
   coinflip: () => import('./games/coinflip.js'),
+  roulette: () => import('./games/roulette.js'),
+  wheel: () => import('./games/wheel.js'),
   bar: () => import('./bar.js'),
   shop: () => import('./shop.js'),
   blackmarket: () => import('./blackmarket.js'),
@@ -94,6 +96,7 @@ window.addEventListener('DOMContentLoaded', () => {
   try {
     const state = JSON.parse(localStorage.getItem('tgx_casino_shop_v1') || '{}');
     if (state && state.themes && state.themes.equipped) applyTheme(state.themes.equipped);
+    applySignFromShop();
   } catch {}
 
   // Clock HUD if enabled
@@ -121,22 +124,14 @@ window.addEventListener('DOMContentLoaded', () => {
   // Apply any active global bar effects (e.g., Beer blur)
   initGlobalBarEffects();
 
-  // Close Shop menu when navigating into any shop route
-  function closeShopMenuIfShopRoute() {
-    const key = (location.hash || '').replace(/^#\/?/, '') || 'home';
-    if (key === 'shop' || key === 'bar' || key === 'blackmarket') {
-      const d = document.querySelector('details.shop-menu');
-      if (d && d.open) d.open = false;
-    }
+  // Close dropdown menus (Shop, Games) when navigating or selecting an item
+  function closeDropdownMenus() {
+    document.querySelectorAll('details.shop-menu').forEach((d) => { if (d.open) d.open = false; });
   }
-  window.addEventListener('hashchange', closeShopMenuIfShopRoute);
-  // Also close immediately when clicking a submenu item
+  window.addEventListener('hashchange', closeDropdownMenus);
   document.addEventListener('click', (e) => {
     const link = e.target && e.target.closest('.shop-panel a');
-    if (link) {
-      const d = document.querySelector('details.shop-menu');
-      if (d && d.open) d.open = false;
-    }
+    if (link) closeDropdownMenus();
   });
 
   loadFromHash(location.hash);
@@ -152,6 +147,7 @@ function applyTheme(id) {
   removeThemeExtras();
   if (id === 'fire') enableFireTheme();
   if (id === 'rich') enableRichTheme();
+  if (id === 'veryrich') enableVeryRichTheme();
 }
 
 function getThemes() {
@@ -165,6 +161,7 @@ function getThemes() {
     fire:    { vars: { '--bg':'#120a06','--panel':'#1c0f08','--panel-2':'#220f0a','--fg':'#ffe9d6','--muted':'#e2b7a0','--accent':'#ff7a18','--accent-2':'#ffd166' } },
     liquid:  { vars: { '--bg':'#ffffff','--panel':'rgba(255,255,255,.35)','--panel-2':'rgba(255,255,255,.25)','--fg':'#0a0f18','--muted':'#6b7686','--accent':'#0ea5e9','--accent-2':'#82cfff' } },
     rich:    { vars: { '--bg':'#08240e','--panel':'#0e2f15','--panel-2':'#12381a','--fg':'#e6ffe6','--muted':'#a8dca8','--accent':'#17c964','--accent-2':'#b8ffb8' } },
+    veryrich:{ vars: { '--bg':'#120d02','--panel':'#1a1405','--panel-2':'#231a07','--fg':'#ffeebe','--muted':'#e4c76f','--accent':'#ffd24d','--accent-2':'#fff0a3' } },
   };
 }
 
@@ -204,6 +201,8 @@ function startIncomeLoop() {
       if (items.stocks3 && items.stocks3.owned && items.stocks3.enabled) inc += 5000;
       if (items.stocks4 && items.stocks4.owned && items.stocks4.enabled) inc += 50000;
       if (items.stocks5 && items.stocks5.owned && items.stocks5.enabled) inc += 500000;
+      if (items.stocks6 && items.stocks6.owned && items.stocks6.enabled) inc += 1000000;
+      if (items.stocks7 && items.stocks7.owned && items.stocks7.enabled) inc += 5000000;
       if (inc > 0) {
         // mark pending so HUD delta can ignore this passive income
         startIncomeLoop._pendingInc = inc;
@@ -222,6 +221,96 @@ export function __applyThemeFromShop() {
     if (state && state.themes && state.themes.equipped) applyTheme(state.themes.equipped);
   } catch {}
   ensureClock();
+  applySignFromShop();
+}
+
+function applySignFromShop() {
+  try {
+    const state = JSON.parse(localStorage.getItem('tgx_casino_shop_v1') || '{}');
+    const id = state && state.signs && state.signs.equipped || 'classic';
+    applySign(id);
+  } catch { applySign('classic'); }
+}
+
+function applySign(id) {
+  const el = document.getElementById('brand-sign');
+  if (!el) return;
+  removeSignExtras();
+  el.style.removeProperty('background');
+  el.style.removeProperty('-webkit-background-clip');
+  el.style.removeProperty('background-clip');
+  el.style.removeProperty('-webkit-text-fill-color');
+  el.style.removeProperty('color');
+  el.textContent = 'thegraxisreal casino';
+  if (id === 'diamond_sign') enableDiamondSign(el);
+  else if (id === 'epilepsy_sign') enableEpilepsySign(el);
+  else if (id === 'gold_sign') enableGoldSign(el);
+  else if (id === 'name_sign') enableNameSign(el);
+}
+
+function removeSignExtras() {
+  document.getElementById('sign-diamond-style')?.remove();
+  document.getElementById('sign-epilepsy-style')?.remove();
+  document.getElementById('sign-gold-style')?.remove();
+  clearInterval(enableGoldSign._t);
+}
+
+function enableDiamondSign(el) {
+  const style = document.createElement('style');
+  style.id = 'sign-diamond-style';
+  style.textContent = `
+    .sign-diamond { background: linear-gradient(90deg, #e3f3ff, #9ad8ff, #e3f3ff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; text-shadow: 0 0 12px rgba(154,216,255,.45); }
+  `;
+  document.head.appendChild(style);
+  el.classList.add('sign-diamond');
+}
+
+function enableEpilepsySign(el) {
+  const style = document.createElement('style');
+  style.id = 'sign-epilepsy-style';
+  style.textContent = `
+    @keyframes strobe { 0%{ color:#000; background:#fff; } 50%{ color:#fff; background:#000; } 100%{ color:#000; background:#fff; } }
+    .sign-epilepsy { animation: strobe .12s linear infinite; padding:.1rem .35rem; border-radius:8px; }
+  `;
+  document.head.appendChild(style);
+  el.classList.add('sign-epilepsy');
+}
+
+function enableGoldSign(el) {
+  const style = document.createElement('style');
+  style.id = 'sign-gold-style';
+  style.textContent = `
+    @keyframes goldShimmer { 0%{ background-position:0% 50%; } 100%{ background-position:200% 50%; } }
+    .sign-gold { 
+      background: linear-gradient(90deg, #fff3b0, #ffd24d, #b8860b, #ffd24d, #fff3b0);
+      background-size: 200% 100%;
+      -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+      text-shadow: 0 0 10px rgba(255,210,77,.35);
+      animation: goldShimmer 3s linear infinite;
+      position: relative;
+    }
+    .gold-sparkle{ position:fixed; z-index:90; color:#ffe9a3; text-shadow:0 0 6px rgba(255,210,77,.8); pointer-events:none; opacity:.9; }
+    @keyframes sparkle { 0%{ transform:translateY(0) scale(0.8) rotate(0deg); opacity:.0 } 20%{opacity:1} 100%{ transform:translateY(40px) scale(1.2) rotate(180deg); opacity:0 } }
+  `;
+  document.head.appendChild(style);
+  el.classList.add('sign-gold');
+  const spawn = () => {
+    const r = el.getBoundingClientRect();
+    const x = r.left + Math.random()*r.width;
+    const y = r.top + Math.random()*r.height*0.6;
+    const n = document.createElement('div');
+    n.className = 'gold-sparkle'; n.textContent = '✦';
+    n.style.left = x+'px'; n.style.top = y+'px'; n.style.animation = `sparkle ${700+Math.random()*600}ms ease-out forwards`;
+    document.body.appendChild(n);
+    setTimeout(()=>n.remove(), 1400);
+  };
+  enableGoldSign._t = setInterval(()=>{ for(let i=0;i<2;i++) spawn(); }, 500);
+}
+
+function enableNameSign(el) {
+  const raw = (localStorage.getItem('tgx_username')||'').trim();
+  const name = raw || 'Player';
+  el.textContent = `${name} casino`;
 }
 
 function removeThemeExtras() {
@@ -229,7 +318,10 @@ function removeThemeExtras() {
   document.getElementById('theme-fire-bg')?.remove();
   document.getElementById('theme-rich-style')?.remove();
   document.getElementById('theme-rich-rain')?.remove();
+  document.getElementById('theme-veryrich-style')?.remove();
+  document.getElementById('theme-veryrich-rain')?.remove();
   clearInterval(enableRichTheme._t);
+  clearInterval(enableVeryRichTheme._t);
   document.removeEventListener('click', richClickBurst, true);
 }
 function enableFireTheme() {
@@ -265,6 +357,37 @@ function richClickBurst(e){
   for(let i=0;i<6;i++) spawnEmoji(x+(Math.random()-0.5)*20, y+(Math.random()-0.5)*10, 0.9+Math.random()*0.6, true);
 }
 function spawnEmoji(x,y,speed=1){ const n=document.createElement('div'); n.className='money-emoji'; n.textContent='💸'; n.style.left=x+'px'; n.style.top=y+'px'; n.style.fontSize=(18+Math.random()*10)+'px'; n.style.animation=`fall ${3/speed}s linear forwards`; document.body.appendChild(n); setTimeout(()=>n.remove(), (3000/speed)|0); }
+
+function enableVeryRichTheme() {
+  const style = document.createElement('style');
+  style.id = 'theme-veryrich-style';
+  style.textContent = `.gold-emoji{position:fixed;will-change:transform,opacity;z-index:1200;pointer-events:none}@keyframes goldfall{0%{transform:translateY(-10vh) rotate(0deg);opacity:0}10%{opacity:1}100%{transform:translateY(110vh) rotate(360deg);opacity:0}}`;
+  document.head.appendChild(style);
+  const rain = document.createElement('div'); rain.id='theme-veryrich-rain'; document.body.appendChild(rain);
+  const svgGoldBar = (w=28) => `
+    <svg width="${w}" height="${Math.round(w*0.6)}" viewBox="0 0 140 84" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="gb1" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0" stop-color="#fff3b0"/>
+          <stop offset="0.5" stop-color="#ffd24d"/>
+          <stop offset="1" stop-color="#b8860b"/>
+        </linearGradient>
+      </defs>
+      <path d="M18 58 L42 18 H98 L122 58 Z" fill="url(#gb1)" stroke="#8f6b12" stroke-width="6"/>
+      <rect x="22" y="58" width="96" height="12" rx="6" fill="#d6a419" stroke="#8f6b12" stroke-width="4"/>
+    </svg>`;
+  const emit = (x,y,speed=1)=>{
+    const n=document.createElement('div'); n.className='gold-emoji';
+    n.innerHTML = svgGoldBar(20 + Math.floor(Math.random()*16));
+    n.style.left=(x||Math.random()*window.innerWidth)+'px';
+    n.style.top=(y||-20)+'px';
+    n.style.position='fixed';
+    n.style.animation=`goldfall ${3/speed}s linear forwards`;
+    document.body.appendChild(n);
+    setTimeout(()=>n.remove(), (3000/speed)|0);
+  };
+  enableVeryRichTheme._t = setInterval(()=>{ for(let i=0;i<4;i++) emit(); },600);
+}
 
 // Render ephemeral delta under HUD
 function showMoneyDelta(delta) {

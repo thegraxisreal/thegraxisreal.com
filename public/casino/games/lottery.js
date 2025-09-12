@@ -39,6 +39,11 @@ export async function mount(root) {
         <div id="lt-winner" class="tag" style="display:none"></div>
       </div>
     </div>
+    <div id="lt-closed" style="display:none; position:absolute; inset:0; z-index:5; align-items:center; justify-content:center; padding:2rem; background:repeating-linear-gradient(45deg, #ffcc00 0 16px, #111 16px 32px);">
+      <div style="max-width:640px; width:100%; text-align:center; background:rgba(0,0,0,.8); color:#ffcc00; border:2px solid #ffcc00; padding:1.25rem 1.5rem; border-radius:8px; box-shadow:0 8px 30px rgba(0,0,0,.5); font-weight:900;">
+        <div style="font-size:1.4rem; letter-spacing:.3px;">Lottery closed</div>
+      </div>
+    </div>
   `;
   root.appendChild(wrap);
 
@@ -52,6 +57,8 @@ export async function mount(root) {
   const entrantsEl = wrap.querySelector('#lt-entrants');
   const winnerEl = wrap.querySelector('#lt-winner');
   const noteEl = wrap.querySelector('#lt-note');
+  wrap.style.position = 'relative';
+  const closedEl = wrap.querySelector('#lt-closed');
 
   const unsub = subscribe(({ balance }) => { balEl.textContent = fmt(balance); updateBuyState(); });
   balEl.textContent = fmt(getBalance());
@@ -60,7 +67,7 @@ export async function mount(root) {
   let boughtRound = null;
   let pollT = 0;
   const BASE = (localStorage.getItem('tgx_ngrok_base') || '').replace(/\/$/, '');
-  if (!BASE) noteEl.textContent = 'Set tgx_ngrok_base to your server (e.g., http://localhost:3002).';
+  if (!BASE) { noteEl.textContent = 'Lottery closed'; closedEl.style.display = 'flex'; }
 
   function loadLocal() {
     try { return JSON.parse(localStorage.getItem('tgx_lottery_local_v1') || '{}'); } catch { return {}; }
@@ -78,9 +85,11 @@ export async function mount(root) {
       const res = await fetch(`${BASE}/lottery?ngrok_skip_browser_warning=true`, { cache:'no-store', headers: { 'ngrok-skip-browser-warning': 'true' } });
       if (!res.ok) throw new Error('HTTP ' + res.status);
       status = await res.json();
+      closedEl.style.display = 'none';
       renderStatus();
     } catch (e) {
-      noteEl.textContent = 'Lottery server unavailable. Start local_server/server.js';
+      noteEl.textContent = 'Lottery closed';
+      closedEl.style.display = 'flex';
     }
   }
 

@@ -209,7 +209,22 @@ export async function mount(root) {
       log(`Winner: ${w.name}. Better luck next time.`);
       logEl.className = 'log loss';
     }
+    // Immediately clear selection to prevent instant re-start exploit
+    state.selected = null;
     updateUI();
+
+    // Reset race state so users cannot spam Start for instant wins
+    // - Clear selection, regenerate horses, rebuild track, clear cheat
+    // - Reset log style back to neutral
+    setTimeout(() => {
+      logEl.className = 'log';
+      cheatHorse = false;
+      generateHorses();
+      highlightSelection();
+      layoutTrack();
+      updateUI();
+      log('Pick a horse to bet on.');
+    }, 800);
   }
 
   function log(msg) { logEl.textContent = msg; }

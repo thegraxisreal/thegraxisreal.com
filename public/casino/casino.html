@@ -8,13 +8,20 @@
   </head>
   <body>
     <header>
-      <h1 class="brand neon mega sign">thegraxisreal casino</h1>
+      <h1 id="brand-sign" class="brand neon mega sign">thegraxisreal casino</h1>
       <nav class="top-nav">
-        <a class="btn glass lg" href="#/slots">Slots</a>
+        <details class="shop-menu games-menu">
+          <summary class="btn glass lg">Chance Games</summary>
+          <div class="shop-panel" role="menu" aria-label="Chance Games submenu">
+            <a class="menu-item" href="#/slots" role="menuitem">Slots</a>
+            <a class="menu-item" href="#/plinko" role="menuitem">Plinko</a>
+            <a class="menu-item" href="#/coinflip" role="menuitem">Coin Flip</a>
+            <a class="menu-item" href="#/roulette" role="menuitem">Roulette</a>
+            <a class="menu-item" href="#/wheel" role="menuitem">Wheel</a>
+          </div>
+        </details>
         <a class="btn glass lg" href="#/blackjack">Blackjack</a>
         <a class="btn glass lg" href="#/horse">Horse Race</a>
-        <a class="btn glass lg" href="#/plinko">Plinko</a>
-        <a class="btn glass lg" href="#/coinflip">Coin Flip</a>
         <details class="shop-menu">
           <summary class="btn glass lg">Shop</summary>
           <div class="shop-panel" role="menu" aria-label="Shop submenu">
