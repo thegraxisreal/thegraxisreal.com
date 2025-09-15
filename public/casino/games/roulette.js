@@ -1,5 +1,6 @@
-import { getBalance, addBalance, canAfford, subscribe } from '../store.js';
+import { getBalance, addBalance, canAfford, subscribe, setBalance } from '../store.js';
 import { formatMoneyExtended as fmt } from '../format.js';
+import { getCheatState, consumeCheat, CHEAT_IDS } from '../cheats.js';
 
 let cleanup = () => {};
 
@@ -96,6 +97,13 @@ export async function mount(root) {
   let capturing = false; // after drop, guide ball into pocket
   let captureIdx = -1;
   let ballRScale = 0.90; // relative to R; eases inward during capture
+  const zeroIdx = 0 + order.indexOf(0);
+  let cheatUseActive = false;
+  let cheatCatastrophe = false; // 25% chance
+  let cheatForcedZero = false;  // true when cheat steers to 0
+  let flyOut = null; // {x,y,vx,vy,active}
+  let spinStart = 0;
+  let lastCx = 0, lastCy = 0, lastR = 0;
 
   function clearSvg() { while (svg.firstChild) svg.removeChild(svg.firstChild); }
 
@@ -113,6 +121,8 @@ export async function mount(root) {
     bg.setAttribute('x','0'); bg.setAttribute('y','0'); bg.setAttribute('width', String(W)); bg.setAttribute('height', String(H));
     bg.setAttribute('fill','#0b1322');
     svg.appendChild(bg);
+
+    lastCx = cx; lastCy = cy; lastR = R;
 
     // Group for wheel that we rotate by wheelAngle
     const g = document.createElementNS('http://www.w3.org/2000/svg','g');
@@ -165,18 +175,37 @@ export async function mount(root) {
     svg.appendChild(rim);
 
     // Ball
-    const bx = cx + Math.cos(ballAngle)*ballR;
-    const by = cy + Math.sin(ballAngle)*ballR;
-    const ball = document.createElementNS('http://www.w3.org/2000/svg','circle');
-    ball.setAttribute('cx', String(bx)); ball.setAttribute('cy', String(by)); ball.setAttribute('r', '7');
-    ball.setAttribute('fill', '#fff'); ball.setAttribute('stroke', '#aaa');
-    svg.appendChild(ball);
+    if (flyOut && flyOut.active) {
+      const ball = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      ball.setAttribute('cx', String(flyOut.x)); ball.setAttribute('cy', String(flyOut.y)); ball.setAttribute('r', '7');
+      ball.setAttribute('fill', '#fff'); ball.setAttribute('stroke', '#aaa');
+      svg.appendChild(ball);
+    } else {
+      const bx = cx + Math.cos(ballAngle)*ballR;
+      const by = cy + Math.sin(ballAngle)*ballR;
+      const ball = document.createElementNS('http://www.w3.org/2000/svg','circle');
+      ball.setAttribute('cx', String(bx)); ball.setAttribute('cy', String(by)); ball.setAttribute('r', '7');
+      ball.setAttribute('fill', '#fff'); ball.setAttribute('stroke', '#aaa');
+      svg.appendChild(ball);
+    }
 
     // Peg at top as reference
     const peg = document.createElementNS('http://www.w3.org/2000/svg','circle');
     peg.setAttribute('cx', String(cx)); peg.setAttribute('cy', String(cy - (ballR+14)));
     peg.setAttribute('r', '3'); peg.setAttribute('fill', '#ffd166');
     svg.appendChild(peg);
+
+    // Tiny green square way left (visible when cheat is armed or during flyout)
+    if (cheatUseActive || (flyOut && flyOut.active)) {
+      const sq = document.createElementNS('http://www.w3.org/2000/svg','rect');
+      const sx = cx - (R + 80);
+      const sy = cy - 6;
+      sq.setAttribute('x', String(sx)); sq.setAttribute('y', String(sy));
+      sq.setAttribute('width', '12'); sq.setAttribute('height', '12');
+      sq.setAttribute('fill', '#0b8f3a');
+      sq.setAttribute('stroke', '#0a6e2e');
+      svg.appendChild(sq);
+    }
   }
 
   function angleNorm(a){ a%=Math.PI*2; if (a<0) a+=Math.PI*2; return a; }
@@ -207,24 +236,77 @@ export async function mount(root) {
     capturing = false;
     captureIdx = -1;
     ballRScale = 0.90;
+    flyOut = null;
+    cheatUseActive = false;
+    cheatCatastrophe = false;
+    spinStart = performance.now();
+    
+    // Check cheat charge
+    try {
+      const charged = getCheatState(CHEAT_IDS.roulette)?.charge;
+      if (charged) {
+        cheatUseActive = true;
+        consumeCheat(CHEAT_IDS.roulette);
+        cheatCatastrophe = Math.random() < 0.25; // 1 in 4 spins backfire
+      }
+    } catch {}
 
     let last = performance.now();
     function frame(now){
       const dt = Math.min(32, now - last) / 1000; // seconds
       last = now;
+      const elapsed = now - spinStart;
       // Integrate
       wheelAngle += wheelVel * dt;
       wheelVel *= 0.994; // wheel friction
 
-      if (!capturing) {
+      if (flyOut && flyOut.active) {
+        // Ball flying toward tiny square
+        flyOut.x += flyOut.vx * dt;
+        flyOut.y += flyOut.vy * dt;
+        const tx = lastCx - (lastR + 80) + 6;
+        const ty = lastCy;
+        const dx = tx - flyOut.x, dy = ty - flyOut.y;
+        if (dx*dx + dy*dy < 12*12) {
+          // Reached square: catastrophic loss
+          cancelAnimationFrame(anim);
+          state.spinning = false;
+          setBalance(0);
+          logEl.className = 'log loss';
+          log('The ball flew off and hit the tiny green square. You lost everything.');
+          updateUI();
+          return;
+        }
+      } else if (!capturing) {
         ballAngle += ballVel * dt;
         ballVel *= 0.992; // ball friction on rim
         // Mild jitter to avoid perfect repeats
         ballVel += (Math.random()-0.5)*0.02;
-        // Start capture phase when slow enough
-        if (Math.abs(ballVel) < 1.6) {
-          const rel = ballAngle - wheelAngle;
-          captureIdx = angleToIndex(rel);
+        // Cheat behaviors
+        if (cheatUseActive && cheatCatastrophe && elapsed > 900) {
+          // Launch ball off toward the tiny green square
+          const R = Math.min((svg.viewBox.baseVal.width||800),(svg.viewBox.baseVal.height||360)) * 0.45;
+          const cx = (svg.viewBox.baseVal.width||800)/2; const cy = (svg.viewBox.baseVal.height||360)/2;
+          const ballR = R * ballRScale;
+          const bx = cx + Math.cos(ballAngle)*ballR;
+          const by = cy + Math.sin(ballAngle)*ballR;
+          const tx = cx - (R + 80) + 6;
+          const ty = cy;
+          const dx = tx - bx, dy = ty - by;
+          const len = Math.hypot(dx,dy) || 1;
+          const speed = 900; // px/s
+          flyOut = { x: bx, y: by, vx: dx/len*speed, vy: dy/len*speed, active: true };
+        }
+        // Start capture phase when slow enough; force to zero if cheat success
+        const threshold = (cheatUseActive && !cheatCatastrophe) ? 2.2 : 1.6;
+        if (Math.abs(ballVel) < threshold) {
+          if (cheatUseActive && !cheatCatastrophe) {
+            captureIdx = zeroIdx;
+            cheatForcedZero = true;
+          } else {
+            const rel = ballAngle - wheelAngle;
+            captureIdx = angleToIndex(rel);
+          }
           capturing = true;
         }
       } else {
@@ -264,8 +346,8 @@ export async function mount(root) {
     const t = state.pick.type;
     if (t === 'red' && color === 'red') payout = state.bet * 4;
     else if (t === 'black' && color === 'black') payout = state.bet * 4;
-    else if (t === 'zero' && number === 0) payout = state.bet * 100;
-    else if (t === 'number' && Number(state.pick.number) === number) payout = state.bet * 100;
+    else if (t === 'zero' && number === 0) payout = state.bet * (cheatForcedZero ? 20 : 100);
+    else if (t === 'number' && Number(state.pick.number) === number) payout = state.bet * (cheatForcedZero ? 20 : 100);
 
     if (payout > 0) {
       addBalance(payout);

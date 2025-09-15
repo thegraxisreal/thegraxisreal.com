@@ -15,6 +15,7 @@ const ITEMS = [
   { id: CHEAT_IDS.plinko,    name: 'Peg Grease',        desc: 'Greases the pegs just right. Your next drop finds the best payout.',                                 game: 'Plinko',     price: 100_000 },
   { id: CHEAT_IDS.coinflip,  name: 'Two‑Heads Coin',    desc: 'A weighted coin for the bold. Your next flip lands your pick.',                                      game: 'Coin Flip',  price: 100_000 },
   { id: CHEAT_IDS.blackjack, name: 'Cold Deck',         desc: 'The house has a cold deck tonight. Your next hand is unbeatable.',                                   game: 'Blackjack',  price: 1_000_000 },
+  { id: CHEAT_IDS.roulette,  name: 'Green Ball',        desc: 'Your Next spin will land on A green square. get it?',                                                game: 'Roulette',   price: 7_000_000 },
 ];
 
 export async function mount(root) {
@@ -40,6 +41,7 @@ export async function mount(root) {
     if (id === CHEAT_IDS.plinko) return `<svg width="140" height="100" viewBox="0 0 140 100"><rect x="8" y="8" width="124" height="84" rx="12" fill="#0e1526"/>${Array.from({length:5},(_,r)=>Array.from({length:r+1},(_,c)=>`<circle cx="${40 + c*16 + (4-r)*8}" cy="${24 + r*12}" r="3" fill="#e6ebf2"/>`).join('')).join('')}</svg>`;
     if (id === CHEAT_IDS.coinflip) return `<svg width="140" height="100" viewBox="0 0 140 100"><rect x="10" y="10" width="120" height="80" rx="12" fill="#201a0a"/><circle cx="70" cy="50" r="28" fill="#ffd166"/><text x="70" y="56" text-anchor="middle" font-size="22" font-weight="700" fill="#3b2b05">H</text></svg>`;
     if (id === CHEAT_IDS.blackjack) return `<svg width="140" height="100" viewBox="0 0 140 100"><rect x="8" y="8" width="124" height="84" rx="12" fill="#0f1420"/><rect x="40" y="26" width="32" height="46" rx="6" fill="#0b1322" stroke="#2b3a52"/><rect x="64" y="30" width="32" height="46" rx="6" fill="#0b1322" stroke="#2b3a52"/><text x="56" y="56" font-size="16">A♠</text><text x="80" y="60" font-size="16">K♦</text></svg>`;
+    if (id === CHEAT_IDS.roulette) return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#0e1524"/><circle cx="70" cy="50" r="32" fill="#1b2336" stroke="#20304a"/><text x="70" y="56" text-anchor="middle" font-size="18" font-weight="800" fill="#0b8f3a">0</text><rect x="18" y="46" width="8" height="8" fill="#0b8f3a"/></svg>`;
     return '';
   }
 

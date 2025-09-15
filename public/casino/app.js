@@ -12,11 +12,12 @@ const routes = {
   roulette: () => import('./games/roulette.js'),
   wheel: () => import('./games/wheel.js'),
   bar: () => import('./bar.js'),
-  shop: () => import('./shop.js'),
+  shop: () => import('./shop_hub.js'),
   blackmarket: () => import('./blackmarket.js'),
   leaderboard: () => import('./leaderboard.js'),
   email: () => import('./email.js'),
   lottery: () => import('./games/lottery.js'),
+  scratchers: () => import('./scratchers.js'),
 };
 
 let activeModule = null;
@@ -212,6 +213,8 @@ function startIncomeLoop() {
       if (items.stocks5 && items.stocks5.owned && items.stocks5.enabled) inc += 500000;
       if (items.stocks6 && items.stocks6.owned && items.stocks6.enabled) inc += 1000000;
       if (items.stocks7 && items.stocks7.owned && items.stocks7.enabled) inc += 5000000;
+      if (items.stocks8 && items.stocks8.owned && items.stocks8.enabled) inc += 50000000;
+      if (items.stocks9 && items.stocks9.owned && items.stocks9.enabled) inc += 1000000000;
       if (inc > 0) {
         // mark pending so HUD delta can ignore this passive income
         startIncomeLoop._pendingInc = inc;

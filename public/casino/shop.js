@@ -34,6 +34,8 @@ const ITEMS = [
   { id:'stocks5', name:'Stocks Lv.5', price:50000000, type:'toggle', desc:'Pays $500,000 every 5s when enabled.' },
   { id:'stocks6', name:'Stocks Lv.6', price:500000000, type:'toggle', desc:'Pays $1,000,000 every 5s when enabled.' },
   { id:'stocks7', name:'Stocks Lv.7', price:5000000000, type:'toggle', desc:'Pays $5,000,000 every 5s when enabled.' },
+  { id:'stocks8', name:'Stocks Lv.8', price:500_000_000_000_000_000, type:'toggle', desc:'Pays $50,000,000 every 5s when enabled.' },
+  { id:'stocks9', name:'Stocks Lv.9', price:5e35, type:'toggle', desc:'Pays $1,000,000,000 every 5s when enabled.' },
   { id:'one_min_timer', name:'1 Minute Timer', price:500000000000, type:'consumable', desc:'Starts a 60s timer. Does absolutely nothing else.' },
 ];
 
@@ -61,6 +63,8 @@ export async function mount(root) {
       <h3 style="margin:.2rem 0">Utilities</h3>
       <div id="items" class="store-grid"></div>
     </div>
+
+    
   `;
   root.appendChild(wrap);
 
@@ -219,6 +223,8 @@ export async function mount(root) {
       });
       itemsEl.appendChild(card);
     });
+
+    // (Scratchers moved to dedicated page)
   }
 
   render();
@@ -294,3 +300,197 @@ function startOneMinuteTimer() {
     setTimeout(() => { clearInterval(t); try{ box.remove(); }catch{} }, 60_500);
   } catch {}
 }
+
+// ---------------- Scratchers implementation ----------------
+function scratchCoverPumpkin() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <linearGradient id="pbg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3a1406"/><stop offset="1" stop-color="#1a0a04"/></linearGradient>
+    </defs>
+    <rect x="8" y="8" width="124" height="84" rx="12" fill="url(#pbg)" stroke="#5a2a0a"/>
+    <text x="70" y="30" text-anchor="middle" fill="#ffcc00" font-weight="900" font-size="12">Thegraxisreal Billions</text>
+    <text x="70" y="46" text-anchor="middle" fill="#e6ebf2" opacity=".9" font-size="10">Match 3 🎃 to win</text>
+    <text x="70" y="64" text-anchor="middle" fill="#ffd166" font-weight="800" font-size="12">100 Billion</text>
+  </svg>`;
+}
+function scratchCoverCharlie() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="8" width="124" height="84" rx="12" fill="#0e1524" stroke="#20304a"/>
+    <g transform="translate(52,18) scale(.6)">${charlieMiniSvg()}</g>
+    <text x="70" y="90" text-anchor="middle" fill="#ffd166" font-weight="800" font-size="12">Charlie Chops</text>
+  </svg>`;
+}
+function scratchCoverNeon() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="8" width="124" height="84" rx="12" fill="#0a0f18" stroke="#20304a"/>
+    <text x="70" y="34" text-anchor="middle" fill="#74e0ff" font-weight="900" font-size="14">Neon Jackpot</text>
+    <text x="70" y="54" text-anchor="middle" fill="#a8dfff" opacity=".9" font-size="10">Match 3 ★ to win</text>
+    <text x="70" y="72" text-anchor="middle" fill="#74e0ff" font-weight="800" font-size="12">10 Billion</text>
+  </svg>`;
+}
+function scratchCoverDiamond() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="8" width="124" height="84" rx="12" fill="#0e1420" stroke="#20304a"/>
+    ${diamondIcon('#9ad8ff')}
+  </svg>`;
+}
+
+function charlieMiniSvg() {
+  // Compact bartender face + torso (inline, self-contained)
+  return `
+    <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="ch1" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="#ff9bd3"/>
+          <stop offset="1" stop-color="#d07cff"/>
+        </linearGradient>
+      </defs>
+      <rect x="10" y="42" width="40" height="8" rx="3" fill="#332244"/>
+      <circle cx="30" cy="24" r="14" fill="url(#ch1)"/>
+      <rect x="22" y="34" width="16" height="16" rx="4" fill="#4a2a6a"/>
+      <path d="M22 22c4 4 12 4 16 0" stroke="#321a4a" stroke-width="2" stroke-linecap="round"/>
+      <circle cx="24" cy="22" r="2" fill="#321a4a"/>
+      <circle cx="36" cy="22" r="2" fill="#321a4a"/>
+      <path d="M24 28c4 3 8 3 12 0" stroke="#321a4a" stroke-width="2" stroke-linecap="round"/>
+    </svg>`;
+}
+
+function symbolPumpkin(){ return emojiSvg('🎃'); }
+function symbolLeaf(){ return emojiSvg('🍁'); }
+function symbolGhost(){ return emojiSvg('👻'); }
+function symbolCharlie(){ return `<div style="display:grid;place-items:center;width:100%;height:100%"><div style="transform:scale(1)">${charlieMiniSvg()}</div></div>`; }
+function symbolMug(){ return emojiSvg('🍺'); }
+function symbolHat(){ return emojiSvg('🎩'); }
+function symbolStar(){ return emojiSvg('★'); }
+function symbolBolt(){ return emojiSvg('⚡'); }
+function symbolMoon(){ return emojiSvg('🌙'); }
+function symbolDiamond(){ return emojiSvg('💎'); }
+function symbolRing(){ return emojiSvg('💍'); }
+function symbolCrown(){ return emojiSvg('👑'); }
+
+function emojiSvg(ch) {
+  const safe = escapeHtml(ch);
+  return `<div style="display:grid;place-items:center;width:100%;height:100%;font-size:46px">${safe}</div>`;
+}
+
+function openScratcher(def, isWin) {
+  const overlay = document.createElement('div');
+  overlay.style.position = 'fixed'; overlay.style.inset = '0'; overlay.style.zIndex = '1200';
+  overlay.style.background = 'radial-gradient(900px 500px at 50% -10%, rgba(255,255,255,.06), transparent), #0a0f18';
+  overlay.style.display = 'grid'; overlay.style.placeItems = 'center';
+
+  const panel = document.createElement('div');
+  panel.className = 'card';
+  panel.style.width = 'min(680px, 96vw)';
+  panel.style.background = '#0e1524'; panel.style.borderColor = '#20304a';
+  panel.style.padding = '1rem'; panel.style.borderRadius = '12px';
+  panel.innerHTML = `
+    <div class="row" style="align-items:center; gap:.5rem; margin-bottom:.5rem">
+      <strong style="font-size:1.2rem">${escapeHtml(def.name)}</strong>
+      <div class="spacer"></div>
+      <button class="glass" id="sc-close">Close</button>
+    </div>
+    <div class="muted" style="margin-bottom:.5rem">Scratch all three areas. 1 in 10 chance to match 3.</div>
+    <div id="sc-area" style="display:grid; grid-template-columns: repeat(3, 1fr); gap:.75rem"></div>
+    <div id="sc-msg" class="stack" style="margin-top:.75rem"></div>
+  `;
+  overlay.appendChild(panel);
+
+  const area = panel.querySelector('#sc-area');
+  const msg = panel.querySelector('#sc-msg');
+
+  // Determine symbols to place behind scratch layers
+  const winner = isWin;
+  const slots = [0,1,2].map(()=>({html:''}));
+  if (winner) {
+    slots.forEach(s => s.html = def.winSymbol());
+  } else {
+    // Ensure not all 3 equal; choose at least one miss symbol
+    const winIdx = Math.floor(Math.random()*3);
+    const missChoices = def.missSymbols;
+    for (let i=0;i<3;i++) {
+      if (i===winIdx) slots[i].html = def.winSymbol(); else slots[i].html = missChoices[Math.floor(Math.random()*missChoices.length)]();
+    }
+    // If by chance all equal (rare), force a miss
+    const allEq = slots.every(s=>s.html===slots[0].html);
+    if (allEq) slots[2].html = missChoices[0]();
+  }
+
+  const revealed = [false,false,false];
+  slots.forEach((s, i) => {
+    const cell = document.createElement('div');
+    cell.style.position='relative'; cell.style.height='160px'; cell.style.border='1px solid #20304a'; cell.style.borderRadius='8px';
+    cell.style.overflow='hidden'; cell.style.background='#0b1322';
+    const content = document.createElement('div'); content.innerHTML = s.html; content.style.width='100%'; content.style.height='100%';
+    cell.appendChild(content);
+    const canvas = document.createElement('canvas'); canvas.width = 600; canvas.height = 400; // will scale via CSS
+    canvas.style.position='absolute'; canvas.style.inset='0'; canvas.style.width='100%'; canvas.style.height='100%';
+    cell.appendChild(canvas);
+    area.appendChild(cell);
+    initScratchCanvas(canvas, def.theme || '#bbb', () => { revealed[i] = true; checkSettle(); });
+  });
+
+  function checkSettle() {
+    if (revealed.every(Boolean)) {
+      const won = winner;
+      if (won) {
+        msg.innerHTML = `<div class="row" style="gap:.5rem; align-items:center"><strong style="color:${def.theme}">WINNER!</strong><div>Prize:</div><div class="money">${fmt(def.prize)}</div></div>`;
+        try { import('./store.js').then(m=>m.addBalance(def.prize)); } catch { }
+      } else {
+        msg.innerHTML = `<div class="muted">No match this time. Better luck on the next ticket.</div>`;
+      }
+    }
+  }
+
+  panel.querySelector('#sc-close').addEventListener('click', () => overlay.remove(), { once:true });
+  document.body.appendChild(overlay);
+}
+
+function initScratchCanvas(canvas, color='#c0c0c0', onReveal=()=>{}) {
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  // Paint foil
+  const grad = ctx.createLinearGradient(0,0,W,H);
+  grad.addColorStop(0, shade(color, -20));
+  grad.addColorStop(0.5, shade(color, 0));
+  grad.addColorStop(1, shade(color, 20));
+  ctx.fillStyle = grad; ctx.fillRect(0,0,W,H);
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  for (let i=0;i<40;i++) { const x=Math.random()*W, y=Math.random()*H, w=60*Math.random(), h=8; ctx.fillRect(x,y,w,h); }
+
+  let scratching = false; let erased = 0; const ERaseToReveal = 0.55;
+  const rect = () => canvas.getBoundingClientRect();
+  const clearAt = (clientX, clientY) => {
+    const r = rect();
+    const x = (clientX - r.left) * (W / r.width);
+    const y = (clientY - r.top) * (H / r.height);
+    ctx.globalCompositeOperation = 'destination-out';
+    const radius = 24;
+    ctx.beginPath(); ctx.arc(x,y,radius,0,Math.PI*2); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    // crude reveal detection
+    erased += (Math.PI*radius*radius)/(W*H);
+    if (erased > ERaseToReveal) { canvas.remove(); onReveal(); }
+  };
+  const onDown = (e) => { scratching = true; const p = point(e); clearAt(p.x,p.y); e.preventDefault(); };
+  const onMove = (e) => { if (!scratching) return; const p = point(e); clearAt(p.x,p.y); e.preventDefault(); };
+  const onUp = () => { scratching = false; };
+  const point = (e) => {
+    if (e.touches && e.touches[0]) return { x:e.touches[0].clientX, y:e.touches[0].clientY };
+    return { x:e.clientX, y:e.clientY };
+  };
+  canvas.addEventListener('mousedown', onDown); canvas.addEventListener('mousemove', onMove); window.addEventListener('mouseup', onUp);
+  canvas.addEventListener('touchstart', onDown, {passive:false}); canvas.addEventListener('touchmove', onMove, {passive:false}); canvas.addEventListener('touchend', onUp, {passive:false});
+}
+
+function shade(hex, amt) {
+  try {
+    const col = hex.replace('#','');
+    const num = parseInt(col.length===3 ? col.split('').map(x=>x+x).join('') : col, 16);
+    let r = (num>>16) + amt, g = (num>>8 & 0xff) + amt, b = (num & 0xff) + amt;
+    r=Math.max(0,Math.min(255,r)); g=Math.max(0,Math.min(255,g)); b=Math.max(0,Math.min(255,b));
+    return '#' + ((1<<24) + (r<<16) + (g<<8) + b).toString(16).slice(1);
+  } catch { return hex; }
+}
+
+function escapeHtml(s) { return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c])); }

@@ -58,5 +58,5 @@ export const CHEAT_IDS = {
   plinko: 'plinko_cheat',
   coinflip: 'coinflip_cheat',
   blackjack: 'blackjack_cheat',
+  roulette: 'roulette_green_ball',
 };
-
