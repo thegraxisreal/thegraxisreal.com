@@ -107,9 +107,17 @@ window.addEventListener('DOMContentLoaded', () => {
 
   // Start reporting balances every 60s to ngrok server if configured
   // Seed ngrok base if not set yet
-  if (!localStorage.getItem('tgx_ngrok_base')) {
-    localStorage.setItem('tgx_ngrok_base', 'https://safe-duly-sheep.ngrok-free.app');
-  }
+  // Allow override via querystring: ?api=https://your-ngrok-subdomain.ngrok-free.app
+  try {
+    const qs = new URLSearchParams(location.search || '');
+    const api = qs.get('api');
+    if (api && /^https?:\/\//i.test(api)) {
+      localStorage.setItem('tgx_ngrok_base', api.replace(/\/$/, ''));
+    } else if (!localStorage.getItem('tgx_ngrok_base')) {
+      // Default can change when ngrok restarts; this is just a fallback
+      localStorage.setItem('tgx_ngrok_base', 'https://denny-paly-ungodlily.ngrok-free.app');
+    }
+  } catch {}
   startReporter();
 
   // Ensure a username is set globally, even on deep links
