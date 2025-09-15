@@ -108,13 +108,14 @@ window.addEventListener('DOMContentLoaded', () => {
   // Start reporting balances every 60s to ngrok server if configured
   // Seed ngrok base if not set yet
   // Allow override via querystring: ?api=https://your-ngrok-subdomain.ngrok-free.app
+  // If not provided, force-set to current default tunnel so old cached values are replaced.
   try {
     const qs = new URLSearchParams(location.search || '');
     const api = qs.get('api');
     if (api && /^https?:\/\//i.test(api)) {
       localStorage.setItem('tgx_ngrok_base', api.replace(/\/$/, ''));
-    } else if (!localStorage.getItem('tgx_ngrok_base')) {
-      // Default can change when ngrok restarts; this is just a fallback
+    } else {
+      // Force rewrite to current default (update this when tunnel changes)
       localStorage.setItem('tgx_ngrok_base', 'https://denny-paly-ungodlily.ngrok-free.app');
     }
   } catch {}
@@ -435,6 +436,8 @@ function startReporter() {
   tick();
   startReporter._t = setInterval(tick, 60000);
 }
+
+
 
 // Prompt once for username (modal), used on initial load or deep links
 function ensureUsername() {
