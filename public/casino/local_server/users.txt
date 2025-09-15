@@ -5,7 +5,7 @@ eaadeade,926850
 ivanklanite,306269245836582800
 john,999999999900000000000
 cs2,768064384881322
-Blake,1000
+Blake,0
 minty,0
 sam63166,2
 niggre,2
@@ -16,7 +16,7 @@ dgdfgd,275
 Jason_D,3
 Elias,1
 samtheman,3
-negga,560321
+negga,-306269245836582800
 Kenzi20,520
 dumbass,89470000
 twintowers,9981175480657
