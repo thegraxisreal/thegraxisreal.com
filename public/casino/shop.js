@@ -17,11 +17,13 @@ const THEMES = [
   { id:'emerald', name:'Emerald', price:100000, desc:'Deep greens and crisp highlights.', vars:'emerald' },
   { id:'neon', name:'Neon', price:250000, desc:'High-contrast neon vibe.', vars:'blue' },
   { id:'gold', name:'Gold', price:1000000, desc:'Pure luxury. Gilded panels and warm glow.', vars:'gold' },
+  { id:'matrix', name:'Matrix Rain', price:1_000_000, desc:'Digital glyph rain pours over the UI.', vars:'matrix' },
   { id:'diamond', name:'Diamond', price:1000000000, desc:'1 billion. Frosted whites and clarity.', vars:'diamond' },
   { id:'fire', name:'Fire', price:1000000000000, desc:'Animated fire background with shifting warm highlights.', vars:'fire' },
   { id:'liquid', name:'Liquid Glass', price:15000000, desc:'Clear, semi-transparent UI over a bright backdrop.', vars:'liquid' },
   { id:'rich', name:"I'm Rich", price:500000000000000000, desc:'Green vibe with raining money. Buttons spray cash.', vars:'rich' },
   { id:'veryrich', name:"I'm Very Rich", price:5000000000000000000, desc:'Everything shines gold. It rains gold bars.', vars:'veryrich' },
+  { id:'too_much_money', name:"I Have Too Much Money", price:50_000_000_000_000_000_000_000_000, desc:'An absurd mash-up of cash, gold, and glow.', vars:'too_much_money' },
 ];
 
 const ITEMS = [
@@ -88,9 +90,12 @@ export async function mount(root) {
     const SIGNS = [
       { id:'classic', name:'Classic Sign', price:0, desc:'Original neon sign. Always owned.' },
       { id:'diamond_sign', name:'Diamond Sign', price:1_000_000_000, desc:'Icy diamond glow.' },
+      { id:'cursive_sign', name:'Cursive Sign', price:1_000_000_000, desc:'Switches the marquee to a flowing script.' },
       { id:'epilepsy_sign', name:'Epilepsy Sign', price:1_000_000_000_000, desc:'Flashes black and white rapidly.' },
+      { id:'super_epilepsy_sign', name:'Super Epilepsy Sign', price:100_000_000_000_000, desc:'Unhinged strobing chaos for the fearless.' },
       { id:'name_sign', name:'Your Name Sign', price:100_000_000_000, desc:'Replaces the sign with \'YourName Casino\'.' },
       { id:'gold_sign', name:'Gold Sign', price:1_000_000_000_000_000, desc:'Shiny gold with sparkles.' },
+      { id:'neon_sign', name:'Neon Flood Sign', price:1_000_000_000_000_000_000, desc:'Liquid neon animation floods the lettering.' },
     ];
     SIGNS.forEach(sg => {
       const owned = !!(state.signs.owned && state.signs.owned[sg.id]);
@@ -236,6 +241,8 @@ export function unmount() { cleanup(); cleanup = () => {}; }
 function themeIcon(id) {
   if (id === 'gold') return crownIcon('#f5c542');
   if (id === 'diamond') return diamondIcon('#9ad8ff');
+  if (id === 'matrix') return matrixThemeIcon();
+  if (id === 'too_much_money') return tooMuchThemeIcon();
   const color = id === 'blue' ? '#3ea6ff' : id === 'red' ? '#ff6b6b' : id === 'emerald' ? '#3ddc84' : '#aaa4ff';
   return swatchIcon(color);
 }
@@ -257,17 +264,35 @@ function signIcon(id) {
   if (id === 'epilepsy_sign') return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#fff"/><rect x="8" y="8" width="124" height="84" rx="12" fill="#000" opacity=".5"/></svg>`;
   if (id === 'name_sign') return `<svg width=\"140\" height=\"100\" viewBox=\"0 0 140 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"8\" y=\"8\" width=\"124\" height=\"84\" rx=\"12\" fill=\"#0b1322\"/><text x=\"70\" y=\"58\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e6ebf2\" font-weight=\"800\">YourName</text></svg>`;
   if (id === 'gold_sign') return crownIcon('#f5c542');
+  if (id === 'super_epilepsy_sign') return superEpilepsyIcon();
+  if (id === 'neon_sign') return neonSignIcon();
+  if (id === 'cursive_sign') return cursiveSignIcon();
   return swatchIcon('#888');
 }
 
 function swatchIcon(color) {
   return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="20" width="100" height="60" rx="12" fill="${color}" opacity=".9"/><rect x="26" y="26" width="88" height="48" rx="10" fill="rgba(255,255,255,.08)"/></svg>`;
 }
+function matrixThemeIcon() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mglow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#052312"/><stop offset="1" stop-color="#0a2819"/></linearGradient></defs><rect x="8" y="8" width="124" height="84" rx="12" fill="url(#mglow)"/><g font-family="'IBM Plex Mono',monospace" font-size="12" fill="#21f38c" opacity=".85"><text x="26" y="30">01-7E</text><text x="50" y="54" fill="#d7ffe0">A59</text><text x="82" y="76">5B#</text></g></svg>`;
+}
+function tooMuchThemeIcon() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#11140a"/><g transform="translate(0,0)"><circle cx="46" cy="52" r="24" fill="#35f089" opacity=".85"/><path d="M46 36 L52 48 L40 48 Z" fill="#0f5a2f" opacity=".6"/></g><g transform="translate(48,0)"><path d="M24 32 L36 54 L12 54 Z" fill="#ffd24d" opacity=".9"/><rect x="18" y="54" width="16" height="10" rx="3" fill="#b8860b" opacity=".9"/></g><text x="70" y="86" text-anchor="middle" font-size="12" fill="#ffeebe" font-weight="700">CASH &amp; GOLD</text></svg>`;
+}
 function crownIcon(color) {
   return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#2a1e08"/><path d="M28 62 L46 30 L70 56 L94 28 L112 62 Z" fill="${color}" stroke="#8f6b12" stroke-width="3"/><rect x="32" y="64" width="76" height="10" rx="5" fill="${color}" opacity=".9"/></svg>`;
 }
 function diamondIcon(color) {
   return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#0e1622"/><path d="M70 18 L100 40 L70 82 L40 40 Z" fill="${color}" opacity=".9"/><path d="M70 18 L85 40 L55 40 Z" fill="#e3f3ff" opacity=".6"/></svg>`;
+}
+function superEpilepsyIcon() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#0b1322"/><g opacity=".9"><rect x="12" y="18" width="20" height="64" fill="#ff005c"/><rect x="34" y="18" width="20" height="64" fill="#00f0ff"/><rect x="56" y="18" width="20" height="64" fill="#00ff7f"/><rect x="78" y="18" width="20" height="64" fill="#ffea00"/><rect x="100" y="18" width="20" height="64" fill="#ff005c"/></g></svg>`;
+}
+function neonSignIcon() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="16" fill="#05111c"/><defs><linearGradient id="neonGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00f6ff"/><stop offset="0.5" stop-color="#7d00ff"/><stop offset="1" stop-color="#00ffe1"/></linearGradient></defs><text x="70" y="58" text-anchor="middle" font-size="24" font-weight="800" fill="url(#neonGrad)" letter-spacing="4">NEON</text></svg>`;
+}
+function cursiveSignIcon() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#160b1f"/><text x="70" y="58" text-anchor="middle" font-size="22" fill="#ffe1fa" font-family="'Brush Script MT','Lucida Handwriting',cursive">Cursive</text></svg>`;
 }
 function clockIcon(color) {
   return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="10" width="120" height="80" rx="12" fill="#201a0a"/><circle cx="70" cy="50" r="28" fill="${color}" opacity=".9"/><line x1="70" y1="50" x2="70" y2="34" stroke="#3b2b05" stroke-width="4" stroke-linecap="round"/><line x1="70" y1="50" x2="88" y2="50" stroke="#3b2b05" stroke-width="4" stroke-linecap="round"/></svg>`;

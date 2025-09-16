@@ -106,9 +106,9 @@ window.addEventListener('DOMContentLoaded', () => {
   // Passive income (stocks)
   startIncomeLoop();
 
-  // Start reporting balances every 60s to ngrok server if configured
-  // Seed ngrok base if not set yet
-  // Allow override via querystring: ?api=https://your-ngrok-subdomain.ngrok-free.app
+  // Start reporting balances every 60s to tunnel server if configured
+  // Seed tunnel base if not set yet
+  // Allow override via querystring: ?api=https://your-tunnel-hostname.example
   // If not provided, force-set to current default tunnel so old cached values are replaced.
   try {
     const qs = new URLSearchParams(location.search || '');
@@ -117,7 +117,7 @@ window.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('tgx_ngrok_base', api.replace(/\/$/, ''));
     } else {
       // Force rewrite to current default (update this when tunnel changes)
-      localStorage.setItem('tgx_ngrok_base', 'https://denny-paly-ungodlily.ngrok-free.app');
+      localStorage.setItem('tgx_ngrok_base', 'https://environments-donation-node-textbook.trycloudflare.com');
     }
   } catch {}
   startReporter();
@@ -158,6 +158,8 @@ function applyTheme(id) {
   if (id === 'fire') enableFireTheme();
   if (id === 'rich') enableRichTheme();
   if (id === 'veryrich') enableVeryRichTheme();
+  if (id === 'matrix') enableMatrixTheme();
+  if (id === 'too_much_money') enableTooMuchMoneyTheme();
 }
 
 function getThemes() {
@@ -172,6 +174,8 @@ function getThemes() {
     liquid:  { vars: { '--bg':'#ffffff','--panel':'rgba(255,255,255,.35)','--panel-2':'rgba(255,255,255,.25)','--fg':'#0a0f18','--muted':'#6b7686','--accent':'#0ea5e9','--accent-2':'#82cfff' } },
     rich:    { vars: { '--bg':'#08240e','--panel':'#0e2f15','--panel-2':'#12381a','--fg':'#e6ffe6','--muted':'#a8dca8','--accent':'#17c964','--accent-2':'#b8ffb8' } },
     veryrich:{ vars: { '--bg':'#120d02','--panel':'#1a1405','--panel-2':'#231a07','--fg':'#ffeebe','--muted':'#e4c76f','--accent':'#ffd24d','--accent-2':'#fff0a3' } },
+    matrix:  { vars: { '--bg':'#030a05','--panel':'#06140a','--panel-2':'#071d11','--fg':'#d7ffe0','--muted':'#6dd89c','--accent':'#21f38c','--accent-2':'#0affd2' } },
+    too_much_money:{ vars: { '--bg':'#050b07','--panel':'#102118','--panel-2':'#241807','--fg':'#f8ffe3','--muted':'#d0f5a5','--accent':'#35f089','--accent-2':'#ffd24d' } },
   };
 }
 
@@ -248,22 +252,37 @@ function applySign(id) {
   const el = document.getElementById('brand-sign');
   if (!el) return;
   removeSignExtras();
+  el.classList.remove('sign-diamond','sign-epilepsy','sign-gold','sign-super-epilepsy','sign-neon','sign-cursive');
   el.style.removeProperty('background');
   el.style.removeProperty('-webkit-background-clip');
   el.style.removeProperty('background-clip');
   el.style.removeProperty('-webkit-text-fill-color');
   el.style.removeProperty('color');
+  el.style.removeProperty('text-shadow');
+  el.style.removeProperty('font-family');
+  el.style.removeProperty('font-size');
+  el.style.removeProperty('letter-spacing');
+  el.style.removeProperty('text-transform');
+  el.style.removeProperty('filter');
+  el.style.removeProperty('animation');
+  el.style.removeProperty('position');
   el.textContent = 'thegraxisreal casino';
   if (id === 'diamond_sign') enableDiamondSign(el);
   else if (id === 'epilepsy_sign') enableEpilepsySign(el);
   else if (id === 'gold_sign') enableGoldSign(el);
   else if (id === 'name_sign') enableNameSign(el);
+  else if (id === 'super_epilepsy_sign') enableSuperEpilepsySign(el);
+  else if (id === 'neon_sign') enableNeonSign(el);
+  else if (id === 'cursive_sign') enableCursiveSign(el);
 }
 
 function removeSignExtras() {
   document.getElementById('sign-diamond-style')?.remove();
   document.getElementById('sign-epilepsy-style')?.remove();
   document.getElementById('sign-gold-style')?.remove();
+  document.getElementById('sign-super-epilepsy-style')?.remove();
+  document.getElementById('sign-neon-style')?.remove();
+  document.getElementById('sign-cursive-style')?.remove();
   clearInterval(enableGoldSign._t);
 }
 
@@ -325,6 +344,48 @@ function enableNameSign(el) {
   el.textContent = `${name} casino`;
 }
 
+function enableSuperEpilepsySign(el) {
+  const style = document.createElement('style');
+  style.id = 'sign-super-epilepsy-style';
+  style.textContent = `
+    @keyframes megaStrobe {
+      0%{ color:#fff; background:#ff005c; box-shadow:0 0 24px rgba(255,0,92,.75); }
+      25%{ color:#000; background:#00f0ff; box-shadow:0 0 26px rgba(0,240,255,.75); }
+      50%{ color:#fff; background:#00ff7f; box-shadow:0 0 28px rgba(0,255,127,.75); }
+      75%{ color:#000; background:#ffea00; box-shadow:0 0 30px rgba(255,234,0,.8); }
+      100%{ color:#fff; background:#ff005c; box-shadow:0 0 24px rgba(255,0,92,.75); }
+    }
+    .sign-super-epilepsy { position:relative; padding:.2rem .55rem; border-radius:14px; text-transform:uppercase; animation:megaStrobe .08s linear infinite, flicker 6s infinite; }
+    .sign-super-epilepsy::after { content:''; position:absolute; inset:-10px; border-radius:16px; border:2px dashed rgba(255,255,255,.75); opacity:.85; mix-blend-mode:screen; animation:megaStrobe .12s linear infinite reverse; }
+  `;
+  document.head.appendChild(style);
+  el.classList.add('sign-super-epilepsy');
+}
+
+function enableNeonSign(el) {
+  const style = document.createElement('style');
+  style.id = 'sign-neon-style';
+  style.textContent = `
+    @keyframes neonFlow { 0%{ background-position:0% 50%; } 100%{ background-position:200% 50%; } }
+    @keyframes neonPulse { 0%,100%{ opacity:1; filter:drop-shadow(0 0 12px rgba(0,255,234,.8)) drop-shadow(0 0 32px rgba(255,0,255,.45)); } 50%{ opacity:.92; filter:drop-shadow(0 0 18px rgba(0,255,234,.9)) drop-shadow(0 0 42px rgba(255,0,255,.6)); } }
+    .sign-neon { position:relative; background:linear-gradient(120deg,#00f6ff,#0d6bff,#ff00ff,#00f6ff); background-size:260% 260%; -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; letter-spacing:4px; text-transform:uppercase; animation:neonFlow 3.4s linear infinite, neonPulse 2.4s ease-in-out infinite; }
+    .sign-neon::before { content:''; position:absolute; inset:-14px; border-radius:18px; background:radial-gradient(circle at 25% 35%, rgba(0,255,234,.32), transparent 60%), radial-gradient(circle at 75% 40%, rgba(255,0,255,.28), transparent 70%); filter:blur(18px); opacity:.85; animation:neonFlow 4.6s linear infinite reverse; z-index:-1; }
+  `;
+  document.head.appendChild(style);
+  el.classList.add('sign-neon');
+}
+
+function enableCursiveSign(el) {
+  const style = document.createElement('style');
+  style.id = 'sign-cursive-style';
+  style.textContent = `
+    .sign-cursive { font-family:'Brush Script MT','Lucida Handwriting','Pacifico',cursive; font-weight:400; font-size:clamp(2.5rem,6vw,3.4rem); letter-spacing:.08em; text-transform:none !important; color:#ffe6fd; text-shadow:0 0 14px rgba(255,143,232,.6), 0 0 30px rgba(255,86,166,.35); }
+  `;
+  document.head.appendChild(style);
+  el.classList.add('sign-cursive');
+  el.textContent = 'Thegraxisreal casino';
+}
+
 function removeThemeExtras() {
   document.getElementById('theme-fire-style')?.remove();
   document.getElementById('theme-fire-bg')?.remove();
@@ -332,9 +393,18 @@ function removeThemeExtras() {
   document.getElementById('theme-rich-rain')?.remove();
   document.getElementById('theme-veryrich-style')?.remove();
   document.getElementById('theme-veryrich-rain')?.remove();
+  document.getElementById('theme-matrix-style')?.remove();
+  document.getElementById('theme-matrix-rain')?.remove();
+  document.getElementById('theme-too-much-style')?.remove();
+  document.getElementById('theme-too-much-glow')?.remove();
+  document.getElementById('theme-too-much-overlay')?.remove();
+  document.getElementById('theme-too-much-burst')?.remove();
   clearInterval(enableRichTheme._t);
   clearInterval(enableVeryRichTheme._t);
+  clearInterval(enableMatrixTheme._t);
+  clearInterval(enableTooMuchMoneyTheme._t);
   document.removeEventListener('click', richClickBurst, true);
+  document.body.classList.remove('theme-too-much');
 }
 function enableFireTheme() {
   const style = document.createElement('style');
@@ -399,6 +469,96 @@ function enableVeryRichTheme() {
     setTimeout(()=>n.remove(), (3000/speed)|0);
   };
   enableVeryRichTheme._t = setInterval(()=>{ for(let i=0;i<4;i++) emit(); },600);
+}
+
+function enableMatrixTheme() {
+  const style = document.createElement('style');
+  style.id = 'theme-matrix-style';
+  style.textContent = `
+    @keyframes matrixFall { 0%{ transform: translate3d(0,-20vh,0); opacity:0; } 10%{ opacity:.85; } 100%{ transform: translate3d(0,110vh,0); opacity:0; } }
+    #theme-matrix-rain { position:fixed; inset:0; pointer-events:none; z-index:95; overflow:hidden; mix-blend-mode:screen; }
+    .matrix-stream { position:absolute; top:-30vh; color:#24ff99; font-family:'IBM Plex Mono','Fira Code',monospace; font-weight:600; text-shadow:0 0 12px rgba(36,255,153,.55); white-space:nowrap; opacity:.85; animation: matrixFall var(--dur,4s) linear forwards; }
+    .matrix-stream span { display:block; line-height:1.05em; }
+    .matrix-stream span.head { color:#d7ffe0; text-shadow:0 0 16px rgba(215,255,224,.85); }
+  `;
+  document.head.appendChild(style);
+  const host = document.createElement('div');
+  host.id = 'theme-matrix-rain';
+  document.body.appendChild(host);
+  const glyphs = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ#$%@&';
+  const spawn = () => {
+    if (!document.body.contains(host)) return;
+    const width = Math.max(typeof window !== 'undefined' && window.innerWidth ? window.innerWidth : 1280, 320);
+    const col = document.createElement('div');
+    col.className = 'matrix-stream';
+    const duration = 3600 + Math.random() * 2600;
+    col.style.setProperty('--dur', duration + 'ms');
+    col.style.animationDuration = duration + 'ms';
+    col.style.left = Math.round(Math.random() * width) + 'px';
+    col.style.fontSize = (14 + Math.random() * 10) + 'px';
+    const length = 12 + Math.floor(Math.random() * 14);
+    let html = '';
+    for (let i = 0; i < length; i++) {
+      const ch = glyphs[Math.floor(Math.random() * glyphs.length)];
+      const cls = i === 0 ? ' class="head"' : '';
+      html += `<span${cls}>${ch}</span>`;
+    }
+    col.innerHTML = html;
+    host.appendChild(col);
+    setTimeout(() => { col.remove(); }, duration + 800);
+  };
+  for (let i = 0; i < 24; i++) spawn();
+  clearInterval(enableMatrixTheme._t);
+  enableMatrixTheme._t = setInterval(spawn, 170);
+}
+
+function enableTooMuchMoneyTheme() {
+  enableRichTheme();
+  enableVeryRichTheme();
+  const style = document.createElement('style');
+  style.id = 'theme-too-much-style';
+  style.textContent = `
+    @keyframes glowRotate { 0%{ transform: rotate(0deg); } 100%{ transform: rotate(360deg); } }
+    @keyframes cashPulse { 0%{ opacity:.35; filter:hue-rotate(0deg); } 50%{ opacity:.6; filter:hue-rotate(30deg); } 100%{ opacity:.45; filter:hue-rotate(-20deg); } }
+    @keyframes blingDrop { 0%{ transform:translate3d(0,-25vh,0) scale(.6); opacity:0; } 15%{ opacity:1; } 60%{ transform:translate3d(var(--sway,0),60vh,0) scale(1.05); opacity:.92; } 100%{ transform:translate3d(calc(var(--sway,0)*1.2),110vh,0) scale(1.3); opacity:0; } }
+    #theme-too-much-glow, #theme-too-much-overlay { position:fixed; inset:-12%; pointer-events:none; }
+    #theme-too-much-glow { z-index:-1; background:conic-gradient(from 0deg, rgba(53,240,137,.55), rgba(255,210,77,.35), rgba(53,240,137,.55)); filter:blur(140px); opacity:.55; animation:glowRotate 32s linear infinite; }
+    #theme-too-much-overlay { z-index:8; mix-blend-mode:screen; background:
+      radial-gradient(circle at 15% 20%, rgba(53,240,137,.25), transparent 55%),
+      radial-gradient(circle at 85% 25%, rgba(255,210,77,.22), transparent 60%),
+      radial-gradient(circle at 50% 80%, rgba(255,255,255,.08), transparent 65%);
+      animation:cashPulse 7s ease-in-out infinite alternate;
+    }
+    #theme-too-much-burst { position:fixed; inset:0; pointer-events:none; z-index:1200; overflow:hidden; }
+    .too-much-bling { position:absolute; top:-10vh; font-size:28px; opacity:0; text-shadow:0 0 16px rgba(255,234,128,.85); filter:drop-shadow(0 0 10px rgba(255,210,77,.45)); animation:blingDrop 4000ms ease-in-out forwards; }
+    .too-much-bling.alt { text-shadow:0 0 18px rgba(111,255,200,.85); filter:drop-shadow(0 0 12px rgba(53,240,137,.6)); }
+  `;
+  document.head.appendChild(style);
+  document.body.classList.add('theme-too-much');
+  const glow = document.createElement('div'); glow.id = 'theme-too-much-glow'; document.body.appendChild(glow);
+  const overlay = document.createElement('div'); overlay.id = 'theme-too-much-overlay'; document.body.appendChild(overlay);
+  const burstHost = document.createElement('div'); burstHost.id = 'theme-too-much-burst'; document.body.appendChild(burstHost);
+  const pool = ['💰','💎','👑','🪙','💵','🤑'];
+  const spawn = () => {
+    if (!document.body.contains(burstHost)) return;
+    const node = document.createElement('div');
+    node.className = 'too-much-bling';
+    if (Math.random() > 0.6) node.classList.add('alt');
+    node.textContent = pool[Math.floor(Math.random() * pool.length)];
+    const left = Math.random() * 100;
+    node.style.left = `${left}vw`;
+    node.style.fontSize = `${26 + Math.random() * 22}px`;
+    const duration = 3200 + Math.random() * 1800;
+    node.style.animationDuration = `${duration}ms`;
+    node.style.setProperty('--sway', `${(Math.random() - 0.5) * 18}vw`);
+    burstHost.appendChild(node);
+    setTimeout(() => { node.remove(); }, duration + 800);
+  };
+  for (let i = 0; i < 6; i++) spawn();
+  clearInterval(enableTooMuchMoneyTheme._t);
+  enableTooMuchMoneyTheme._t = setInterval(() => {
+    for (let i = 0; i < 3; i++) spawn();
+  }, 1000);
 }
 
 // Render ephemeral delta under HUD
