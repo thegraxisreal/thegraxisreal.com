@@ -10,7 +10,6 @@ const routes = {
   plinko: () => import('./games/plinko.js'),
   coinflip: () => import('./games/coinflip.js'),
   roulette: () => import('./games/roulette.js'),
-  wheel: () => import('./games/wheel.js'),
   bar: () => import('./bar.js'),
   shop: () => import('./shop_hub.js'),
   blackmarket: () => import('./blackmarket.js'),
@@ -117,7 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('tgx_ngrok_base', api.replace(/\/$/, ''));
     } else {
       // Force rewrite to current default (update this when tunnel changes)
-      localStorage.setItem('tgx_ngrok_base', 'https://environments-donation-node-textbook.trycloudflare.com');
+      localStorage.setItem('tgx_ngrok_base', 'https://theft-managed-determination-toward.trycloudflare.com');
     }
   } catch {}
   startReporter();
@@ -176,6 +175,8 @@ function getThemes() {
     veryrich:{ vars: { '--bg':'#120d02','--panel':'#1a1405','--panel-2':'#231a07','--fg':'#ffeebe','--muted':'#e4c76f','--accent':'#ffd24d','--accent-2':'#fff0a3' } },
     matrix:  { vars: { '--bg':'#030a05','--panel':'#06140a','--panel-2':'#071d11','--fg':'#d7ffe0','--muted':'#6dd89c','--accent':'#21f38c','--accent-2':'#0affd2' } },
     too_much_money:{ vars: { '--bg':'#050b07','--panel':'#102118','--panel-2':'#241807','--fg':'#f8ffe3','--muted':'#d0f5a5','--accent':'#35f089','--accent-2':'#ffd24d' } },
+    blackout: { vars: { '--bg':'#040404','--panel':'#0a0a0a','--panel-2':'#101010','--fg':'#f2f2f2','--muted':'#a3a3a3','--accent':'#ff5c58','--accent-2':'#ffb347','--shadow':'0 18px 36px rgba(0,0,0,.55)','--border':'rgba(255,255,255,.05)' } },
+    love_plinko: { vars: { '--bg':'radial-gradient(circle, rgba(255,79,172,.12) 1px, transparent 1px) 0 0/14px 14px, #040207','--panel':'#150424','--panel-2':'#1d0633','--fg':'#fceaff','--muted':'#c69fff','--accent':'#ff4fac','--accent-2':'#7dd3ff','--shadow':'0 24px 50px rgba(31,3,53,.6)','--border':'rgba(255,79,172,.18)' } },
   };
 }
 

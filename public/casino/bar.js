@@ -40,7 +40,7 @@ export async function mount(root) {
   const drinks = [
     { key: 'beer', name: 'Beer', price: 100_000, desc: 'Blurs your vision for 30s (persists across pages).' },
     { key: 'whiskey', name: 'Whiskey Shot', price: 1_000_000, desc: 'Blackout for 10s. You might drop 1 or 2 dollars.' },
-    { key: 'death', name: 'Very Strong', price: 500_000, desc: 'Very Strong' },
+    { key: 'kirk', name: 'Final Debate', price: 500_000, desc: 'Fades into crimson with final words before the same fallout.' },
   ];
   function renderDrinks() {
     drinksEl.innerHTML = '';
@@ -71,7 +71,7 @@ export async function mount(root) {
     addBalance(-d.price);
     if (d.key === 'beer') buyBeer();
     else if (d.key === 'whiskey') buyWhiskey();
-    else if (d.key === 'death') buyDeath();
+    else if (d.key === 'kirk') buyKirk();
   }
 
   // Beer: persistent global blur 30s
@@ -97,10 +97,20 @@ export async function mount(root) {
     }, 10_000);
   }
 
-  // Death: blackout 10s, then gravestone, reset to 1000
-  function buyDeath() {
-    const overlay = mkOverlay('#000');
+  // Final Debate: fade from black into red during blackout, play audio once, then gravestone reset to 100k
+  function buyKirk() {
+    const overlay = mkOverlay('#000'); // start black
     document.body.appendChild(overlay);
+
+    // play once
+    const audio = new Audio('https://www.thegraxisreal.com/finalwords.mp3');
+    audio.play().catch(() => {});
+
+    // fade into red
+    requestAnimationFrame(() => {
+      overlay.style.background = '#a00';
+    });
+
     setTimeout(() => {
       overlay.style.opacity = '0';
       overlay.remove();
@@ -114,7 +124,7 @@ export async function mount(root) {
   function mkOverlay(color='#000') {
     const o = document.createElement('div');
     o.style.position = 'fixed'; o.style.inset = '0'; o.style.background = color; o.style.zIndex = '1000'; o.style.opacity = '1';
-    o.style.transition = 'opacity .6s ease';
+    o.style.transition = 'opacity .6s ease, background 2s ease';
     return o;
   }
 

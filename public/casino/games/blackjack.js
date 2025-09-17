@@ -38,6 +38,7 @@ export async function mount(root) {
           <button id="bj-bet-dec" class="glass xl">−</button>
           <div id="bj-bet" class="tag" style="cursor:pointer">$10</div>
           <button id="bj-bet-inc" class="glass xl">+</button>
+          <button id="bj-bet-half" class="glass xl" style="background: linear-gradient(180deg, rgba(0,212,255,.18), rgba(255,255,255,.06)); border-color: rgba(0,212,255,.3);">Half</button>
           <button id="bj-bet-max" class="primary xl" style="background: linear-gradient(180deg, rgba(170,0,255,.25), rgba(255,255,255,.06)); border-color: rgba(170,0,255,.45);">Max</button>
         </div>
       </div>
@@ -56,6 +57,7 @@ export async function mount(root) {
   // Elements
   const balEl = wrap.querySelector('#bj-balance');
   const betEl = wrap.querySelector('#bj-bet');
+  const betHalfBtn = wrap.querySelector('#bj-bet-half');
   const betMaxBtn = wrap.querySelector('#bj-bet-max');
   const dealBtn = wrap.querySelector('#bj-deal');
   const hitBtn = wrap.querySelector('#bj-hit');
@@ -74,7 +76,6 @@ export async function mount(root) {
   const state = {
     bet: 10,
     minBet: 1,
-    maxBet: 500,
     inHand: false,
     deck: [],
     player: [],
@@ -146,11 +147,17 @@ export async function mount(root) {
   // Game flow
   let cheatNext = false;
   function updateUI() {
+    if (!state.inHand) {
+      const balance = getBalance();
+      if (state.bet > balance) state.bet = Math.max(state.minBet, balance);
+    }
     betEl.textContent = fmt(state.bet);
     balEl.textContent = fmt(getBalance());
     dealBtn.disabled = state.inHand || !canAfford(state.bet);
     hitBtn.disabled = !state.inHand;
     standBtn.disabled = !state.inHand;
+    betHalfBtn.disabled = state.inHand;
+    betMaxBtn.disabled = state.inHand;
     const cs = getCheatState(CHEAT_IDS.blackjack);
     cheatBtn.style.display = cs.charge ? 'inline-block' : 'none';
     cheatBtn.disabled = state.inHand;
@@ -260,12 +267,40 @@ export async function mount(root) {
   }
 
   // Events
-  function onBetInc() { if (state.inHand) return; state.bet = Math.min(state.maxBet, state.bet + 1); updateUI(); }
+  function onBetInc() {
+    if (state.inHand) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, Math.min(balance, state.bet + 1));
+    updateUI();
+  }
   function onBetDec() { if (state.inHand) return; state.bet = Math.max(state.minBet, state.bet - 1); updateUI(); }
-  function onBetMax() { if (state.inHand) return; state.bet = Math.max(state.minBet, getBalance()); updateUI(); }
-  function onBetEdit() { if (state.inHand) return; const v = prompt('Enter bet amount', String(state.bet)); if (v==null) return; const n = Math.floor(Number(v)); if (!Number.isFinite(n) || n<=0) return; state.bet = Math.max(state.minBet, Math.min(n, getBalance())); updateUI(); }
+  function onBetHalf() {
+    if (state.inHand) return;
+    const balance = getBalance();
+    const addition = Math.floor(balance / 2);
+    if (addition <= 0) return;
+    state.bet = Math.max(state.minBet, Math.min(balance, state.bet + addition));
+    updateUI();
+  }
+  function onBetMax() {
+    if (state.inHand) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, balance);
+    updateUI();
+  }
+  function onBetEdit() {
+    if (state.inHand) return;
+    const v = prompt('Enter bet amount', String(state.bet));
+    if (v==null) return;
+    const n = Math.floor(Number(v));
+    if (!Number.isFinite(n) || n<=0) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, Math.min(n, balance));
+    updateUI();
+  }
   wrap.querySelector('#bj-bet-inc').addEventListener('click', onBetInc);
   wrap.querySelector('#bj-bet-dec').addEventListener('click', onBetDec);
+  betHalfBtn.addEventListener('click', onBetHalf);
   betMaxBtn.addEventListener('click', onBetMax);
   betEl.addEventListener('click', onBetEdit);
   dealBtn.addEventListener('click', startHand);
@@ -280,6 +315,7 @@ export async function mount(root) {
     unsub();
     wrap.querySelector('#bj-bet-inc')?.removeEventListener('click', onBetInc);
     wrap.querySelector('#bj-bet-dec')?.removeEventListener('click', onBetDec);
+    betHalfBtn?.removeEventListener('click', onBetHalf);
     betMaxBtn?.removeEventListener('click', onBetMax);
     betEl?.removeEventListener('click', onBetEdit);
     dealBtn?.removeEventListener('click', startHand);

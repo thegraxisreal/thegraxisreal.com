@@ -126,17 +126,10 @@ export async function mount(root) {
       panel.querySelector('#adm-1m').addEventListener('click', () => { grant(1_000_000); closePanel(); });
     } else {
       // Persistent admin console (no close button)
-      const currentName = localStorage.getItem('tgx_username') || '';
       panel.innerHTML = `
         <div class="row"><strong>Admin Console</strong></div>
         <div class="stack">
-          <div class="stack" style="margin-bottom:.25rem">
-            <div class="muted">Set username (admin override)</div>
-            <div class="controls" style="gap:.5rem; flex-wrap:wrap;">
-              <input id="adm-name" type="text" value="${currentName.replace(/"/g,'&quot;')}" style="flex:1; min-width: 180px; padding:.6rem .7rem; border-radius:10px; border:1px solid #2b3a52; background:#0b1322; color:var(--fg);" />
-              <button id="adm-name-save" class="primary">Save</button>
-            </div>
-          </div>
+          <div class="muted" style="margin-bottom:.15rem;">Balance tools</div>
           <button data-give="1000000" class="glass">+ $1,000,000</button>
           <button data-give="1000000000" class="glass">+ $1,000,000,000 (1b)</button>
           <button data-give="1000000000000" class="glass">+ $1,000,000,000,000 (1t)</button>
@@ -148,13 +141,6 @@ export async function mount(root) {
           </div>
         </div>
       `;
-      panel.querySelector('#adm-name-save').addEventListener('click', () => {
-        const v = panel.querySelector('#adm-name').value || '';
-        const s = v.trim();
-        if (!/^\w{3,20}$/.test(s)) { flash('Invalid username'); return; }
-        localStorage.setItem('tgx_username', s);
-        flash('Username updated');
-      });
       panel.querySelectorAll('[data-give]').forEach(btn => {
         btn.addEventListener('click', () => { const v = parseInt(btn.getAttribute('data-give'), 10); grant(v); /* stays open */ });
       });

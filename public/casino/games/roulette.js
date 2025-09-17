@@ -33,6 +33,7 @@ export async function mount(root) {
           <button id="rl-bet-dec" class="glass xl">−</button>
           <div id="rl-bet" class="tag" style="cursor:pointer">$10</div>
           <button id="rl-bet-inc" class="glass xl">+</button>
+          <button id="rl-bet-half" class="glass xl" style="background: linear-gradient(180deg, rgba(0,212,255,.18), rgba(255,255,255,.06)); border-color: rgba(0,212,255,.3);">Half</button>
           <button id="rl-bet-max" class="primary xl" style="background: linear-gradient(180deg, rgba(170,0,255,.25), rgba(255,255,255,.06)); border-color: rgba(170,0,255,.45);">Max</button>
         </div>
       </div>
@@ -59,6 +60,7 @@ export async function mount(root) {
   const betEl = wrap.querySelector('#rl-bet');
   const betInc = wrap.querySelector('#rl-bet-inc');
   const betDec = wrap.querySelector('#rl-bet-dec');
+  const betHalf = wrap.querySelector('#rl-bet-half');
   const betMax = wrap.querySelector('#rl-bet-max');
   const startBtn = wrap.querySelector('#rl-start');
   const numInput = wrap.querySelector('#rl-number');
@@ -70,7 +72,6 @@ export async function mount(root) {
   const state = {
     bet: 10,
     minBet: 1,
-    maxBet: 1000,
     spinning: false,
     pick: { type: null, number: null },
   };
@@ -362,9 +363,17 @@ export async function mount(root) {
 
   // UI helpers
   function updateUI(){
+    if (!state.spinning) {
+      const balance = getBalance();
+      if (state.bet > balance) state.bet = Math.max(state.minBet, balance);
+    }
     betEl.textContent = fmt(state.bet);
     startBtn.disabled = state.spinning || !state.pick.type || !canAfford(state.bet);
     numInput.disabled = state.pick.type !== 'number' || state.spinning;
+    betInc.disabled = state.spinning;
+    betDec.disabled = state.spinning;
+    betHalf.disabled = state.spinning;
+    betMax.disabled = state.spinning;
     // Sync radios
     wrap.querySelectorAll('input[name="rl-type"]').forEach((el) => {
       el.checked = (el.value === state.pick.type);
@@ -375,13 +384,41 @@ export async function mount(root) {
     }
   }
 
-  function onBetInc(){ state.bet = Math.min(state.maxBet, state.bet + 1); updateUI(); }
-  function onBetDec(){ state.bet = Math.max(state.minBet, state.bet - 1); updateUI(); }
-  function onBetMax(){ state.bet = Math.max(state.minBet, getBalance()); updateUI(); }
-  function onBetEdit(){ if (state.spinning) return; const v = prompt('Enter bet amount', String(state.bet)); if (v==null) return; const n = Math.floor(Number(v)); if (!Number.isFinite(n) || n<=0) return; state.bet = Math.max(state.minBet, Math.min(n, getBalance())); updateUI(); }
+  function onBetInc(){
+    if (state.spinning) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, Math.min(balance, state.bet + 1));
+    updateUI();
+  }
+  function onBetDec(){ if (state.spinning) return; state.bet = Math.max(state.minBet, state.bet - 1); updateUI(); }
+  function onBetHalf(){
+    if (state.spinning) return;
+    const balance = getBalance();
+    const addition = Math.floor(balance / 2);
+    if (addition <= 0) return;
+    state.bet = Math.max(state.minBet, Math.min(balance, state.bet + addition));
+    updateUI();
+  }
+  function onBetMax(){
+    if (state.spinning) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, balance);
+    updateUI();
+  }
+  function onBetEdit(){
+    if (state.spinning) return;
+    const v = prompt('Enter bet amount', String(state.bet));
+    if (v==null) return;
+    const n = Math.floor(Number(v));
+    if (!Number.isFinite(n) || n<=0) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, Math.min(n, balance));
+    updateUI();
+  }
 
   betInc.addEventListener('click', onBetInc);
   betDec.addEventListener('click', onBetDec);
+  betHalf.addEventListener('click', onBetHalf);
   betMax.addEventListener('click', onBetMax);
   betEl.addEventListener('click', onBetEdit);
   startBtn.addEventListener('click', startSpin);
@@ -416,6 +453,7 @@ export async function mount(root) {
     window.removeEventListener('resize', onResize);
     betInc?.removeEventListener('click', onBetInc);
     betDec?.removeEventListener('click', onBetDec);
+    betHalf?.removeEventListener('click', onBetHalf);
     betMax?.removeEventListener('click', onBetMax);
     betEl?.removeEventListener('click', onBetEdit);
     startBtn?.removeEventListener('click', startSpin);

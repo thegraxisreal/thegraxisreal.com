@@ -33,6 +33,7 @@ export async function mount(root) {
           <button id="hr-bet-dec" class="glass xl">−</button>
           <div id="hr-bet" class="tag" style="cursor:pointer">$10</div>
           <button id="hr-bet-inc" class="glass xl">+</button>
+          <button id="hr-bet-half" class="glass xl" style="background: linear-gradient(180deg, rgba(0,212,255,.18), rgba(255,255,255,.06)); border-color: rgba(0,212,255,.3);">Half</button>
           <button id="hr-bet-max" class="primary xl" style="background: linear-gradient(180deg, rgba(170,0,255,.25), rgba(255,255,255,.06)); border-color: rgba(170,0,255,.45);">Max</button>
         </div>
       </div>
@@ -47,7 +48,6 @@ export async function mount(root) {
   const state = {
     bet: 10,
     minBet: 1,
-    maxBet: 200,
     lanes: 5,
     racing: false,
     selected: null, // index
@@ -58,6 +58,7 @@ export async function mount(root) {
   const balEl = wrap.querySelector('#hr-balance');
   const betEl = wrap.querySelector('#hr-bet');
   const startBtn = wrap.querySelector('#hr-start');
+  const betHalfBtn = wrap.querySelector('#hr-bet-half');
   const betMaxBtn = wrap.querySelector('#hr-bet-max');
   const namesEl = wrap.querySelector('#hr-names');
   const svg = wrap.querySelector('#hr-svg');
@@ -232,27 +233,53 @@ export async function mount(root) {
   // UI wiring
   let cheatHorse = false;
   function updateUI() {
+    if (!state.racing) {
+      const balance = getBalance();
+      if (state.bet > balance) state.bet = Math.max(state.minBet, balance);
+    }
     betEl.textContent = fmt(state.bet);
     startBtn.disabled = state.racing || state.selected == null || !canAfford(state.bet);
     const cs = getCheatState(CHEAT_IDS.horse);
     cheatBtn.style.display = cs.charge ? 'inline-block' : 'none';
     cheatBtn.disabled = state.racing || state.selected == null;
+    betHalfBtn.disabled = state.racing;
+    betMaxBtn.disabled = state.racing;
   }
-  function onBetInc() { state.bet = Math.min(state.maxBet, state.bet + 1); updateUI(); }
-  function onBetDec() { state.bet = Math.max(state.minBet, state.bet - 1); updateUI(); }
-  function onBetMax() { state.bet = Math.max(state.minBet, getBalance()); updateUI(); }
+  function onBetInc() {
+    if (state.racing) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, Math.min(balance, state.bet + 1));
+    updateUI();
+  }
+  function onBetDec() { if (state.racing) return; state.bet = Math.max(state.minBet, state.bet - 1); updateUI(); }
+  function onBetHalf() {
+    if (state.racing) return;
+    const balance = getBalance();
+    const addition = Math.floor(balance / 2);
+    if (addition <= 0) return;
+    state.bet = Math.max(state.minBet, Math.min(balance, state.bet + addition));
+    updateUI();
+  }
+  function onBetMax() {
+    if (state.racing) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, balance);
+    updateUI();
+  }
   function onBetEdit() {
     if (state.racing) return;
     const v = prompt('Enter bet amount', String(state.bet));
     if (v == null) return;
     const n = Math.floor(Number(v));
     if (!Number.isFinite(n) || n <= 0) return;
-    state.bet = Math.max(state.minBet, Math.min(n, getBalance()));
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, Math.min(n, balance));
     updateUI();
   }
 
   wrap.querySelector('#hr-bet-inc').addEventListener('click', onBetInc);
   wrap.querySelector('#hr-bet-dec').addEventListener('click', onBetDec);
+  betHalfBtn.addEventListener('click', onBetHalf);
   betMaxBtn.addEventListener('click', onBetMax);
   betEl.addEventListener('click', onBetEdit);
   startBtn.addEventListener('click', startRace);
@@ -284,6 +311,7 @@ export async function mount(root) {
     unsub();
     wrap.querySelector('#hr-bet-inc')?.removeEventListener('click', onBetInc);
     wrap.querySelector('#hr-bet-dec')?.removeEventListener('click', onBetDec);
+    betHalfBtn?.removeEventListener('click', onBetHalf);
     betMaxBtn?.removeEventListener('click', onBetMax);
     betEl?.removeEventListener('click', onBetEdit);
     startBtn?.removeEventListener('click', startRace);

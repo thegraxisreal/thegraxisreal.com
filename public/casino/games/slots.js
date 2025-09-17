@@ -24,6 +24,11 @@ export async function mount(root) {
         <div class="slots-reel" data-reel="1"><div class="slots-track"></div></div>
         <div class="slots-reel" data-reel="2"><div class="slots-track"></div></div>
       </div>
+      <div class="slots-lever" role="button" aria-label="Pull the lever to spin" tabindex="0">
+        <div class="slots-lever-arm">
+          <div class="slots-lever-knob"></div>
+        </div>
+      </div>
       <div class="row slots-toolbar">
         <div class="stack">
           <div class="muted">Bet</div>
@@ -31,6 +36,7 @@ export async function mount(root) {
             <button id="bet-dec" class="glass xl">−</button>
             <div id="bet" class="tag slots-bet-display" style="cursor:pointer">$10</div>
             <button id="bet-inc" class="glass xl">+</button>
+            <button id="bet-half" class="glass xl slots-half">Half</button>
             <button id="bet-max" class="primary xl slots-max">Max</button>
           </div>
         </div>
@@ -55,7 +61,7 @@ export async function mount(root) {
 
   const state = { bet: 10, spinning: false };
   const minBet = 1;
-  const maxBet = 100;
+  const getMaxBet = () => Math.max(minBet, getBalance());
   const symbols = ['🍒', '🍋', '🍇', '🔔', '⭐️', '7️⃣'];
   const sequenceRepeats = 12;
 
@@ -63,11 +69,22 @@ export async function mount(root) {
   const betEl = el.querySelector('#bet');
   const betIncBtn = el.querySelector('#bet-inc');
   const betDecBtn = el.querySelector('#bet-dec');
+  const betHalfBtn = el.querySelector('#bet-half');
   const betMaxBtn = el.querySelector('#bet-max');
   const spinBtn = el.querySelector('#spin');
   const cheatBtn = el.querySelector('#cheat-slots');
   const resultEl = el.querySelector('#result');
   const reelEls = Array.from(el.querySelectorAll('.slots-reel'));
+  if (resultEl) {
+    resultEl.textContent = 'Pull the lever or press spin to play!';
+    resultEl.className = 'log slots-log';
+  }
+  const leverEl = el.querySelector('.slots-lever');
+  const leverKnob = leverEl?.querySelector('.slots-lever-knob');
+  if (leverEl) {
+    leverEl.setAttribute('title', 'Pull the lever to spin');
+    leverEl.setAttribute('aria-disabled', 'false');
+  }
 
   const machineEl = el.querySelector('.slots-machine');
   const computed = machineEl ? getComputedStyle(machineEl) : null;
@@ -96,15 +113,109 @@ export async function mount(root) {
     };
   });
 
+  const lever = { progress: 0, pointerId: null, startY: 0 };
+  const LEVER_PULL_REQUIRED = 0.65;
+  const LEVER_DRAG_MAX = 150;
+
+  function setLeverProgress(p) {
+    lever.progress = Math.max(0, Math.min(1, p));
+    const offsetPx = lever.progress * 110;
+    if (leverEl) leverEl.style.setProperty('--lever-offset', `${Math.min(offsetPx, 96).toFixed(1)}px`);
+  }
+
+  function animateLeverReturn(delay = 0) {
+    if (lever.pointerId != null) return;
+    const reset = () => {
+      setLeverProgress(0);
+      leverEl?.classList.remove('slots-lever-fired');
+    };
+    if (delay > 0) setTimeout(reset, delay);
+    else reset();
+  }
+
+  function fireLever(source = 'lever') {
+    if (!leverEl) return false;
+    if (leverEl.classList.contains('slots-lever-disabled') || state.spinning) {
+      animateLeverReturn();
+      return false;
+    }
+    setLeverProgress(1);
+    leverEl.classList.add('slots-lever-fired');
+    const releaseDelay = source === 'button' ? 320 : 520;
+    animateLeverReturn(releaseDelay);
+    setTimeout(() => {
+      leverEl?.classList.remove('slots-lever-fired');
+    }, releaseDelay + 260);
+    onSpin();
+    return true;
+  }
+
+  function onLeverPointerDown(e) {
+    if (!leverEl || !leverKnob || leverEl.classList.contains('slots-lever-disabled') || state.spinning) return;
+    lever.pointerId = e.pointerId;
+    lever.startY = e.clientY;
+    leverEl.classList.add('slots-lever-dragging');
+    try { leverKnob.setPointerCapture(e.pointerId); } catch {}
+    e.preventDefault();
+  }
+
+  function onLeverPointerMove(e) {
+    if (lever.pointerId == null || e.pointerId !== lever.pointerId) return;
+    const delta = e.clientY - lever.startY;
+    const progress = Math.max(0, Math.min(1, delta / LEVER_DRAG_MAX));
+    setLeverProgress(progress);
+  }
+
+  function finishLeverPointer(e, cancelled) {
+    if (lever.pointerId == null || e.pointerId !== lever.pointerId) return;
+    try { leverKnob?.releasePointerCapture(lever.pointerId); } catch {}
+    lever.pointerId = null;
+    leverEl?.classList.remove('slots-lever-dragging');
+    if (!cancelled && lever.progress >= LEVER_PULL_REQUIRED) {
+      fireLever();
+    } else {
+      animateLeverReturn();
+    }
+  }
+
+  function onLeverPointerUp(e) { finishLeverPointer(e, false); }
+  function onLeverPointerCancel(e) { finishLeverPointer(e, true); }
+
+  function onLeverKeyDown(e) {
+    if (!leverEl) return;
+    if (e.key === 'Enter' || e.key === ' ') {
+      if (leverEl.classList.contains('slots-lever-disabled') || state.spinning) return;
+      e.preventDefault();
+      leverEl.classList.remove('slots-lever-dragging');
+      fireLever('keyboard');
+    }
+  }
+
+  setLeverProgress(0);
+
   const update = () => {
     balanceEl.textContent = fmt(getBalance());
+    const maxBet = getMaxBet();
+    if (!state.spinning) {
+      if (state.bet > maxBet) state.bet = maxBet;
+      else if (state.bet < minBet) state.bet = minBet;
+    }
     betEl.textContent = fmt(state.bet);
     const affordable = canAfford(state.bet);
     spinBtn.disabled = state.spinning || !affordable;
     betIncBtn.disabled = state.spinning;
     betDecBtn.disabled = state.spinning;
+    betHalfBtn.disabled = state.spinning;
     betMaxBtn.disabled = state.spinning;
     betEl.style.opacity = state.spinning ? '.7' : '1';
+    if (leverEl) {
+      const leverDisabled = state.spinning || !affordable;
+      leverEl.classList.toggle('slots-lever-disabled', leverDisabled);
+      leverEl.setAttribute('aria-disabled', leverDisabled ? 'true' : 'false');
+      if (leverDisabled && lever.pointerId == null && lever.progress > 0 && !leverEl.classList.contains('slots-lever-fired')) {
+        animateLeverReturn();
+      }
+    }
     const cs = getCheatState(CHEAT_IDS.slots);
     cheatBtn.style.display = cs.charge ? 'inline-block' : 'none';
     cheatBtn.disabled = state.spinning;
@@ -115,8 +226,8 @@ export async function mount(root) {
   };
   update();
 
-  const unsub = subscribe(({ balance }) => {
-    balanceEl.textContent = fmt(balance);
+  const unsub = subscribe(() => {
+    update();
   });
 
   const randomSymbol = () => symbols[Math.floor(Math.random() * symbols.length)];
@@ -184,7 +295,7 @@ export async function mount(root) {
 
   function onBetInc() {
     if (state.spinning) return;
-    state.bet = Math.min(maxBet, state.bet + 1);
+    state.bet = Math.min(getMaxBet(), state.bet + 1);
     update();
   }
 
@@ -194,9 +305,17 @@ export async function mount(root) {
     update();
   }
 
+  function onBetHalf() {
+    if (state.spinning) return;
+    const addition = Math.floor(getBalance() / 2);
+    if (addition <= 0) return;
+    state.bet = Math.max(minBet, Math.min(getMaxBet(), state.bet + addition));
+    update();
+  }
+
   function onBetMax() {
     if (state.spinning) return;
-    state.bet = Math.max(minBet, Math.min(getBalance(), maxBet));
+    state.bet = getMaxBet();
     update();
   }
 
@@ -206,7 +325,8 @@ export async function mount(root) {
     if (v == null) return;
     const n = Math.floor(Number(v));
     if (!Number.isFinite(n) || n <= 0) return;
-    state.bet = Math.max(minBet, Math.min(n, maxBet, getBalance() || maxBet));
+    const maxBet = getMaxBet();
+    state.bet = Math.max(minBet, Math.min(n, maxBet));
     update();
   }
 
@@ -257,21 +377,47 @@ export async function mount(root) {
     }
   }
 
+  function onSpinClick() {
+    if (state.spinning) return;
+    if (leverEl && !leverEl.classList.contains('slots-lever-disabled')) {
+      const fired = fireLever('button');
+      if (!fired) onSpin();
+    } else {
+      onSpin();
+    }
+  }
+
   betIncBtn.addEventListener('click', onBetInc);
   betDecBtn.addEventListener('click', onBetDec);
+  betHalfBtn.addEventListener('click', onBetHalf);
   betMaxBtn.addEventListener('click', onBetMax);
   betEl.addEventListener('click', onBetEdit);
-  spinBtn.addEventListener('click', onSpin);
+  spinBtn.addEventListener('click', onSpinClick);
   cheatBtn.addEventListener('click', onCheat);
+  if (leverKnob) {
+    leverKnob.addEventListener('pointerdown', onLeverPointerDown);
+    leverKnob.addEventListener('pointermove', onLeverPointerMove);
+    leverKnob.addEventListener('pointerup', onLeverPointerUp);
+    leverKnob.addEventListener('pointercancel', onLeverPointerCancel);
+  }
+  leverEl?.addEventListener('keydown', onLeverKeyDown);
 
   cleanup = () => {
     unsub();
     betIncBtn?.removeEventListener('click', onBetInc);
     betDecBtn?.removeEventListener('click', onBetDec);
+    betHalfBtn?.removeEventListener('click', onBetHalf);
     betMaxBtn?.removeEventListener('click', onBetMax);
     betEl?.removeEventListener('click', onBetEdit);
-    spinBtn?.removeEventListener('click', onSpin);
+    spinBtn?.removeEventListener('click', onSpinClick);
     cheatBtn?.removeEventListener('click', onCheat);
+    if (leverKnob) {
+      leverKnob.removeEventListener('pointerdown', onLeverPointerDown);
+      leverKnob.removeEventListener('pointermove', onLeverPointerMove);
+      leverKnob.removeEventListener('pointerup', onLeverPointerUp);
+      leverKnob.removeEventListener('pointercancel', onLeverPointerCancel);
+    }
+    leverEl?.removeEventListener('keydown', onLeverKeyDown);
     el.remove();
   };
 }

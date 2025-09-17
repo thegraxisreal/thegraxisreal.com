@@ -32,6 +32,7 @@ export async function mount(root) {
           <button id="cf-bet-dec" class="glass xl">−</button>
           <div id="cf-bet" class="tag" style="cursor:pointer">$10</div>
           <button id="cf-bet-inc" class="glass xl">+</button>
+          <button id="cf-bet-half" class="glass xl" style="background: linear-gradient(180deg, rgba(0,212,255,.18), rgba(255,255,255,.06)); border-color: rgba(0,212,255,.3);">Half</button>
           <button id="cf-bet-max" class="primary xl" style="background: linear-gradient(180deg, rgba(170,0,255,.25), rgba(255,255,255,.06)); border-color: rgba(170,0,255,.45);">Max</button>
         </div>
       </div>
@@ -71,7 +72,6 @@ export async function mount(root) {
   const state = {
     bet: 10,
     minBet: 1,
-    maxBet: 500,
     pick: 'H',
     flipping: false,
   };
@@ -83,6 +83,7 @@ export async function mount(root) {
   const flipBtn = wrap.querySelector('#cf-flip');
   const incBtn = wrap.querySelector('#cf-bet-inc');
   const decBtn = wrap.querySelector('#cf-bet-dec');
+  const halfBtn = wrap.querySelector('#cf-bet-half');
   const maxBtn = wrap.querySelector('#cf-bet-max');
   const btnH = wrap.querySelector('#pick-h');
   const btnT = wrap.querySelector('#pick-t');
@@ -93,11 +94,15 @@ export async function mount(root) {
   function fmt(n) { return formatMoney(n); }
 
   function updateUI() {
-    balEl.textContent = fmt(getBalance());
+    const balance = getBalance();
+    if (!state.flipping && state.bet > balance) state.bet = Math.max(state.minBet, balance);
+    balEl.textContent = fmt(balance);
     betEl.textContent = fmt(state.bet);
     flipBtn.disabled = state.flipping || !canAfford(state.bet) || !state.pick;
     incBtn.disabled = state.flipping;
     decBtn.disabled = state.flipping;
+    halfBtn.disabled = state.flipping;
+    maxBtn.disabled = state.flipping;
     btnH.disabled = state.flipping;
     btnT.disabled = state.flipping;
     const cs = getCheatState(CHEAT_IDS.coinflip);
@@ -111,8 +116,30 @@ export async function mount(root) {
   // Selection
   function onPickH() { if (state.flipping) return; state.pick = 'H'; updateUI(); }
   function onPickT() { if (state.flipping) return; state.pick = 'T'; updateUI(); }
-  function onBetMax() { if (state.flipping) return; state.bet = Math.max(state.minBet, getBalance()); updateUI(); }
-  function onBetEdit() { if (state.flipping) return; const v = prompt('Enter bet amount', String(state.bet)); if (v==null) return; const n = Math.floor(Number(v)); if (!Number.isFinite(n) || n<=0) return; state.bet = Math.max(state.minBet, Math.min(n, getBalance())); updateUI(); }
+  function onBetHalf() {
+    if (state.flipping) return;
+    const balance = getBalance();
+    const addition = Math.floor(balance / 2);
+    if (addition <= 0) return;
+    state.bet = Math.max(state.minBet, Math.min(balance, state.bet + addition));
+    updateUI();
+  }
+  function onBetMax() {
+    if (state.flipping) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, balance);
+    updateUI();
+  }
+  function onBetEdit() {
+    if (state.flipping) return;
+    const v = prompt('Enter bet amount', String(state.bet));
+    if (v==null) return;
+    const n = Math.floor(Number(v));
+    if (!Number.isFinite(n) || n<=0) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, Math.min(n, balance));
+    updateUI();
+  }
 
   // Flip logic
   function onFlip() {
@@ -159,11 +186,17 @@ export async function mount(root) {
   }
 
   // Events
-  function onInc() { state.bet = Math.min(state.maxBet, state.bet + 1); updateUI(); }
-  function onDec() { state.bet = Math.max(state.minBet, state.bet - 1); updateUI(); }
+  function onInc() {
+    if (state.flipping) return;
+    const balance = getBalance();
+    state.bet = Math.max(state.minBet, Math.min(balance, state.bet + 1));
+    updateUI();
+  }
+  function onDec() { if (state.flipping) return; state.bet = Math.max(state.minBet, state.bet - 1); updateUI(); }
   flipBtn.addEventListener('click', onFlip);
   incBtn.addEventListener('click', onInc);
   decBtn.addEventListener('click', onDec);
+  halfBtn.addEventListener('click', onBetHalf);
   maxBtn.addEventListener('click', onBetMax);
   betEl.addEventListener('click', onBetEdit);
   btnH.addEventListener('click', onPickH);
@@ -177,6 +210,7 @@ export async function mount(root) {
     flipBtn?.removeEventListener('click', onFlip);
     incBtn?.removeEventListener('click', onInc);
     decBtn?.removeEventListener('click', onDec);
+    halfBtn?.removeEventListener('click', onBetHalf);
     maxBtn?.removeEventListener('click', onBetMax);
     betEl?.removeEventListener('click', onBetEdit);
     btnH?.removeEventListener('click', onPickH);

@@ -17,7 +17,9 @@ const THEMES = [
   { id:'emerald', name:'Emerald', price:100000, desc:'Deep greens and crisp highlights.', vars:'emerald' },
   { id:'neon', name:'Neon', price:250000, desc:'High-contrast neon vibe.', vars:'blue' },
   { id:'gold', name:'Gold', price:1000000, desc:'Pure luxury. Gilded panels and warm glow.', vars:'gold' },
+  { id:'blackout', name:'Blackout', price:1_000_000, desc:'Ultra-dark night mode with sharp accents.', vars:'blackout' },
   { id:'matrix', name:'Matrix Rain', price:1_000_000, desc:'Digital glyph rain pours over the UI.', vars:'matrix' },
+  { id:'love_plinko', name:'I LOVE PLINKO', price:100_000_000, desc:'Pitch black backdrop, peg dots, and neon Plinko sparks everywhere.', vars:'love_plinko' },
   { id:'diamond', name:'Diamond', price:1000000000, desc:'1 billion. Frosted whites and clarity.', vars:'diamond' },
   { id:'fire', name:'Fire', price:1000000000000, desc:'Animated fire background with shifting warm highlights.', vars:'fire' },
   { id:'liquid', name:'Liquid Glass', price:15000000, desc:'Clear, semi-transparent UI over a bright backdrop.', vars:'liquid' },
@@ -142,6 +144,7 @@ export async function mount(root) {
     THEMES.forEach(t => {
       const owned = !!(state.themes.owned && state.themes.owned[t.id]);
       const equipped = state.themes.equipped === t.id;
+      const isNew = t.id === 'blackout' || t.id === 'love_plinko';
       const card = document.createElement('div');
       card.className = 'store-card';
       card.innerHTML = `
@@ -149,6 +152,7 @@ export async function mount(root) {
         <div class="stack">
           <div class="store-name">
             <span>${t.name}</span>
+            ${isNew ? '<span class="store-badge store-badge-new">New</span>' : ''}
             ${equipped ? '<span class="store-badge">Equipped</span>' : owned ? '<span class="store-badge">Owned</span>' : ''}
           </div>
           <div class="store-desc">${t.desc}</div>
@@ -243,6 +247,8 @@ function themeIcon(id) {
   if (id === 'diamond') return diamondIcon('#9ad8ff');
   if (id === 'matrix') return matrixThemeIcon();
   if (id === 'too_much_money') return tooMuchThemeIcon();
+  if (id === 'blackout') return blackoutThemeIcon();
+  if (id === 'love_plinko') return lovePlinkoIcon();
   const color = id === 'blue' ? '#3ea6ff' : id === 'red' ? '#ff6b6b' : id === 'emerald' ? '#3ddc84' : '#aaa4ff';
   return swatchIcon(color);
 }
@@ -275,6 +281,12 @@ function swatchIcon(color) {
 }
 function matrixThemeIcon() {
   return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="mglow" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#052312"/><stop offset="1" stop-color="#0a2819"/></linearGradient></defs><rect x="8" y="8" width="124" height="84" rx="12" fill="url(#mglow)"/><g font-family="'IBM Plex Mono',monospace" font-size="12" fill="#21f38c" opacity=".85"><text x="26" y="30">01-7E</text><text x="50" y="54" fill="#d7ffe0">A59</text><text x="82" y="76">5B#</text></g></svg>`;
+}
+function blackoutThemeIcon() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="14" fill="#050505" stroke="rgba(255,255,255,.05)"/><rect x="24" y="24" width="92" height="52" rx="12" fill="#0b0b0b" stroke="rgba(255,255,255,.06)"/><path d="M40 66 H108" stroke="#ff5c58" stroke-width="4" stroke-linecap="round" opacity=".85"/><circle cx="52" cy="46" r="6" fill="#ff5c58" opacity=".9"/><circle cx="68" cy="46" r="6" fill="#ffb347" opacity=".85"/><circle cx="84" cy="46" r="6" fill="#9aa0a6" opacity=".75"/></svg>`;
+}
+function lovePlinkoIcon() {
+  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="lp-bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#040207"/><stop offset="1" stop-color="#11052b"/></linearGradient></defs><rect x="8" y="8" width="124" height="84" rx="12" fill="url(#lp-bg)" stroke="#6f2b9a" opacity=".85"/><g fill="rgba(148,120,255,.55)">${Array.from({length:28}).map((_,i)=>{const x=16+Math.random()*104;const y=16+Math.random()*64;const r=1+Math.random()*1.8;return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${r.toFixed(1)}"/>`;}).join('')}</g><g><circle cx="40" cy="28" r="7" fill="#ff4fac"/><path d="M40 18 v8" stroke="#ff9ffd" stroke-width="2" stroke-linecap="round" opacity=".8"/></g><g><circle cx="86" cy="18" r="6" fill="#7dd3ff"/><path d="M86 10 v8" stroke="#adf1ff" stroke-width="2" stroke-linecap="round" opacity=".75"/></g><g><circle cx="62" cy="48" r="8" fill="#ff7ace"/><path d="M62 38 v10" stroke="#ffc2f5" stroke-width="2" stroke-linecap="round" opacity=".75"/></g><g><circle cx="104" cy="52" r="5" fill="#ffd166"/><path d="M104 44 v8" stroke="#ffe9a3" stroke-width="2" stroke-linecap="round" opacity=".75"/></g><text x="70" y="88" text-anchor="middle" font-size="12" fill="#ff9ffd" font-weight="700">I LOVE PLINKO</text></svg>`;
 }
 function tooMuchThemeIcon() {
   return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#11140a"/><g transform="translate(0,0)"><circle cx="46" cy="52" r="24" fill="#35f089" opacity=".85"/><path d="M46 36 L52 48 L40 48 Z" fill="#0f5a2f" opacity=".6"/></g><g transform="translate(48,0)"><path d="M24 32 L36 54 L12 54 Z" fill="#ffd24d" opacity=".9"/><rect x="18" y="54" width="16" height="10" rx="3" fill="#b8860b" opacity=".9"/></g><text x="70" y="86" text-anchor="middle" font-size="12" fill="#ffeebe" font-weight="700">CASH &amp; GOLD</text></svg>`;
