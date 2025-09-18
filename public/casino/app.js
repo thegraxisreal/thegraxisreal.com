@@ -116,7 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('tgx_ngrok_base', api.replace(/\/$/, ''));
     } else {
       // Force rewrite to current default (update this when tunnel changes)
-      localStorage.setItem('tgx_ngrok_base', 'https://theft-managed-determination-toward.trycloudflare.com');
+      localStorage.setItem('tgx_ngrok_base', 'https://station-salaries-relationships-inn.trycloudflare.com');
     }
   } catch {}
   startReporter();
