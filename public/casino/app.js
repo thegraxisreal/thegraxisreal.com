@@ -92,7 +92,7 @@ window.addEventListener('DOMContentLoaded', () => {
     hudWrap.appendChild(d);
   }
 
-  // Apply equipped theme from shop state
+  // Apply equipped theme from shop e
   try {
     const state = JSON.parse(localStorage.getItem('tgx_casino_shop_v1') || '{}');
     if (state && state.themes && state.themes.equipped) applyTheme(state.themes.equipped);
@@ -116,7 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('tgx_ngrok_base', api.replace(/\/$/, ''));
     } else {
       // Force rewrite to current default (update this when tunnel changes)
-      localStorage.setItem('tgx_ngrok_base', 'https://station-salaries-relationships-inn.trycloudflare.com');
+      localStorage.setItem('tgx_ngrok_base', 'https://pension-nose-oxygen-folders.trycloudflare.com');
     }
   } catch {}
   startReporter();
