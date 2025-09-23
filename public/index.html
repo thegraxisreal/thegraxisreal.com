@@ -29,6 +29,7 @@
       margin:0;
       font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
       color:#111827;
+      /* Dynamic animated gradient using CSS variables; palette is set by JS each load */
       background: linear-gradient(var(--bg-angle), var(--c1), var(--c2), var(--c3), var(--c4));
       background-size: 400% 400%;
       animation: gradientMove 18s ease infinite;
@@ -50,6 +51,7 @@
       border-radius: 1rem;
     }
 
+    /* ---------- Brand title animations (preserved) ---------- */
     .split-char{
       opacity:0; transform: translateY(40px);
       display:inline-block; line-height:1em;
@@ -64,6 +66,7 @@
 
     #fuzzy-canvas{ display:block }
 
+    /* ---------- Buttons ---------- */
     .btn{
       display:inline-flex; align-items:center; gap:.6rem;
       padding:.9rem 1.2rem; border-radius:.9rem; font-weight:700;
@@ -75,13 +78,16 @@
     .btn-light{ color:#111827; background: white }
     .btn-ghost{ color:white; background: transparent; border:1px solid rgba(255,255,255,.3) }
 
+    /* ---------- Utilities ---------- */
     .section{ padding: min(10vh,5rem) 1.25rem; }
     .shadow-soft{ box-shadow: 0 10px 30px rgba(0,0,0,.15); }
     .ring-focus:focus-visible{ outline:none; box-shadow: 0 0 0 3px rgba(99,102,241,.5) }
 
+    /* ---------- Footer ---------- */
     footer a{ opacity:.9; transition:opacity .2s ease }
     footer a:hover{ opacity:1 }
 
+    /* Reduced motion */
     @media (prefers-reduced-motion: reduce){
       *{ animation: none !important; transition:none !important }
     }
@@ -89,140 +95,243 @@
 </head>
 
 <body class="min-h-screen flex flex-col text-white/95">
-  <div id="click-spark-wrapper" style="flex:1; display:flex; flex-direction:column;">
-    <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:m-3 focus:p-2 focus:bg-black/60 focus:rounded">Skip to content</a>
+  <a href="#main" class="sr-only focus:not-sr-only focus:absolute focus:m-3 focus:p-2 focus:bg-black/60 focus:rounded">Skip to content</a>
 
-    <!-- Header / Top Bar -->
-    <header class="container w-full px-5 pt-6">
-      <nav class="glass shadow-soft px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <img src="logo.png" alt="" width="28" height="28" class="rounded-md opacity-90">
-          <span class="font-extrabold tracking-tight">thegraxisreal</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <a href="#videos" class="btn btn-ghost ring-focus" aria-label="Go to videos"><i class="fa-solid fa-video"></i><span class="hidden sm:inline">Videos</span></a>
-          <a href="/casino/casino.html" class="btn btn-light text-gray-900 ring-focus" aria-label="Enter casino"><i class="fa-solid fa-dice"></i><span class="hidden sm:inline">Enter Casino</span></a>
-        </div>
-      </nav>
-    </header>
+  <!-- Header / Top Bar -->
+  <header class="container w-full px-5 pt-6">
+    <nav class="glass shadow-soft px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <img src="logo.png" alt="" width="28" height="28" class="rounded-md opacity-90">
+        <span class="font-extrabold tracking-tight">thegraxisreal</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="#videos" class="btn btn-ghost ring-focus" aria-label="Go to videos"><i class="fa-solid fa-video"></i><span class="hidden sm:inline">Videos</span></a>
+        <a href="/casino/casino.html" class="btn btn-light text-gray-900 ring-focus" aria-label="Enter casino"><i class="fa-solid fa-dice"></i><span class="hidden sm:inline">Enter Casino</span></a>
+      </div>
+    </nav>
+  </header>
 
-    <!-- Hero -->
-    <main id="main" class="flex-1">
-      <section class="section container text-center">
-        <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold drop-shadow-lg mb-3">
-          I'm <span id="animated-text" class="inline-block align-middle"></span>
-        </h1>
-        <p class="text-white/85 text-lg md:text-xl">Just making random stuff</p>
+  <!-- Hero -->
+  <main id="main" class="flex-1">
+    <section class="section container text-center">
+      <h1 class="text-3xl sm:text-4xl md:text-5xl font-extrabold drop-shadow-lg mb-3">
+        I'm <span id="animated-text" class="inline-block align-middle"></span>
+      </h1>
+      <p class="text-white/85 text-lg md:text-xl">Just making random stuff</p>
 
-        <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <a href="#videos" class="btn btn-primary ring-focus shadow-soft"><i class="fa-solid fa-play"></i> Watch Videos</a>
-          <a href="/casino/casino.html" class="btn btn-light text-gray-900 ring-focus shadow-soft"><i class="fa-solid fa-dice"></i> Enter Casino</a>
-        </div>
+      <div class="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
+        <a href="#videos" class="btn btn-primary ring-focus shadow-soft"><i class="fa-solid fa-play"></i> Watch Videos</a>
+        <a href="/casino/casino.html" class="btn btn-light text-gray-900 ring-focus shadow-soft"><i class="fa-solid fa-dice"></i> Enter Casino</a>
+      </div>
 
-        <!-- Socials -->
-        <div class="mt-8 flex items-center justify-center gap-4">
-          <a class="glass w-11 h-11 grid place-items-center ring-focus" href="https://twitter.com/thegraxisreal" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
-            <i class="fab fa-twitter"></i>
-          </a>
-          <a class="glass w-11 h-11 grid place-items-center ring-focus" href="https://github.com/thegraxisreal" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
-            <i class="fab fa-github"></i>
-          </a>
-          <a class="glass w-11 h-11 grid place-items-center ring-focus" href="https://www.instagram.com/thegraxisreal/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
-            <i class="fab fa-instagram"></i>
-          </a>
-        </div>
+      <!-- Socials -->
+      <div class="mt-8 flex items-center justify-center gap-4">
+        <a class="glass w-11 h-11 grid place-items-center ring-focus" href="https://twitter.com/thegraxisreal" target="_blank" rel="noopener noreferrer" aria-label="Twitter">
+          <i class="fab fa-twitter"></i>
+        </a>
+        <a class="glass w-11 h-11 grid place-items-center ring-focus" href="https://github.com/thegraxisreal" target="_blank" rel="noopener noreferrer" aria-label="GitHub">
+          <i class="fab fa-github"></i>
+        </a>
+        <a class="glass w-11 h-11 grid place-items-center ring-focus" href="https://www.instagram.com/thegraxisreal/" target="_blank" rel="noopener noreferrer" aria-label="Instagram">
+          <i class="fab fa-instagram"></i>
+        </a>
+      </div>
 
-        <div class="mt-5 text-white/80 text-sm">
-          Tip: press <kbd>C</kbd> for Casino or <kbd>V</kbd> for Videos.
-        </div>
-      </section>
+      <!-- Shortcuts hint -->
+      <div class="mt-5 text-white/80 text-sm">
+        Tip: press <kbd>C</kbd> for Casino or <kbd>V</kbd> for Videos.
+      </div>
+    </section>
 
-      <!-- Videos -->
-      <section id="videos" class="section">
-        <div class="container">
-          <div class="glass shadow-soft p-6 md:p-8">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-              <div>
-                <h2 class="text-2xl md:text-3xl font-bold">Video Hub</h2>
-                <p class="text-white/85 mt-1">Jump straight to your latest motion-picture content.</p>
-              </div>
-              <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                <a class="btn btn-light text-gray-900 ring-focus w-full sm:w-auto" href="https://gfsdorg.vercel.app" target="_blank" rel="noopener noreferrer">
-                  <i class="fa-solid fa-clapperboard"></i> Open Video Client
-                </a>
-              </div>
+    <!-- Videos: streamlined access -->
+    <section id="videos" class="section">
+      <div class="container">
+        <div class="glass shadow-soft p-6 md:p-8">
+          <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div>
+              <h2 class="text-2xl md:text-3xl font-bold">Video Hub</h2>
+              <p class="text-white/85 mt-1">Jump straight to your latest motion-picture content.</p>
             </div>
-
-            <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              <a href="https://gfsdorg.vercel.app" target="_blank" rel="noopener noreferrer"
-                 class="glass p-4 hover:opacity-100 opacity-95 ring-focus">
-                <div class="flex items-center gap-3">
-                  <i class="fa-solid fa-film text-xl"></i>
-                  <div>
-                    <div class="font-semibold">Latest Motion-Picture Content</div>
-                    <div class="text-sm text-white/80">Ad-free client</div>
-                  </div>
-                </div>
+            <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+              <a class="btn btn-light text-gray-900 ring-focus w-full sm:w-auto" href="https://gfsdorg.vercel.app" target="_blank" rel="noopener noreferrer">
+                <i class="fa-solid fa-clapperboard"></i> Open Video Client
               </a>
             </div>
           </div>
-        </div>
-      </section>
 
-      <!-- Other -->
-      <section class="section">
-        <div class="container">
-          <div class="grid gap-4 md:grid-cols-2">
-            <a href="https://graxybot.com" target="_blank" rel="noopener noreferrer" class="glass p-6 shadow-soft hover:opacity-100 opacity-95 ring-focus">
-              <div class="flex items-center gap-4">
-                <i class="fas fa-robot text-3xl"></i>
+          <!-- Simple, non-cluttered quick links block (easy to extend later) -->
+          <div class="mt-6 grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <a href="https://gfsdorg.vercel.app" target="_blank" rel="noopener noreferrer"
+               class="glass p-4 hover:opacity-100 opacity-95 ring-focus">
+              <div class="flex items-center gap-3">
+                <i class="fa-solid fa-film text-xl"></i>
                 <div>
-                  <div class="text-xl font-semibold">Graxybot AI</div>
-                  <p class="text-white/80 text-sm">Custom-built AI model</p>
+                  <div class="font-semibold">Latest Motion-Picture Content</div>
+                  <div class="text-sm text-white/80">Ad-free client</div>
                 </div>
               </div>
             </a>
-            <a href="https://github.com/thegraxisreal" target="_blank" rel="noopener noreferrer" class="glass p-6 shadow-soft hover:opacity-100 opacity-95 ring-focus">
-              <div class="flex items-center gap-4">
-                <i class="fab fa-github text-3xl"></i>
-                <div>
-                  <div class="text-xl font-semibold">GitHub</div>
-                  <p class="text-white/80 text-sm">Code & experiments</p>
-                </div>
-              </div>
-            </a>
+            <!-- Add more video destinations here when ready (kept minimal on purpose) -->
           </div>
-        </div>
-      </section>
-    </main>
-
-    <!-- Mobile bar -->
-    <div class="fixed bottom-4 left-0 right-0 px-4 sm:hidden">
-      <a href="/casino/casino.html" class="btn btn-primary w-full glass shadow-soft text-center ring-focus" aria-label="Enter casino quick action">
-        <i class="fa-solid fa-dice"></i> Enter Casino
-      </a>
-    </div>
-
-    <!-- Footer -->
-    <footer class="mt-6">
-      <div class="container px-5 pb-10">
-        <div class="glass shadow-soft p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div class="flex items-center gap-4">
-            <a href="https://twitter.com/thegraxisreal" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-            <a href="https://github.com/thegraxisreal" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
-            <a href="https://www.instagram.com/thegraxisreal/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-          </div>
-          <p class="text-sm text-white/85">&copy; <span id="year"></span> TheGraxIsReal. All rights reserved.</p>
         </div>
       </div>
-    </footer>
-  </div><!-- end wrapper -->
+    </section>
+
+    <!-- Optional: compact “Other” section kept minimal to avoid clutter -->
+    <section class="section">
+      <div class="container">
+        <div class="grid gap-4 md:grid-cols-2">
+          <a href="https://graxybot.com" target="_blank" rel="noopener noreferrer" class="glass p-6 shadow-soft hover:opacity-100 opacity-95 ring-focus">
+            <div class="flex items-center gap-4">
+              <i class="fas fa-robot text-3xl"></i>
+              <div>
+                <div class="text-xl font-semibold">Graxybot AI</div>
+                <p class="text-white/80 text-sm">Custom-built AI model</p>
+              </div>
+            </div>
+          </a>
+          <a href="https://github.com/thegraxisreal" target="_blank" rel="noopener noreferrer" class="glass p-6 shadow-soft hover:opacity-100 opacity-95 ring-focus">
+            <div class="flex items-center gap-4">
+              <i class="fab fa-github text-3xl"></i>
+              <div>
+                <div class="text-xl font-semibold">GitHub</div>
+                <p class="text-white/80 text-sm">Code & experiments</p>
+              </div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Persistent mobile bar for super-fast Casino access -->
+  <div class="fixed bottom-4 left-0 right-0 px-4 sm:hidden">
+    <a href="/casino/casino.html" class="btn btn-primary w-full glass shadow-soft text-center ring-focus" aria-label="Enter casino quick action">
+      <i class="fa-solid fa-dice"></i> Enter Casino
+    </a>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-6">
+    <div class="container px-5 pb-10">
+      <div class="glass shadow-soft p-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div class="flex items-center gap-4">
+          <a href="https://twitter.com/thegraxisreal" target="_blank" rel="noopener noreferrer" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
+          <a href="https://github.com/thegraxisreal" target="_blank" rel="noopener noreferrer" aria-label="GitHub"><i class="fab fa-github"></i></a>
+          <a href="https://www.instagram.com/thegraxisreal/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
+        </div>
+        <p class="text-sm text-white/85">&copy; <span id="year"></span> TheGraxIsReal. All rights reserved.</p>
+      </div>
+    </div>
+  </footer>
 
   <script>
-    // gradient, text, fuzzy
-    (function setRandomGradient(){ /* ... unchanged ... */ })();
-    (function brandAnimation(){ /* ... unchanged ... */ })();
+    /* -----------------------------
+       1) Randomized reactive gradient
+       ----------------------------- */
+    (function setRandomGradient(){
+      const palettes = [
+        ['#7C3AED','#2563EB','#06B6D4','#22D3EE'],
+        ['#F43F5E','#FB923C','#F59E0B','#84CC16'],
+        ['#22C55E','#14B8A6','#06B6D4','#3B82F6'],
+        ['#8B5CF6','#EC4899','#F43F5E','#F59E0B'],
+        ['#0EA5E9','#6366F1','#8B5CF6','#D946EF'],
+        ['#FF6B6B','#FFD166','#06D6A0','#118AB2'],
+        ['#2DD4BF','#4ADE80','#FDE047','#F97316']
+      ];
+      const pick = palettes[Math.floor(Math.random()*palettes.length)];
+      const angle = Math.floor(Math.random()*360) + 'deg';
+      document.documentElement.style.setProperty('--c1', pick[0]);
+      document.documentElement.style.setProperty('--c2', pick[1]);
+      document.documentElement.style.setProperty('--c3', pick[2]);
+      document.documentElement.style.setProperty('--c4', pick[3]);
+      document.documentElement.style.setProperty('--bg-angle', angle);
 
+      // Harmonize browser UI color
+      const themeMeta = document.querySelector('meta[name="theme-color"]');
+      if (themeMeta) themeMeta.setAttribute('content', pick[0]);
+    })();
+
+    /* -----------------------------
+       2) Preserve your text animations
+          (split / typing / fuzzy)
+       ----------------------------- */
+    (function brandAnimation(){
+      const container = document.getElementById("animated-text");
+      const text = "thegraxisreal";
+      const animations = ["split","typing","fuzzy"];
+      const choice = animations[Math.floor(Math.random()*animations.length)];
+
+      if (choice === "split") {
+        container.innerHTML = "";
+        text.split("").forEach((ch,i)=>{
+          const span = document.createElement("span");
+          span.textContent = ch;
+          span.className = "split-char";
+          span.style.setProperty("--i", i);
+          container.appendChild(span);
+        });
+        setTimeout(()=>container.classList.add("split-animate"), 50);
+      }
+
+      if (choice === "typing") {
+        container.className = "typing";
+        let i = 0;
+        function type() {
+          if (i < text.length) {
+            container.textContent += text[i];
+            i++;
+            setTimeout(type, 120);
+          } else {
+            const cursor = document.createElement("span");
+            cursor.className = "cursor";
+            cursor.textContent = "|";
+            container.appendChild(cursor);
+          }
+        }
+        type();
+      }
+
+      if (choice === "fuzzy") {
+        const canvas = document.createElement("canvas");
+        canvas.id = "fuzzy-canvas";
+        container.appendChild(canvas);
+
+        const ctx = canvas.getContext("2d");
+        const offscreen = document.createElement("canvas");
+        const offCtx = offscreen.getContext("2d");
+
+        const font = "bold 64px Poppins";
+        offCtx.font = font;
+        offCtx.textBaseline = "middle";
+        const metrics = offCtx.measureText(text);
+
+        const w = Math.ceil(metrics.width) + 100;
+        const h = 120;
+        canvas.width = w; canvas.height = h;
+        offscreen.width = w; offscreen.height = h;
+
+        offCtx.font = font;
+        offCtx.fillStyle = "#fff";
+        offCtx.textBaseline = "middle";
+        offCtx.fillText(text, (w - metrics.width) / 2, h/2);
+
+        function draw() {
+          ctx.clearRect(0,0,w,h);
+          const fuzzRange = 6;
+          for (let y = 0; y < h; y++) {
+            const dx = (Math.random()-0.5) * fuzzRange;
+            ctx.drawImage(offscreen, 0, y, w, 1, dx, y, w, 1);
+          }
+          requestAnimationFrame(draw);
+        }
+        draw();
+      }
+    })();
+
+    /* -----------------------------
+       3) UX niceties
+       ----------------------------- */
     // Year stamp
     document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -231,100 +340,6 @@
       if (e.key.toLowerCase()==='c') window.location.href = '/casino/casino.html';
       if (e.key.toLowerCase()==='v') document.getElementById('videos').scrollIntoView({behavior:'smooth'});
     }, {passive:true});
-  </script>
-
-  <!-- ClickSpark effect -->
-  <script>
-  (function() {
-    const sparkColor = '#fff';
-    const sparkSize = 10;
-    const sparkRadius = 15;
-    const sparkCount = 8;
-    const duration = 400;
-    const easing = 'ease-out';
-    const extraScale = 1.0;
-
-    const wrapper = document.getElementById('click-spark-wrapper');
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    wrapper.style.position = 'relative';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.style.display = 'block';
-    canvas.style.userSelect = 'none';
-    canvas.style.position = 'absolute';
-    canvas.style.top = 0;
-    canvas.style.left = 0;
-    canvas.style.pointerEvents = 'none';
-    wrapper.appendChild(canvas);
-
-    let sparks = [];
-
-    const resizeCanvas = () => {
-      const { width, height } = wrapper.getBoundingClientRect();
-      if (canvas.width !== width || canvas.height !== height) {
-        canvas.width = width;
-        canvas.height = height;
-      }
-    };
-
-    new ResizeObserver(resizeCanvas).observe(wrapper);
-    resizeCanvas();
-
-    const easeFunc = (t) => {
-      switch (easing) {
-        case 'linear': return t;
-        case 'ease-in': return t * t;
-        case 'ease-in-out': return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
-        default: return t * (2 - t);
-      }
-    };
-
-    const draw = (timestamp) => {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      sparks = sparks.filter(spark => {
-        const elapsed = timestamp - spark.startTime;
-        if (elapsed >= duration) return false;
-
-        const progress = elapsed / duration;
-        const eased = easeFunc(progress);
-
-        const distance = eased * sparkRadius * extraScale;
-        const lineLength = sparkSize * (1 - eased);
-
-        const x1 = spark.x + distance * Math.cos(spark.angle);
-        const y1 = spark.y + distance * Math.sin(spark.angle);
-        const x2 = spark.x + (distance + lineLength) * Math.cos(spark.angle);
-        const y2 = spark.y + (distance + lineLength) * Math.sin(spark.angle);
-
-        ctx.strokeStyle = sparkColor;
-        ctx.lineWidth = 2;
-        ctx.beginPath();
-        ctx.moveTo(x1, y1);
-        ctx.lineTo(x2, y2);
-        ctx.stroke();
-
-        return true;
-      });
-      requestAnimationFrame(draw);
-    };
-
-    requestAnimationFrame(draw);
-
-    wrapper.addEventListener('click', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const now = performance.now();
-      const newSparks = Array.from({ length: sparkCount }, (_, i) => ({
-        x,
-        y,
-        angle: (2 * Math.PI * i) / sparkCount,
-        startTime: now
-      }));
-      sparks.push(...newSparks);
-    });
-  })();
   </script>
 </body>
 </html>
