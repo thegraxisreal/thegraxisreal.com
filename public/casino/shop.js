@@ -21,7 +21,6 @@ const THEMES = [
   { id:'matrix', name:'Matrix Rain', price:1_000_000, desc:'Digital glyph rain pours over the UI.', vars:'matrix' },
   { id:'love_plinko', name:'I LOVE PLINKO', price:100_000_000, desc:'Pitch black backdrop, peg dots, and neon Plinko sparks everywhere.', vars:'love_plinko' },
   { id:'diamond', name:'Diamond', price:1000000000, desc:'1 billion. Frosted whites and clarity.', vars:'diamond' },
-  { id:'waves', name:'Waves', price:5_000_000_000, desc:'Reactive iridescent waves from the ether.', vars:'waves' },
   { id:'fire', name:'Fire', price:1000000000000, desc:'Animated fire background with shifting warm highlights.', vars:'fire' },
   { id:'liquid', name:'Liquid Glass', price:15000000, desc:'Clear, semi-transparent UI over a bright backdrop.', vars:'liquid' },
   { id:'rich', name:"I'm Rich", price:500000000000000000, desc:'Green vibe with raining money. Buttons spray cash.', vars:'rich' },
@@ -92,7 +91,6 @@ export async function mount(root) {
     // Signs
     const SIGNS = [
       { id:'classic', name:'Classic Sign', price:0, desc:'Original neon sign. Always owned.' },
-      { id:'ascii_sign', name:'ASCII SIGN', price:10_000_000, desc:'Animated ASCII marquee ripped from cyberspace.' },
       { id:'diamond_sign', name:'Diamond Sign', price:1_000_000_000, desc:'Icy diamond glow.' },
       { id:'cursive_sign', name:'Cursive Sign', price:1_000_000_000, desc:'Switches the marquee to a flowing script.' },
       { id:'epilepsy_sign', name:'Epilepsy Sign', price:1_000_000_000_000, desc:'Flashes black and white rapidly.' },
@@ -106,13 +104,11 @@ export async function mount(root) {
       const equipped = state.signs.equipped === sg.id;
       const card = document.createElement('div');
       card.className = 'store-card';
-      const isNew = sg.id === 'ascii_sign';
       card.innerHTML = `
         <div class="store-thumb">${signIcon(sg.id)}</div>
         <div class="stack">
           <div class="store-name">
             <span>${sg.name}</span>
-            ${isNew ? '<span class="store-badge store-badge-new">New</span>' : ''}
             ${equipped ? '<span class="store-badge">Equipped</span>' : owned ? '<span class="store-badge">Owned</span>' : ''}
           </div>
           <div class="store-desc">${sg.desc}</div>
@@ -148,7 +144,7 @@ export async function mount(root) {
     THEMES.forEach(t => {
       const owned = !!(state.themes.owned && state.themes.owned[t.id]);
       const equipped = state.themes.equipped === t.id;
-      const isNew = t.id === 'blackout' || t.id === 'love_plinko' || t.id === 'waves';
+      const isNew = t.id === 'blackout' || t.id === 'love_plinko';
       const card = document.createElement('div');
       card.className = 'store-card';
       card.innerHTML = `
@@ -253,7 +249,6 @@ function themeIcon(id) {
   if (id === 'too_much_money') return tooMuchThemeIcon();
   if (id === 'blackout') return blackoutThemeIcon();
   if (id === 'love_plinko') return lovePlinkoIcon();
-  if (id === 'waves') return wavesThemeIcon();
   const color = id === 'blue' ? '#3ea6ff' : id === 'red' ? '#ff6b6b' : id === 'emerald' ? '#3ddc84' : '#aaa4ff';
   return swatchIcon(color);
 }
@@ -271,7 +266,6 @@ function itemIcon(id) {
 
 function signIcon(id) {
   if (id === 'classic') return swatchIcon('#8a64ff');
-  if (id === 'ascii_sign') return asciiSignIcon();
   if (id === 'diamond_sign') return diamondIcon('#9ad8ff');
   if (id === 'epilepsy_sign') return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#fff"/><rect x="8" y="8" width="124" height="84" rx="12" fill="#000" opacity=".5"/></svg>`;
   if (id === 'name_sign') return `<svg width=\"140\" height=\"100\" viewBox=\"0 0 140 100\" xmlns=\"http://www.w3.org/2000/svg\"><rect x=\"8\" y=\"8\" width=\"124\" height=\"84\" rx=\"12\" fill=\"#0b1322\"/><text x=\"70\" y=\"58\" text-anchor=\"middle\" font-size=\"14\" fill=\"#e6ebf2\" font-weight=\"800\">YourName</text></svg>`;
@@ -305,12 +299,6 @@ function diamondIcon(color) {
 }
 function superEpilepsyIcon() {
   return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="12" fill="#0b1322"/><g opacity=".9"><rect x="12" y="18" width="20" height="64" fill="#ff005c"/><rect x="34" y="18" width="20" height="64" fill="#00f0ff"/><rect x="56" y="18" width="20" height="64" fill="#00ff7f"/><rect x="78" y="18" width="20" height="64" fill="#ffea00"/><rect x="100" y="18" width="20" height="64" fill="#ff005c"/></g></svg>`;
-}
-function wavesThemeIcon() {
-  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="wavesGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#8f8bff"/><stop offset="0.5" stop-color="#5ad8ff"/><stop offset="1" stop-color="#ffd6ff"/></linearGradient></defs><rect x="8" y="8" width="124" height="84" rx="16" fill="#050b16"/><g opacity=".9" fill="none" stroke="url(#wavesGrad)" stroke-width="2"><path d="M14 60 Q28 40 42 56 T70 50 T98 58 T126 52"/><path opacity=".6" d="M12 72 Q30 48 48 64 T80 58 T112 64"/><path opacity=".4" d="M18 34 Q34 50 50 38 T82 44 T120 36"/></g><circle cx="38" cy="32" r="6" fill="url(#wavesGrad)" opacity=".85"/><circle cx="102" cy="72" r="5" fill="#5ad8ff" opacity=".8"/><text x="70" y="86" text-anchor="middle" font-size="12" fill="url(#wavesGrad)" font-weight="700">WAVES</text></svg>`;
-}
-function asciiSignIcon() {
-  return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="asciiGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#ff6188"/><stop offset="0.5" stop-color="#fc9867"/><stop offset="1" stop-color="#ffd866"/></linearGradient></defs><rect x="8" y="8" width="124" height="84" rx="12" fill="#04070f" stroke="rgba(255,255,255,.08)"/><rect x="18" y="18" width="104" height="64" rx="10" fill="rgba(12,24,40,.9)" stroke="rgba(255,255,255,.08)"/><text x="70" y="44" text-anchor="middle" font-size="12" font-family="'IBM Plex Mono',monospace" fill="url(#asciiGrad)" opacity=".9">thegraxisreal</text><text x="70" y="62" text-anchor="middle" font-size="12" font-family="'IBM Plex Mono',monospace" fill="url(#asciiGrad)" opacity=".9">casino</text><text x="70" y="80" text-anchor="middle" font-size="10" font-family="'IBM Plex Mono',monospace" fill="#6d97ff" opacity=".7">ASCII</text></svg>`;
 }
 function neonSignIcon() {
   return `<svg width="140" height="100" viewBox="0 0 140 100" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="8" width="124" height="84" rx="16" fill="#05111c"/><defs><linearGradient id="neonGrad" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#00f6ff"/><stop offset="0.5" stop-color="#7d00ff"/><stop offset="1" stop-color="#00ffe1"/></linearGradient></defs><text x="70" y="58" text-anchor="middle" font-size="24" font-weight="800" fill="url(#neonGrad)" letter-spacing="4">NEON</text></svg>`;

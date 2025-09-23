@@ -1,9 +1,5 @@
 import store, { subscribe, getBalance } from './store.js';
-import { formatMoneyExtended } from './format.js';
-import { initStatsTracking, recordBalanceSnapshot, recordGameVisit } from './player_stats.js';
-import { startFeaturePromoter } from './feature_promoter.js';
-import { initGooeyNav } from './gooey_nav.js';
-import { initRankTracker, refreshRankNow } from './rank_tracker.js';
+import { formatMoney, formatMoneyExtended } from './format.js';
 
 // Simple hash-based router and dynamic importer
 const routes = {
@@ -21,80 +17,9 @@ const routes = {
   email: () => import('./email.js'),
   lottery: () => import('./games/lottery.js'),
   scratchers: () => import('./scratchers.js'),
-  stats: () => import('./stats.js'),
 };
 
 let activeModule = null;
-let gooeyNavController = null;
-let asciiSignController = null;
-let wavesController = null;
-const THEME_OVERRIDE_KEY = 'tgx_theme_override';
-const LIQUID_UI_PREF_KEY = 'tgx_liquid_ui_pref';
-let currentThemeId = 'default';
-
-function detectLowSpecDevice() {
-  try {
-    const nav = navigator || {};
-    const ua = (nav.userAgent || '').toLowerCase();
-    if (ua.includes('cros')) return true;
-    if (typeof nav.hardwareConcurrency === 'number' && nav.hardwareConcurrency > 0 && nav.hardwareConcurrency <= 4) return true;
-    if (typeof nav.deviceMemory === 'number' && nav.deviceMemory > 0 && nav.deviceMemory <= 4) return true;
-    if (typeof window !== 'undefined' && window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return true;
-  } catch {}
-  return false;
-}
-
-const LOW_SPEC_DEVICE = detectLowSpecDevice();
-
-const gooeyItems = [
-  { label: 'Home', href: '#/' },
-  { label: 'Slots', href: '#/slots' },
-  { label: 'Plinko', href: '#/plinko' },
-  { label: 'Blackjack', href: '#/blackjack' },
-  { label: 'Coin Flip', href: '#/coinflip' },
-  { label: 'Roulette', href: '#/roulette' },
-  { label: 'Horse Race', href: '#/horse' },
-  { label: 'Lottery', href: '#/lottery' },
-  { label: 'Scratchers', href: '#/scratchers' },
-];
-
-function getLiquidUIPref() {
-  try {
-    return localStorage.getItem(LIQUID_UI_PREF_KEY) === '1';
-  } catch {
-    return false;
-  }
-}
-
-function applyLiquidUIState() {
-  if (!document.body) return;
-  const pref = getLiquidUIPref();
-  const useLiquid = pref || currentThemeId === 'liquid';
-  document.body.classList.toggle('liquid-ui', useLiquid);
-  document.body.classList.toggle('liquid-lite', useLiquid && LOW_SPEC_DEVICE);
-  try { window.dispatchEvent(new CustomEvent('tgx:liquid-ui-state', { detail: useLiquid })); } catch {}
-}
-
-window.addEventListener('tgx:liquid-ui-toggle', (event) => {
-  const pref = !!event.detail;
-  try {
-    if (pref) localStorage.setItem(LIQUID_UI_PREF_KEY, '1');
-    else localStorage.removeItem(LIQUID_UI_PREF_KEY);
-  } catch {}
-  applyLiquidUIState();
-});
-
-function normalizeHref(hash) {
-  const raw = hash || '';
-  if (!raw || raw === '#') return '#/';
-  if (raw.startsWith('#/')) return raw;
-  if (raw.startsWith('#')) return `#/${raw.slice(1)}`;
-  return `#/${raw}`;
-}
-
-function hashForRoute(routeKey) {
-  return routeKey === 'home' ? '#/' : `#/${routeKey}`;
-}
 
 function unmountActive() {
   if (activeModule && typeof activeModule.unmount === 'function') {
@@ -110,12 +35,6 @@ async function loadFromHash(hash) {
   // Default to home when no route
   const routeKey = (!key || !routes[key]) ? 'home' : key;
 
-  if (gooeyNavController) {
-    gooeyNavController.setActiveByHref(normalizeHref(hashForRoute(routeKey)), { emitParticles: false });
-  }
-
-  recordGameVisit(routeKey);
-
   try {
     const mod = await routes[routeKey]();
     unmountActive();
@@ -128,10 +47,7 @@ async function loadFromHash(hash) {
   }
 }
 
-window.addEventListener('hashchange', () => {
-  loadFromHash(location.hash);
-  if (gooeyNavController) gooeyNavController.setActiveByHref(normalizeHref(location.hash));
-});
+window.addEventListener('hashchange', () => loadFromHash(location.hash));
 window.addEventListener('DOMContentLoaded', () => {
   // Initialize money HUD
   const hud = document.getElementById('money-amount');
@@ -156,7 +72,6 @@ window.addEventListener('DOMContentLoaded', () => {
       startIncomeLoop._pendingInc = 0;
     }
     prevBal = balance;
-    recordBalanceSnapshot(balance);
   });
   if (hud) {
     hud.addEventListener('mouseenter', () => {
@@ -177,16 +92,11 @@ window.addEventListener('DOMContentLoaded', () => {
     hudWrap.appendChild(d);
   }
 
-  // Apply equipped theme from shop state
+  // Apply equipped theme from shop e
   try {
     const state = JSON.parse(localStorage.getItem('tgx_casino_shop_v1') || '{}');
     if (state && state.themes && state.themes.equipped) applyTheme(state.themes.equipped);
     applySignFromShop();
-  } catch {}
-  applyLiquidUIState();
-  try {
-    const overrideTheme = localStorage.getItem(THEME_OVERRIDE_KEY);
-    if (overrideTheme) applyTheme(overrideTheme);
   } catch {}
 
   // Clock HUD if enabled
@@ -204,11 +114,9 @@ window.addEventListener('DOMContentLoaded', () => {
     const api = qs.get('api');
     if (api && /^https?:\/\//i.test(api)) {
       localStorage.setItem('tgx_ngrok_base', api.replace(/\/$/, ''));
-      try { refreshRankNow(); } catch {}
     } else {
       // Force rewrite to current default (update this when tunnel changes)
       localStorage.setItem('tgx_ngrok_base', 'https://fog-president-begin-respective.trycloudflare.com');
-      try { refreshRankNow(); } catch {}
     }
   } catch {}
   startReporter();
@@ -235,41 +143,13 @@ window.addEventListener('DOMContentLoaded', () => {
     if (link) closeDropdownMenus();
   });
 
-  initStatsTracking(getBalance());
-  startFeaturePromoter();
-  initRankTracker();
-
-  const gooeyRoot = document.getElementById('gooey-nav-root');
-  if (gooeyRoot) {
-    const initialHref = normalizeHref(location.hash);
-    const initialIndex = gooeyItems.findIndex((item) => item.href === initialHref);
-    gooeyNavController = initGooeyNav(gooeyRoot, {
-      items: gooeyItems,
-      initialActiveIndex: initialIndex === -1 ? 0 : initialIndex,
-      reducedEffects: LOW_SPEC_DEVICE,
-    });
-  }
-
   loadFromHash(location.hash);
-});
-
-window.addEventListener('tgx:theme-request', (event) => {
-  const theme = event?.detail?.theme;
-  if (!theme) return;
-  const persist = event.detail?.persist !== false;
-  applyTheme(theme);
-  if (persist) {
-    try { localStorage.setItem(THEME_OVERRIDE_KEY, theme); } catch {}
-  } else {
-    try { localStorage.removeItem(THEME_OVERRIDE_KEY); } catch {}
-  }
 });
 
 function applyTheme(id) {
   const themes = getThemes();
   const t = themes[id];
   if (!t) return;
-  currentThemeId = id;
   const r = document.documentElement;
   for (const k in t.vars) r.style.setProperty(k, t.vars[k]);
   // Theme extras
@@ -279,8 +159,6 @@ function applyTheme(id) {
   if (id === 'veryrich') enableVeryRichTheme();
   if (id === 'matrix') enableMatrixTheme();
   if (id === 'too_much_money') enableTooMuchMoneyTheme();
-  if (id === 'waves') enableWavesTheme();
-  applyLiquidUIState();
 }
 
 function getThemes() {
@@ -291,7 +169,6 @@ function getThemes() {
     gold:    { vars: { '--bg':'#1e1503','--panel':'#281d05','--panel-2':'#2f230a','--fg':'#fff8e6','--muted':'#e6d8b0','--accent':'#f5c542','--accent-2':'#ffea86' } },
     emerald: { vars: { '--bg':'#071c16','--panel':'#0a261e','--panel-2':'#0c2e24','--fg':'#e7fff6','--muted':'#a8dccc','--accent':'#3ddc84','--accent-2':'#00ffd0' } },
     diamond: { vars: { '--bg':'#0a0f18','--panel':'#0e1420','--panel-2':'#111a2a','--fg':'#f5fbff','--muted':'#c6d8f0','--accent':'#9ad8ff','--accent-2':'#e3f3ff' } },
-    waves:   { vars: { '--bg':'#040914','--panel':'rgba(10,18,36,.9)','--panel-2':'rgba(6,14,26,.92)','--fg':'#e6f1ff','--muted':'#9cb3d8','--accent':'#7fd9ff','--accent-2':'#c5a8ff' } },
     fire:    { vars: { '--bg':'#120a06','--panel':'#1c0f08','--panel-2':'#220f0a','--fg':'#ffe9d6','--muted':'#e2b7a0','--accent':'#ff7a18','--accent-2':'#ffd166' } },
     liquid:  { vars: { '--bg':'#ffffff','--panel':'rgba(255,255,255,.35)','--panel-2':'rgba(255,255,255,.25)','--fg':'#0a0f18','--muted':'#6b7686','--accent':'#0ea5e9','--accent-2':'#82cfff' } },
     rich:    { vars: { '--bg':'#08240e','--panel':'#0e2f15','--panel-2':'#12381a','--fg':'#e6ffe6','--muted':'#a8dca8','--accent':'#17c964','--accent-2':'#b8ffb8' } },
@@ -362,11 +239,6 @@ export function __applyThemeFromShop() {
   } catch {}
   ensureClock();
   applySignFromShop();
-  try {
-    const state = JSON.parse(localStorage.getItem('tgx_casino_shop_v1') || '{}');
-    const theme = state?.themes?.equipped;
-    window.dispatchEvent(new CustomEvent('tgx:theme-changed', { detail: { theme } }));
-  } catch {}
 }
 
 function applySignFromShop() {
@@ -403,7 +275,6 @@ function applySign(id) {
   else if (id === 'super_epilepsy_sign') enableSuperEpilepsySign(el);
   else if (id === 'neon_sign') enableNeonSign(el);
   else if (id === 'cursive_sign') enableCursiveSign(el);
-  else if (id === 'ascii_sign') enableAsciiSign(el);
 }
 
 function removeSignExtras() {
@@ -413,11 +284,6 @@ function removeSignExtras() {
   document.getElementById('sign-super-epilepsy-style')?.remove();
   document.getElementById('sign-neon-style')?.remove();
   document.getElementById('sign-cursive-style')?.remove();
-  document.getElementById('sign-ascii-style')?.remove();
-  if (asciiSignController) {
-    asciiSignController.dispose();
-    asciiSignController = null;
-  }
   clearInterval(enableGoldSign._t);
 }
 
@@ -521,365 +387,6 @@ function enableCursiveSign(el) {
   el.textContent = 'Thegraxisreal casino';
 }
 
-function enableAsciiSign(el) {
-  const style = document.createElement('style');
-  style.id = 'sign-ascii-style';
-  style.textContent = `
-    @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&display=swap');
-    .ascii-sign-wrap {
-      position: relative;
-      width: 100%;
-      max-width: 720px;
-      margin: 0 auto;
-      padding: 0;
-      min-height: 120px;
-      perspective: 600px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .ascii-sign-pre {
-      font-family: 'IBM Plex Mono', monospace;
-      font-size: 12px;
-      line-height: 1.05em;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      margin: 0;
-      white-space: pre;
-      display: inline-block;
-      background: linear-gradient(120deg, #ff6188, #fc9867, #ffd866);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      filter: drop-shadow(0 0 18px rgba(255,97,136,.25));
-      user-select: none;
-    }
-  `;
-  document.head.appendChild(style);
-
-  el.innerHTML = '';
-  const wrap = document.createElement('div');
-  wrap.className = 'ascii-sign-wrap';
-  el.appendChild(wrap);
-
-  asciiSignController?.dispose();
-  asciiSignController = new AsciiSignEffect(wrap, { text: 'thegraxisreal casino' });
-}
-
-class AsciiSignEffect {
-  constructor(host, opts = {}) {
-    this.host = host;
-    this.text = opts.text || 'thegraxisreal casino';
-    this.cellWidth = 6;
-    this.cellHeight = 10;
-    this.amplitude = 6;
-    this.pre = document.createElement('pre');
-    this.pre.className = 'ascii-sign-pre';
-    this.host.appendChild(this.pre);
-
-    this.canvas = document.createElement('canvas');
-    this.ctx = this.canvas.getContext('2d');
-    this.loop = this.loop.bind(this);
-    this.resize = this.resize.bind(this);
-
-    this.resizeObserver = new ResizeObserver(this.resize);
-    this.resizeObserver.observe(this.host);
-    this.resize();
-    this.running = true;
-    this.frame = requestAnimationFrame(this.loop);
-  }
-
-  resize() {
-    const rect = this.host.getBoundingClientRect();
-    const width = Math.max(420, Math.floor(rect.width || 420));
-    const height = Math.max(110, Math.floor(rect.height || 110));
-    this.canvas.width = width;
-    this.canvas.height = height;
-    this.ctx.font = `700 ${Math.floor(height * 0.45)}px 'IBM Plex Mono', monospace`;
-    this.ctx.textBaseline = 'middle';
-    this.ctx.textAlign = 'center';
-    this.cols = Math.floor(width / this.cellWidth);
-    this.rows = Math.floor(height / this.cellHeight);
-    this.pre.style.fontSize = `${this.cellHeight}px`;
-  }
-
-  drawBase(time) {
-    const ctx = this.ctx;
-    const { width, height } = this.canvas;
-    ctx.clearRect(0, 0, width, height);
-    const grad = ctx.createLinearGradient(0, 0, width, height);
-    const offset = (Math.sin(time * 0.4) + 1) / 2;
-    grad.addColorStop(0, `hsl(${(offset * 60 + 330) % 360}, 95%, 70%)`);
-    grad.addColorStop(0.5, `hsl(${(offset * 90 + 210) % 360}, 95%, 68%)`);
-    grad.addColorStop(1, `hsl(${(offset * 60 + 70) % 360}, 95%, 72%)`);
-    ctx.fillStyle = grad;
-    const x = width / 2;
-    const y = height / 2;
-    ctx.fillText(this.text, x, y);
-  }
-
-  loop(timestamp) {
-    if (!this.running) return;
-    const time = timestamp * 0.001;
-    this.drawBase(time);
-    this.renderAscii(time);
-    this.frame = requestAnimationFrame(this.loop);
-  }
-
-  renderAscii(time) {
-    const { width, height } = this.canvas;
-    if (!width || !height) return;
-    const data = this.ctx.getImageData(0, 0, width, height).data;
-    const chars = ' .\'`^",:;Il!i~+_-?][}{1)(|/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$';
-    const len = chars.length - 1;
-    const waveT = time * 6;
-    let output = '';
-    for (let row = 0; row < this.rows; row++) {
-      const y = Math.min(height - 1, Math.floor(row * this.cellHeight + this.cellHeight / 2));
-      const wave = Math.sin(waveT + row * 0.35) * this.amplitude;
-      for (let col = 0; col < this.cols; col++) {
-        const x = Math.min(width - 1, Math.floor(col * this.cellWidth + this.cellWidth / 2 + wave));
-        const idx = (y * width + x) * 4;
-        const r = data[idx];
-        const g = data[idx + 1];
-        const b = data[idx + 2];
-        const a = data[idx + 3];
-        if (!a) {
-          output += ' ';
-          continue;
-        }
-        const brightness = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
-        const charIndex = len - Math.round(brightness * len);
-        output += chars.charAt(Math.max(0, Math.min(len, charIndex)));
-      }
-      if (row !== this.rows - 1) output += '\n';
-    }
-    this.pre.textContent = output;
-  }
-
-  dispose() {
-    this.running = false;
-    if (this.frame) cancelAnimationFrame(this.frame);
-    this.resizeObserver.disconnect();
-    if (this.pre.parentElement === this.host) this.host.removeChild(this.pre);
-  }
-}
-
-function enableWavesTheme() {
-  const style = document.createElement('style');
-  style.id = 'theme-waves-style';
-  style.textContent = `
-    .waves-bg { position: fixed; inset: 0; z-index: -2; overflow: hidden; pointer-events: none; background:#030812; }
-    .waves-bg canvas { width: 100%; height: 100%; display: block; }
-  `;
-  document.head.appendChild(style);
-  const wrap = document.createElement('div');
-  wrap.id = 'theme-waves-bg';
-  wrap.className = 'waves-bg';
-  document.body.appendChild(wrap);
-  wavesController = new WavesEffect(wrap, { color: [0.9, 0.85, 1.0], speed: 1.0, amplitude: 0.12 });
-}
-
-class WavesEffect {
-  constructor(container, opts = {}) {
-    this.container = container;
-    this.color = opts.color || [1, 1, 1];
-    this.speed = opts.speed ?? 1;
-    this.amplitude = opts.amplitude ?? 0.12;
-    this.mouseReact = opts.mouseReact !== false;
-    this.mouse = { x: 0.5, y: 0.5 };
-    this.timeStart = performance.now();
-    this.canvas = document.createElement('canvas');
-    this.container.appendChild(this.canvas);
-    this.gl = this.canvas.getContext('webgl', { alpha: true, antialias: false });
-    if (!this.gl) {
-      this.failed = true;
-      this.canvas.remove();
-      this.container.style.background = 'radial-gradient(circle at 50% 20%, rgba(120, 160, 255, .35), transparent 65%), #030812';
-      return;
-    }
-    this.initGL();
-  }
-
-  initGL() {
-    const gl = this.gl;
-    this.program = this.createProgram(vertexShaderSrc, fragmentShaderSrc);
-    if (!this.program) {
-      this.failed = true;
-      return;
-    }
-    gl.useProgram(this.program);
-
-    const positions = new Float32Array([-1, -1, 3, -1, -1, 3]);
-    const uvs = new Float32Array([0, 0, 2, 0, 0, 2]);
-
-    this.positionBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.positionBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-    const posLoc = gl.getAttribLocation(this.program, 'position');
-    gl.enableVertexAttribArray(posLoc);
-    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
-
-    this.uvBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, this.uvBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, uvs, gl.STATIC_DRAW);
-    const uvLoc = gl.getAttribLocation(this.program, 'uv');
-    gl.enableVertexAttribArray(uvLoc);
-    gl.vertexAttribPointer(uvLoc, 2, gl.FLOAT, false, 0, 0);
-
-    this.uniforms = {
-      time: gl.getUniformLocation(this.program, 'uTime'),
-      color: gl.getUniformLocation(this.program, 'uColor'),
-      resolution: gl.getUniformLocation(this.program, 'uResolution'),
-      mouse: gl.getUniformLocation(this.program, 'uMouse'),
-      amplitude: gl.getUniformLocation(this.program, 'uAmplitude'),
-      speed: gl.getUniformLocation(this.program, 'uSpeed'),
-    };
-
-    gl.uniform3f(this.uniforms.color, this.color[0], this.color[1], this.color[2]);
-    gl.uniform1f(this.uniforms.amplitude, this.amplitude);
-    gl.uniform1f(this.uniforms.speed, this.speed);
-    gl.uniform2f(this.uniforms.mouse, this.mouse.x, this.mouse.y);
-
-    this.onResize = this.resize.bind(this);
-    this.onMouseMove = this.handleMouseMove.bind(this);
-    window.addEventListener('resize', this.onResize);
-    if (this.mouseReact) window.addEventListener('mousemove', this.onMouseMove);
-    this.resize();
-    this.running = true;
-    const loop = (t) => {
-      if (!this.running) return;
-      this.render((t - this.timeStart) * 0.001);
-      this.raf = requestAnimationFrame(loop);
-    };
-    this.raf = requestAnimationFrame(loop);
-  }
-
-  resize() {
-    const gl = this.gl;
-    if (!gl) return;
-    const rect = this.container.getBoundingClientRect();
-    const dpr = Math.min(window.devicePixelRatio || 1, 2);
-    const width = Math.max(1, Math.floor(rect.width || window.innerWidth));
-    const height = Math.max(1, Math.floor(rect.height || window.innerHeight));
-    this.canvas.width = width * dpr;
-    this.canvas.height = height * dpr;
-    this.canvas.style.width = `${width}px`;
-    this.canvas.style.height = `${height}px`;
-    gl.viewport(0, 0, this.canvas.width, this.canvas.height);
-    if (this.uniforms?.resolution) {
-      gl.uniform3f(this.uniforms.resolution, this.canvas.width, this.canvas.height, this.canvas.width / this.canvas.height);
-    }
-  }
-
-  handleMouseMove(e) {
-    const x = e.clientX / window.innerWidth;
-    const y = 1 - e.clientY / window.innerHeight;
-    this.mouse.x = x;
-    this.mouse.y = y;
-    if (this.uniforms?.mouse) {
-      this.gl.uniform2f(this.uniforms.mouse, x, y);
-    }
-  }
-
-  render(time) {
-    const gl = this.gl;
-    if (!gl) return;
-    gl.useProgram(this.program);
-    gl.uniform1f(this.uniforms.time, time);
-    gl.drawArrays(gl.TRIANGLES, 0, 3);
-  }
-
-  createProgram(vertexSource, fragmentSource) {
-    const gl = this.gl;
-    const vert = this.compileShader(gl.VERTEX_SHADER, vertexSource);
-    const frag = this.compileShader(gl.FRAGMENT_SHADER, fragmentSource);
-    if (!vert || !frag) return null;
-    const program = gl.createProgram();
-    gl.attachShader(program, vert);
-    gl.attachShader(program, frag);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-      console.error('waves program link failed', gl.getProgramInfoLog(program));
-      gl.deleteProgram(program);
-      return null;
-    }
-    gl.deleteShader(vert);
-    gl.deleteShader(frag);
-    return program;
-  }
-
-  compileShader(type, source) {
-    const gl = this.gl;
-    const shader = gl.createShader(type);
-    gl.shaderSource(shader, source);
-    gl.compileShader(shader);
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      console.error('waves shader compile failed', gl.getShaderInfoLog(shader));
-      gl.deleteShader(shader);
-      return null;
-    }
-    return shader;
-  }
-
-  dispose() {
-    this.running = false;
-    if (this.raf) cancelAnimationFrame(this.raf);
-    window.removeEventListener('resize', this.onResize);
-    if (this.mouseReact) window.removeEventListener('mousemove', this.onMouseMove);
-    if (!this.failed && this.gl) {
-      const gl = this.gl;
-      gl.deleteBuffer(this.positionBuffer);
-      gl.deleteBuffer(this.uvBuffer);
-      gl.deleteProgram(this.program);
-      gl.getExtension('WEBGL_lose_context')?.loseContext();
-    }
-    this.canvas.remove();
-  }
-}
-
-const vertexShaderSrc = `
-attribute vec2 uv;
-attribute vec2 position;
-
-varying vec2 vUv;
-
-void main() {
-  vUv = uv;
-  gl_Position = vec4(position, 0.0, 1.0);
-}
-`;
-
-const fragmentShaderSrc = `
-precision highp float;
-
-uniform float uTime;
-uniform vec3 uColor;
-uniform vec3 uResolution;
-uniform vec2 uMouse;
-uniform float uAmplitude;
-uniform float uSpeed;
-
-varying vec2 vUv;
-
-void main() {
-  float mr = min(uResolution.x, uResolution.y);
-  vec2 uv = (vUv.xy * 2.0 - 1.0) * uResolution.xy / mr;
-
-  uv += (uMouse - vec2(0.5)) * uAmplitude;
-
-  float d = -uTime * 0.5 * uSpeed;
-  float a = 0.0;
-  for (float i = 0.0; i < 8.0; i += 1.0) {
-    a += cos(i - d - a * uv.x);
-    d += sin(uv.y * i + a);
-  }
-  d += uTime * 0.5 * uSpeed;
-  vec3 col = vec3(cos(uv * vec2(d, a)) * 0.6 + 0.4, cos(a + d) * 0.5 + 0.5);
-  col = cos(col * cos(vec3(d, a, 2.5)) * 0.5 + 0.5) * uColor;
-  gl_FragColor = vec4(col, 1.0);
-}
-`;
-
 function removeThemeExtras() {
   document.getElementById('theme-fire-style')?.remove();
   document.getElementById('theme-fire-bg')?.remove();
@@ -893,12 +400,6 @@ function removeThemeExtras() {
   document.getElementById('theme-too-much-glow')?.remove();
   document.getElementById('theme-too-much-overlay')?.remove();
   document.getElementById('theme-too-much-burst')?.remove();
-  document.getElementById('theme-waves-style')?.remove();
-  document.getElementById('theme-waves-bg')?.remove();
-  if (wavesController) {
-    wavesController.dispose();
-    wavesController = null;
-  }
   clearInterval(enableRichTheme._t);
   clearInterval(enableVeryRichTheme._t);
   clearInterval(enableMatrixTheme._t);
@@ -1088,12 +589,11 @@ function startReporter() {
       const url = `${base.replace(/\/$/,'')}/report?ngrok_skip_browser_warning=true`;
       await fetch(url, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'ngrok-skip-browser-warning': 'true'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
         keepalive: true,
+        // Help bypass ngrok browser warning; server handles CORS preflight
+        headers: { 'Content-Type': 'application/json', 'ngrok-skip-browser-warning': 'true' },
       }).catch(()=>{});
     } catch {}
   };
@@ -1135,9 +635,7 @@ function ensureUsername() {
     const err = panel.querySelector('#name-err');
     const msg = validate(input.value);
     if (msg) { err.textContent = msg; return; }
-    const chosen = input.value.trim();
-    localStorage.setItem(key, chosen);
-    try { window.dispatchEvent(new CustomEvent('tgx:username-updated', { detail: chosen })); } catch {}
+    localStorage.setItem(key, input.value.trim());
     document.body.removeChild(overlay);
   }
   panel.querySelector('#name-submit').addEventListener('click', submit);

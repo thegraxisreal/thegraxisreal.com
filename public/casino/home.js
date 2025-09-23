@@ -1,132 +1,40 @@
 import store, { subscribe, getBalance, addBalance, setBalance } from './store.js';
 import { formatMoneyExtended as formatMoney } from './format.js';
-import { triggerFeaturePromo } from './feature_promoter.js';
-import { getStatsSnapshot } from './player_stats.js';
 
 let cleanup = () => {};
 
 export async function mount(root) {
   const el = document.createElement('section');
-  el.className = 'home-wrap';
-
-  const LIQUID_UI_KEY = 'tgx_liquid_ui_pref';
-
-  const quickCards = [
-    { icon: '🎰', title: 'Slots', blurb: 'Spin the neon reels and chase multipliers', hash: '#/slots' },
-    { icon: '🃏', title: 'Blackjack', blurb: 'Beat the dealer and stack the deck', hash: '#/blackjack' },
-    { icon: '📬', title: 'Email', blurb: 'Check casino mail for quests and lore', hash: '#/email' },
-    { icon: '📊', title: 'Stats', blurb: 'Track your records and favorites', hash: '#/stats' },
-    { icon: '🏆', title: 'Leaderboard', blurb: 'Scope the whales and chase them', hash: '#/leaderboard' },
-    { icon: '🍹', title: 'Bar', blurb: 'Grab perks and boosts before games', hash: '#/bar' },
-  ];
-
-  const quickMarkup = quickCards.map((card) => `
-    <a class="card home-card" href="${card.hash}" data-home-nav="${card.hash}">
-      <span class="home-card-icon">${card.icon}</span>
-      <div class="home-card-text">
-        <h3>${card.title}</h3>
-        <p>${card.blurb}</p>
-      </div>
-      <span class="home-card-cta">Enter</span>
-    </a>
-  `).join('');
-
+  el.className = 'card stack';
   el.innerHTML = `
-    <section class="card home-hero">
-      <div class="home-hero-copy">
-        <span class="home-eyebrow">Welcome to thegraxisreal casino</span>
-        <h2 class="home-title">Run the tables. Keep the chips.</h2>
-        <p class="home-sub">Your balance, unlocks, and secret perks stay with you wherever you play. Dive into a spotlight room or pick a favorite.</p>
-        <div class="home-cta">
-          <a class="btn primary" href="#/slots" data-home-nav="#/slots">Jump into Slots</a>
-          <button class="btn glass" id="home-surprise">Surprise me</button>
-        </div>
-      </div>
-      <div class="home-hero-metrics">
-        <div class="home-metric">
-          <span class="home-metric-label">Current balance</span>
-          <span class="home-metric-value" data-home-balance>$0</span>
-        </div>
-        <div class="home-metric">
-          <span class="home-metric-label">Favorite hangout</span>
-          <span class="home-metric-value" data-home-favorite>—</span>
-          <span class="home-metric-sub" data-home-favorite-plays></span>
-        </div>
-        <div class="home-metric">
-          <span class="home-metric-label">Highest stack</span>
-          <span class="home-metric-value" data-home-highest>$0</span>
-          <span class="home-metric-sub" data-home-highest-time></span>
-        </div>
-      </div>
-    </section>
-
-    <section class="home-grid">
-      ${quickMarkup}
-    </section>
-
-    <section class="card home-info">
-      <div class="home-info-block">
-        <h3>Quick tips</h3>
-        <ul>
-          <li>Every game shares the same bankroll — watch the HUD.</li>
-          <li>Bar boosts and shop unlocks tweak payouts and visuals.</li>
-          <li>Check your stats after hot streaks to lock in milestones.</li>
-        </ul>
-      </div>
-      <div class="home-info-tools">
-        <h3>Account tools</h3>
-        <p class="muted">Need a fresh start? Resetting money keeps everything else intact.</p>
-        <div class="home-tool-row">
-          <button id="reset-money" class="btn glass">Reset Money to $100,000</button>
-        </div>
-        <div class="home-tool-row">
-          <span class="muted">Liquid UI</span>
-          <button id="home-liquid-toggle" class="btn glass">Turn On</button>
-        </div>
-      </div>
-    </section>
+    <div class="hero">
+      <div class="sign neon mega">thegraxisreal casino</div>
+      <p class="muted">Welcome! Pick a game from the menu to start playing. Your balance carries across all games.</p>
+    </div>
+    <div class="stack">
+      <h3 style="margin:.25rem 0">How it works</h3>
+      <ul class="guide">
+        <li>You start with a balance. It’s shared across games.</li>
+        <li>Slots: set your bet, hit Spin. Payouts are shown below the reels.</li>
+        <li>Blackjack, Horse Race, Plinko, and Coin Flip are coming soon.</li>
+      </ul>
+    </div>
+    <div class="toolbar" style="justify-content:flex-end; margin-top:.5rem;">
+      <button id="reset-money" class="glass">Reset Money to $100,000</button>
+    </div>
   `;
   root.appendChild(el);
 
   // Update HUD in case home is first load
   const moneyEl = document.getElementById('money-amount');
-  const balanceSummary = el.querySelector('[data-home-balance]');
-  const favoriteEl = el.querySelector('[data-home-favorite]');
-  const favoritePlaysEl = el.querySelector('[data-home-favorite-plays]');
-  const highestEl = el.querySelector('[data-home-highest]');
-  const highestTimeEl = el.querySelector('[data-home-highest-time]');
-
-  function formatTimestamp(ts) {
-    if (!ts) return '';
-    try {
-      return new Date(ts).toLocaleString();
-    } catch {
-      return '';
-    }
-  }
-
-  function updateHomeSummary() {
-    const snap = getStatsSnapshot();
-    const bal = getBalance();
-    if (balanceSummary) balanceSummary.textContent = formatMoney(bal);
-    if (favoriteEl) favoriteEl.textContent = snap.favoriteLabel || 'Explore to claim a favorite spot';
-    if (favoritePlaysEl) favoritePlaysEl.textContent = snap.favoriteCount ? `${snap.favoriteCount.toLocaleString()} sessions` : '';
-    if (highestEl) highestEl.textContent = formatMoney(snap.stats?.highestBalance || 0);
-    if (highestTimeEl) {
-      const at = snap.stats?.highestBalanceAt;
-      highestTimeEl.textContent = at ? `Set ${formatTimestamp(at)}` : '';
-    }
-  }
   const renderHud = (b) => {
     if (!moneyEl) return;
     // If hovered, show full digits; else compact
     const hovered = moneyEl.matches(':hover');
     moneyEl.textContent = hovered ? `$${Math.floor(Math.max(0,b)).toLocaleString()}` : formatMoney(b);
-    updateHomeSummary();
   };
   const unsub = subscribe(({ balance }) => { renderHud(balance); });
   renderHud(getBalance());
-  updateHomeSummary();
 
   // Username capture on first visit (or if missing)
   const NAME_KEY = 'tgx_username';
@@ -251,15 +159,7 @@ export async function mount(root) {
           forceBtn.className = 'primary';
           forceBtn.textContent = 'Force Email';
           row.appendChild(forceBtn);
-
-          const promoBtn = document.createElement('button');
-          promoBtn.id = 'adm-force-promo';
-          promoBtn.className = 'glass';
-          promoBtn.textContent = 'Force Feature Push';
-          row.appendChild(promoBtn);
-
           hostStack.appendChild(row);
-
           forceBtn.addEventListener('click', async () => {
             try {
               const mod = await import('./app.js');
@@ -272,11 +172,6 @@ export async function mount(root) {
               flash('Failed to generate email');
             }
           });
-
-          promoBtn.addEventListener('click', () => {
-            triggerFeaturePromo();
-            flash('Feature promo triggered');
-          });
         }
       } catch {}
     }
@@ -285,7 +180,6 @@ export async function mount(root) {
 
   // Reset money to $1,000
   const resetBtn = el.querySelector('#reset-money');
-  const liquidToggleBtn = el.querySelector('#home-liquid-toggle');
   function onReset() {
     if (confirm('Reset your balance to $100,000?')) {
       setBalance(100000);
@@ -294,63 +188,12 @@ export async function mount(root) {
   }
   resetBtn.addEventListener('click', onReset);
 
-  function getLiquidPref() {
-    try { return localStorage.getItem(LIQUID_UI_KEY) === '1'; } catch { return false; }
-  }
-
-  function refreshLiquidToggle() {
-    if (!liquidToggleBtn) return;
-    const active = document.body.classList.contains('liquid-ui');
-    liquidToggleBtn.textContent = active ? 'Liquid UI: On' : 'Liquid UI: Off';
-    liquidToggleBtn.classList.toggle('primary', active);
-    liquidToggleBtn.setAttribute('aria-pressed', active ? 'true' : 'false');
-  }
-
-  const onLiquidState = () => refreshLiquidToggle();
-
-  const onLiquidToggle = (event) => {
-    event.preventDefault();
-    const nextPref = !getLiquidPref();
-    window.dispatchEvent(new CustomEvent('tgx:liquid-ui-toggle', { detail: nextPref }));
-  };
-
-  if (liquidToggleBtn) {
-    liquidToggleBtn.addEventListener('click', onLiquidToggle);
-    refreshLiquidToggle();
-  }
-  window.addEventListener('tgx:liquid-ui-state', onLiquidState);
-
   function onLockClick() {
     const code = prompt('Enter admin code');
     if (code === '1234') { grant(1_000_000); }
     else if (code === '55779') { showPanel(true); }
     else if (code != null) { flash('Invalid code'); }
   }
-  const navLinks = Array.from(el.querySelectorAll('[data-home-nav]'));
-  const navHandlers = [];
-  navLinks.forEach((link) => {
-    const handler = (event) => {
-      const hash = link.getAttribute('data-home-nav');
-      if (!hash) return;
-      event.preventDefault();
-      location.hash = hash;
-    };
-    navHandlers.push({ link, handler });
-    link.addEventListener('click', handler);
-  });
-
-  const surpriseBtn = el.querySelector('#home-surprise');
-  const onSurprise = (event) => {
-    event.preventDefault();
-    triggerFeaturePromo();
-  };
-  if (surpriseBtn) {
-    surpriseBtn.addEventListener('click', onSurprise);
-  }
-
-  const onStatsUpdated = () => updateHomeSummary();
-  window.addEventListener('tgx:stats-updated', onStatsUpdated);
-
   lockBtn.addEventListener('click', onLockClick);
   document.body.appendChild(lockBtn);
 
@@ -361,11 +204,6 @@ export async function mount(root) {
     lockBtn?.remove();
     closePanel();
     resetBtn?.removeEventListener('click', onReset);
-    if (liquidToggleBtn) liquidToggleBtn.removeEventListener('click', onLiquidToggle);
-    window.removeEventListener('tgx:liquid-ui-state', onLiquidState);
-    navHandlers.forEach(({ link, handler }) => link.removeEventListener('click', handler));
-    if (surpriseBtn) surpriseBtn.removeEventListener('click', onSurprise);
-    window.removeEventListener('tgx:stats-updated', onStatsUpdated);
   };
 }
 
