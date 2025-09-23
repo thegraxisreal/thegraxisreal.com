@@ -116,7 +116,7 @@ window.addEventListener('DOMContentLoaded', () => {
       localStorage.setItem('tgx_ngrok_base', api.replace(/\/$/, ''));
     } else {
       // Force rewrite to current default (update this when tunnel changes)
-      localStorage.setItem('tgx_ngrok_base', 'https://fog-president-begin-respective.trycloudflare.com');
+      localStorage.setItem('tgx_ngrok_base', 'https://weather-opportunities-cet-simpsons.trycloudflare.com');
     }
   } catch {}
   startReporter();
