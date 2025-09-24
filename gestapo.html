@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Report Someone</title>
+  <meta name="description" content="Submit a report. Simple, accessible, single‑file page." />
+  <style>
+    :root {
+      --bg: #0f172a;        /* slate-900 */
+      --muted: #1e293b;     /* slate-800 */
+      --card: #111827;      /* gray-900 */
+      --text: #e5e7eb;      /* gray-200 */
+      --subtext: #94a3b8;   /* slate-400 */
+      --accent: #22d3ee;    /* cyan-400 */
+      --danger: #ef4444;    /* red-500 */
+      --ok: #10b981;        /* emerald-500 */
+      --focus: #38bdf8;     /* sky-400 */
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, "Helvetica Neue", Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      color: var(--text);
+      background: radial-gradient(1200px 800px at 80% -10%, #0b1220 0%, #0a0f1a 35%, var(--bg) 100%);
+      line-height: 1.6;
+    }
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    header {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(10, 15, 26, .7);
+      backdrop-filter: saturate(140%) blur(8px);
+      border-bottom: 1px solid rgba(148,163,184,.15);
+    }
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 1rem 1.25rem; }
+    .nav { display: flex; align-items: center; gap: 1rem; justify-content: space-between; }
+    .brand { font-weight: 700; letter-spacing: .4px; }
+    .nav a { color: var(--text); opacity: .9; }
+    .nav a[aria-current="page"] { color: var(--accent); }
+
+    .hero { padding: 5rem 1.25rem 2rem; text-align: center; }
+    .hero h1 { font-size: clamp(2rem, 4.5vw, 3rem); line-height: 1.15; margin: 0 0 .5rem; }
+    .hero p { margin: 0 auto; max-width: 60ch; color: var(--subtext); }
+
+    .grid { display: grid; gap: 1.25rem; grid-template-columns: 1fr; }
+    @media (min-width: 900px) { .grid { grid-template-columns: 1.2fr .8fr; } }
+
+    .card { background: linear-gradient(180deg, rgba(30,41,59,.6), rgba(2,6,23,.6)); border: 1px solid rgba(148,163,184,.2); border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+    .card h2 { margin: 0 0 .75rem; font-size: 1.25rem; }
+    .card .body { padding: 1.25rem; }
+
+    form { display: grid; gap: 1rem; }
+    .row { display: grid; gap: 1rem; grid-template-columns: 1fr; }
+    @media (min-width: 700px) { .row.two { grid-template-columns: 1fr 1fr; } }
+
+    label { font-size: .94rem; color: var(--text); }
+    .hint { font-size: .85rem; color: var(--subtext); }
+    input[type="text"], input[type="email"], input[type="tel"], input[type="date"], input[type="time"], select, textarea {
+      width: 100%; padding: .8rem .9rem; border-radius: 12px; border: 1px solid rgba(148,163,184,.25);
+      background: rgba(2,6,23,.7); color: var(--text); outline: none; transition: border-color .15s, box-shadow .15s;
+    }
+    textarea { min-height: 140px; resize: vertical; }
+    input:focus, select:focus, textarea:focus { border-color: var(--focus); box-shadow: 0 0 0 3px rgba(56,189,248,.2); }
+
+    .switch { display: inline-flex; align-items: center; gap: .6rem; cursor: pointer; user-select: none; }
+    .switch input { appearance: none; width: 44px; height: 24px; border-radius: 999px; background: #334155; position: relative; transition: background .2s; outline: none; border: 1px solid rgba(148,163,184,.3); }
+    .switch input:checked { background: #0ea5e9; }
+    .switch input::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: white; transition: transform .2s; }
+    .switch input:checked::after { transform: translateX(20px); }
+
+    .actions { display: flex; gap: .75rem; align-items: center; flex-wrap: wrap; }
+    button { padding: .85rem 1rem; border-radius: 12px; border: 1px solid rgba(148,163,184,.25); background: #0ea5e9; color: #06121f; font-weight: 600; cursor: pointer; }
+    button.secondary { background: #0b1220; color: var(--text); }
+    .note { font-size: .85rem; color: var(--subtext); }
+
+    .status { display: none; border-radius: 12px; padding: .75rem 1rem; border: 1px solid; }
+    .status.ok { display: none; background: rgba(16,185,129,.1); border-color: rgba(16,185,129,.4); }
+    .status.err { display: none; background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.4); }
+
+    footer { color: var(--subtext); padding: 3rem 1.25rem; text-align: center; }
+    .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-top: 1rem; }
+    .kpi { background: rgba(2,6,23,.6); border: 1px solid rgba(148,163,184,.2); border-radius: 14px; padding: 1rem; }
+    @media (max-width: 700px) { .kpis { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap nav" role="navigation" aria-label="Primary">
+      <a class="brand" href="#home">Report Portal</a>
+      <nav class="links" aria-label="Sections">
+        <a href="#report" aria-current="page">Report</a>
+        <a href="#faq">FAQ</a>
+        <a href="#contact">Contact</a>
+      </nav>
+    </div>
+  </header>
+
+  <main id="home" class="wrap">
+    <section class="hero" aria-labelledby="hero-title">
+      <h1 id="hero-title">Submit a report privately and securely to the Gestapo</h1>
+      <p>Use the form below to describe the person and the incident. Only required fields are needed. If they are inferior, no evidence is needed.<p>
+    </section>
+
+    <section id="report" class="grid" aria-labelledby="report-title">
+      <div class="card">
+        <div class="body">
+          <h2 id="report-title">Report form</h2>
+
+          <form id="reportForm" novalidate>
+            <div class="row two">
+              <div>
+                <label for="anonymous" class="switch"><input type="checkbox" id="anonymous" name="anonymous" /> <span>Submit anonymously</span></label>
+              </div>
+              <div>
+                <label for="reportType">Report type</label>
+                <select id="reportType" name="reportType" required>
+                  <option value="" disabled selected>Select one</option>
+                  <option>Harassment</option>
+                  <option>Threat</option>
+                  <option>Fraud</option>
+                  <option>Vandalism</option>
+                  <option>Other</option>
+                </select>
+              </div>
+            </div>
+
+            <fieldset id="contactFieldset" style="border:0; padding:0; margin:0;">
+              <legend class="hint" style="position:absolute; left:-9999px;">Contact details</legend>
+              <div class="row two">
+                <div>
+                  <label for="reporterName">Your name <span class="hint">(optional)</span></label>
+                  <input type="text" id="reporterName" name="reporterName" autocomplete="name" />
+                </div>
+                <div>
+                  <label for="reporterEmail">Your email <span class="hint">(optional)</span></label>
+                  <input type="email" id="reporterEmail" name="reporterEmail" autocomplete="email" />
+                </div>
+              </div>
+              <div class="row two">
+                <div>
+                  <label for="reporterPhone">Your phone <span class="hint">(optional)</span></label>
+                  <input type="tel" id="reporterPhone" name="reporterPhone" autocomplete="tel" />
+                </div>
+                <div>
+                  <label for="preferredContact">Preferred contact</label>
+                  <select id="preferredContact" name="preferredContact">
+                    <option>Email</option>
+                    <option>Phone</option>
+                    <option>Either</option>
+                  </select>
+                </div>
+              </div>
+            </fieldset>
+
+            <div class="row two">
+              <div>
+                <label for="personName">Person's name <span class="hint">(if known)</span></label>
+                <input type="text" id="personName" name="personName" />
+              </div>
+              <div>
+                <label for="incidentDate">Date of incident</label>
+                <input type="date" id="incidentDate" name="incidentDate" required />
+              </div>
+            </div>
+
+            <div class="row two">
+              <div>
+                <label for="incidentTime">Time of incident <span class="hint">(optional)</span></label>
+                <input type="time" id="incidentTime" name="incidentTime" />
+              </div>
+              <div>
+                <label for="location">Location</label>
+                <input type="text" id="location" name="location" placeholder="City, place, or address" required />
+              </div>
+            </div>
+
+            <div>
+              <label for="summary">Short summary</label>
+              <input type="text" id="summary" name="summary" placeholder="One‑line description" required />
+            </div>
+
+            <div>
+              <label for="details">Details</label>
+              <textarea id="details" name="details" placeholder="Describe what happened" required></textarea>
+              <p class="hint">Avoid sensitive personal data unless necessary for the report.</p>
+            </div>
+
+            <div class="row two">
+              <div>
+                <label for="attachments">Attachments <span class="hint">(images, pdf)</span></label>
+                <input type="file" id="attachments" name="attachments" accept="image/*,.pdf" multiple />
+              </div>
+              <div>
+                <label for="tags">Tags <span class="hint">(comma‑separated)</span></label>
+                <input type="text" id="tags" name="tags" placeholder="e.g. night, park" />
+              </div>
+            </div>
+
+            <div>
+              <label class="switch"><input type="checkbox" id="consent" required /> <span>I confirm this report is accurate to the best of my knowledge.</span></label>
+            </div>
+
+            <div aria-live="polite" aria-atomic="true">
+              <div id="statusOk" class="status ok" role="status">Submitted. Reference: <span id="refId"></span></div>
+              <div id="statusErr" class="status err" role="alert">Fix the highlighted fields and try again.</div>
+            </div>
+
+            <div class="actions">
+              <button type="submit">Submit report</button>
+              <button type="reset" class="secondary">Reset</button>
+              <span class="note">A CAPTCHA or server validation should be added in production.</span>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <aside class="card" aria-labelledby="about-title">
+        <div class="body">
+          <h2 id="about-title">About this portal</h2>
+          <p class="hint">This is a front‑end only demo. Wire the form's <code>submit</code> handler to your backend endpoint or service.</p>
+          <ul>
+            <li>Accessible labels and keyboard focus.</li>
+            <li>Anonymous mode hides contact inputs.</li>
+            <li>Client validation with error summaries.</li>
+            <li>Single file. No frameworks.</li>
+          </ul>
+
+          <div class="kpis" aria-label="Service stats">
+            <div class="kpi"><strong id="kpi-total">0</strong><div class="hint">Total submissions (local)</div></div>
+            <div class="kpi"><strong id="kpi-anon">0</strong><div class="hint">Anonymous submissions</div></div>
+            <div class="kpi"><strong id="kpi-last">—</strong><div class="hint">Last submission</div></div>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="faq" class="wrap" style="padding:2rem 0;">
+      <div class="card"><div class="body">
+        <h2>FAQ</h2>
+        <details>
+          <summary>What happens after I submit?</summary>
+          <p>A reference ID is generated locally for demo. Replace with a server‑side ID in production.</p>
+        </details>
+        <details>
+          <summary>Can I edit a report?</summary>
+          <p>Not in this demo. Add an authenticated dashboard to support edits.</p>
+        </details>
+        <details>
+          <summary>How is my data stored?</summary>
+          <p>In this demo, data is kept only in your browser's memory for KPIs. Implement secure storage on the server.</p>
+        </details>
+      </div></div>
+    </section>
+
+    <section id="contact" class="wrap" style="padding:2rem 0 3rem;">
+      <div class="card"><div class="body">
+        <h2>Contact</h2>
+        <p class="hint">Provide a monitored address here.</p>
+        <p>Email: <a href="mailto:support@example.com">support@example.com</a></p>
+      </div></div>
+    </section>
+  </main>
+
+  <footer>
+    <small>&copy; <span id="year"></span> Report Portal. For demonstration only.</small>
+  </footer>
+
+  <script>
+    const byId = (id) => document.getElementById(id);
+    const form = byId('reportForm');
+    const anonymous = byId('anonymous');
+    const contactFieldset = byId('contactFieldset');
+    const statusOk = byId('statusOk');
+    const statusErr = byId('statusErr');
+    const refSpan = byId('refId');
+    const kpiTotal = byId('kpi-total');
+    const kpiAnon = byId('kpi-anon');
+    const kpiLast = byId('kpi-last');
+
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    function toggleAnonymous() {
+      const hide = anonymous.checked;
+      contactFieldset.style.display = hide ? 'none' : '';
+    }
+    anonymous.addEventListener('change', toggleAnonymous);
+    toggleAnonymous();
+
+    function validate() {
+      statusErr.style.display = 'none';
+      let valid = true;
+      const requiredIds = ['reportType','incidentDate','location','summary','details','consent'];
+      requiredIds.forEach(id => {
+        const el = byId(id);
+        el.classList.remove('invalid');
+        if ((el.type === 'checkbox' && !el.checked) || (el.value || '').trim() === '') {
+          el.scrollIntoView({ block: 'nearest' });
+          el.focus({ preventScroll: true });
+          el.style.borderColor = 'var(--danger)';
+          valid = false;
+        } else {
+          el.style.borderColor = 'rgba(148,163,184,.25)';
+        }
+      });
+      if (!valid) {
+        statusErr.style.display = 'block';
+      }
+      return valid;
+    }
+
+    function randRef() {
+      return 'R-' + Math.random().toString(36).slice(2, 6).toUpperCase() + '-' + Date.now().toString(36).slice(-5).toUpperCase();
+    }
+
+    function updateKPIs(isAnon) {
+      const total = Number(localStorage.getItem('kpiTotal') || '0') + 1;
+      localStorage.setItem('kpiTotal', String(total));
+      kpiTotal.textContent = total;
+
+      const anon = Number(localStorage.getItem('kpiAnon') || '0') + (isAnon ? 1 : 0);
+      localStorage.setItem('kpiAnon', String(anon));
+      kpiAnon.textContent = anon;
+
+      const last = new Date().toLocaleString();
+      localStorage.setItem('kpiLast', last);
+      kpiLast.textContent = last;
+    }
+
+    function loadKPIs() {
+      kpiTotal.textContent = localStorage.getItem('kpiTotal') || '0';
+      kpiAnon.textContent = localStorage.getItem('kpiAnon') || '0';
+      kpiLast.textContent = localStorage.getItem('kpiLast') || '—';
+    }
+
+    loadKPIs();
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (!validate()) return;
+
+      const data = new FormData(form);
+      const json = Object.fromEntries(data.entries());
+      json.anonymous = anonymous.checked;
+
+      // TODO: Replace with a real POST request
+      // await fetch('/api/report', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(json) });
+
+      const ref = randRef();
+      refSpan.textContent = ref;
+      statusOk.style.display = 'block';
+      statusErr.style.display = 'none';
+
+      updateKPIs(json.anonymous);
+
+      form.reset();
+      toggleAnonymous();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  </script>
+</body>
+</html>
